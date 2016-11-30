@@ -1,0 +1,8 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    
+    <!-- Main Activity -->
+    
+<dimen name="root_layout_padding_top">?android:attr/actionBarSize</dimen>
+</resources>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.colormindapps.rest_reminder_alarm"
+    android:versionCode="6"
+    android:versionName="1.0.1" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="25" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/launch_icon"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.WorkRestTheme" >
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.MainActivity"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.WorkRestTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.PreferenceActivity"
+            android:label="@string/app_name"
+            android:parentActivityName="com.colormindapps.rest_reminder_alarm.MainActivity"
+            android:theme="@style/PreferencesNoOverlayActionbar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.colormindapps.rest_reminder_alarm.MainActivity" />
+        </activity>
+
+        <receiver android:name="com.colormindapps.rest_reminder_alarm.OnAlarmReceiver" />
+
+        <service android:name="com.colormindapps.rest_reminder_alarm.PeriodService" />
+        <service android:name="com.colormindapps.rest_reminder_alarm.PlaySoundService" />
+        <service
+            android:name="com.colormindapps.rest_reminder_alarm.CounterService"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/counter_on" />
+
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.NotificationActivity"
+            android:excludeFromRecents="true"
+            android:label="@string/title_activity_notification"
+            android:taskAffinity=""
+            android:theme="@style/NotificationActivity" >
+        </activity>
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.ManualActivity"
+            android:label="@string/manual_activity_title"
+            android:parentActivityName="com.colormindapps.rest_reminder_alarm.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.colormindapps.rest_reminder_alarm.MainActivity" />
+        </activity>
+        <!--
+             ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!--
+        enable for testing purposes only
+        <service android:name="rest_reminder_alarm_alarm.NLService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+        -->
+
+        <activity
+            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="com.colormindapps.rest_reminder_alarm.firebaseinitprovider"
+            android:exported="false"
+            android:initOrder="100" />
+    </application>
+
+</manifest>

@@ -1,0 +1,4 @@
+#Wed Nov 23 12:56:08 EET 2016
+base.0=C\:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main
+renamed.0=classes.dex
+file.0=C\:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\transforms\\dex\\debug\\folders\\1000\\1f\\main\\classes.dex

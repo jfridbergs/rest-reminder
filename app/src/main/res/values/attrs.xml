@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<declare-styleable name="TimePreference">
+	    <attr name="timeDialogTopText" format="string"/>
+	</declare-styleable>
+	<declare-styleable name="CustomTimePreference">
+	    <attr name="customTimeDialogTopText" format="string"/>
+	   	<attr name="firstMinValue" format="integer"/>
+	    <attr name="firstMaxValue" format="integer"/>
+	    <attr name="usedForApproximate" format="boolean" />
+	</declare-styleable>
+	<declare-styleable name="TimeSupportPickerPreference">
+	    <attr name="customTimeSupportDialogTopText" format="string"/>
+	   	<attr name="firstSupportMinValue" format="integer"/>
+	    <attr name="firstSupportMaxValue" format="integer"/>
+	    <attr name="defaultValueSupportTime" format="string"/>
+	    <attr name="usedForApproximateSupport" format="boolean" />
+	</declare-styleable>
+	<declare-styleable name="NumberPreference">
+	    <attr name="numberDialogTopText" format="string"/>
+	    <attr name="numberMinValue" format="integer"/>
+	    <attr name="numberMaxValue" format="integer"/>
+	</declare-styleable> 
+	
+	<declare-styleable name="numberpicker">
+	    <attr name="numberSupportDialogTopText" format="string"/>
+        <attr name="startRange" format="integer" />
+        <attr name="endRange" format="integer" />
+        <attr name="defaultValue" format="integer" />
+        <attr name="maxValue" format="integer" />
+        <attr name="wrap" format="boolean" />
+    </declare-styleable>
+
+    <!-- NumberPicker style. -->
+    <attr name="numberPickerStyle" format="reference" />
+    <!-- NumberPicker up button style. -->
+    <attr name="numberPickerUpButtonStyle" format="reference" />
+    <!-- NumberPicker down button style. -->
+    <attr name="numberPickerDownButtonStyle" format="reference" />
+    <!-- NumberPicker input text style. -->
+    <attr name="numberPickerInputTextStyle" format="reference" />
+</resources>
+

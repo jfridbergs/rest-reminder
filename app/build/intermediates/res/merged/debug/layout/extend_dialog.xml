@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView
+        android:id="@+id/extend_dialog_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/DialogTitle"
+        android:text="@string/extend_dialog_title" />
+    <Button
+	    android:id="@+id/extend_dialog_button_extend"
+		style="@style/ExtendDialogButton"
+	    android:text="@string/extend_current_period"
+		/>
+	<Button
+	    android:id="@+id/extend_dialog_button_extend1"
+		style="@style/ExtendDialogButton"
+	    android:text="@string/extend_current_period"
+	    android:visibility="gone" />
+	<Button
+	    android:id="@+id/extend_dialog_button_extend2"
+		style="@style/ExtendDialogButton"
+	    android:text="@string/extend_current_period"
+	    android:visibility="gone" />      
+    
+
+</LinearLayout>

@@ -1,0 +1,30 @@
+END USER LICENSE AGREEMENT FOR REST REMINDER ANDROID  APPLICATION
+
+Please read this document carefully before using Rest Reminder android application (here after referred to as “the application”) . This license provides important information concerning the application, provides you with a license to use the application and contains warranty and liability information.
+By using the application, you are accepting the application "as is" and agreeing to be bound by the terms of this license agreement.
+In no event will the authors be held liable for any damages arising from the use of this application.
+If you do not wish to do so, do not use the application.
+
+1. Terms of License
+This license allows you to:
+(a) use the Application on a single device; and
+If you wish to use the Application on more than one device, you must license another copy of the
+Application.
+
+2. Restrictions on Use
+Unless colormindapps (here after referered as “the developer”) has authorized you to distribute the Application, you shall not make or distribute copies of the Application or transfer the Application from one device to another. You shall not decompile, reverse engineer, disassemble, include in other software, or translate the Application, or use the Application for any commercial purposes. You shall not modify, alter, change or otherwise make any modification to the Application or create derivative works based upon the Application. You shall not rent, lease, resell, sub-license, assign, distribute or otherwise transfer the Software or this license. Any attempt to do so shall be void and of no effect.
+
+3. Ownership
+This license provides you with limited rights to use the Application. The developer retains all ownership, right, title and interest in, to and of the Application and all copies of it. All rights not specifically granted in this license, including domestic and international copyrights, are reserved by the developer.
+
+4. DISCLAIMER OF WARRANTIES
+a. YOU EXPRESSLY UNDERSTAND AND AGREE THAT YOUR USE OF THE APPLICATION IS AT YOUR SOLE DISCRETION AND RISK AND THAT THE APPLICATION IS PROVIDED AS IS AND AS AVAILABLE WITHOUT WARRANTY OF ANY KIND.
+b. YOU ARE SOLELY RESPONSIBLE FOR ANY DAMAGE TO YOUR MOBILE DEVICE, OR OTHER DEVICE, OR LOSS OF DATA THAT RESULTS FROM SUCH USE.
+c. THE DEVELOPER FURTHER EXPRESSLY DISCLAIMS ALL WARRANTIES AND CONDITIONS OF ANY KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES AND CONDITIONS OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT, WITH RESPECT TO THE APPLICATION.
+d. THE APPLICATION IS NOT INTENDED FOR USE IN THE OPERATION OF NUCLEAR FACILITIES, LIFE SUPPORT SYSTEMS, EMERGENCY COMMUNICATIONS, AIRCRAFT NAVIGATION OR COMMUNICATION SYSTEMS, AIR TRAFFIC CONTROL SYSTEMS, OR ANY OTHER ACTIVITIES IN WHICH THE FAILURE OF THE APPLICATION COULD LEAD TO DEATH, PERSONAL INJURY, OR SEVERE PHYSICAL OR ENVIRONMENTAL DAMAGE.
+
+5. LIMITATION OF LIABILITY
+YOU EXPRESSLY UNDERSTAND AND AGREE THAT THE DEVELOPER IS NOT LIABLE TO YOU UNDER ANY THEORY OF LIABILITY FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL CONSEQUENTIAL OR EXEMPLARY DAMAGES THAT MAY BE INCURRED BY YOU THROUGH YOUR USE OF THE APPLICATION, INCLUDING ANY LOSS OF DATA OR DAMAGE TO YOUR MOBILE DEVICE, WHETHER OR NOT THE DEVELOPER HAVE BEEN ADVISED OF OR SHOULD HAVE BEEN AWARE OF THE POSSIBILITY OF ANY SUCH LOSSES ARISING.
+
+6. TERMINATION
+This End User License Agreement will continue to apply until terminated by either you or the developer as set forth below. You may terminate this End User License Agreement at any time by permanently deleting the Application from your mobile device in its entirety. Your rights automatically and immediately terminate without notice from developer or any Third Party if you fail to comply with any provision of this End User License Agreement. In such event, you must immediately delete the Application. 

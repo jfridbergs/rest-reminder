@@ -1,0 +1,497 @@
+[
+    {
+        "outputFile": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v11\\values-v11.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 77,
+                    "endOffset": 128
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\src\\main\\res\\values-v11\\dimens.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 0,
+                        "startOffset": 128,
+                        "endColumn": 73,
+                        "endOffset": 201
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 133,
+                    "endLine": 5,
+                    "endColumn": 12,
+                    "endOffset": 281
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\src\\main\\res\\values-v11\\styles.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 183,
+                        "endLine": 8,
+                        "endColumn": 12,
+                        "endOffset": 333
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 6,
+                    "startColumn": 4,
+                    "startOffset": 286,
+                    "endLine": 11,
+                    "endColumn": 12,
+                    "endOffset": 700
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 2,
+                        "startColumn": 4,
+                        "startOffset": 55,
+                        "endLine": 7,
+                        "endColumn": 12,
+                        "endOffset": 469
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 12,
+                    "startColumn": 4,
+                    "startOffset": 705,
+                    "endLine": 17,
+                    "endColumn": 12,
+                    "endOffset": 1125
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 8,
+                        "startColumn": 4,
+                        "startOffset": 474,
+                        "endLine": 13,
+                        "endColumn": 12,
+                        "endOffset": 894
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 18,
+                    "startColumn": 4,
+                    "startOffset": 1130,
+                    "endLine": 23,
+                    "endColumn": 12,
+                    "endOffset": 1553
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 14,
+                        "startColumn": 4,
+                        "startOffset": 899,
+                        "endLine": 19,
+                        "endColumn": 12,
+                        "endOffset": 1322
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 24,
+                    "startColumn": 4,
+                    "startOffset": 1558,
+                    "endLine": 29,
+                    "endColumn": 12,
+                    "endOffset": 1979
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 20,
+                        "startColumn": 4,
+                        "startOffset": 1327,
+                        "endLine": 25,
+                        "endColumn": 12,
+                        "endOffset": 1748
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 30,
+                    "startColumn": 4,
+                    "startOffset": 1984,
+                    "endLine": 35,
+                    "endColumn": 12,
+                    "endOffset": 2406
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 26,
+                        "startColumn": 4,
+                        "startOffset": 1753,
+                        "endLine": 31,
+                        "endColumn": 12,
+                        "endOffset": 2175
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 36,
+                    "startColumn": 4,
+                    "startOffset": 2411,
+                    "endLine": 41,
+                    "endColumn": 12,
+                    "endOffset": 2831
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 32,
+                        "startColumn": 4,
+                        "startOffset": 2180,
+                        "endLine": 37,
+                        "endColumn": 12,
+                        "endOffset": 2600
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 42,
+                    "startColumn": 4,
+                    "startOffset": 2836,
+                    "endColumn": 88,
+                    "endOffset": 2920
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 38,
+                        "startColumn": 4,
+                        "startOffset": 2605,
+                        "endColumn": 88,
+                        "endOffset": 2689
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 43,
+                    "startColumn": 4,
+                    "startOffset": 2925,
+                    "endColumn": 100,
+                    "endOffset": 3021
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 39,
+                        "startColumn": 4,
+                        "startOffset": 2694,
+                        "endColumn": 100,
+                        "endOffset": 2790
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 44,
+                    "startColumn": 4,
+                    "startOffset": 3026,
+                    "endColumn": 102,
+                    "endOffset": 3124
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 40,
+                        "startColumn": 4,
+                        "startOffset": 2795,
+                        "endColumn": 102,
+                        "endOffset": 2893
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 45,
+                    "startColumn": 4,
+                    "startOffset": 3129,
+                    "endLine": 49,
+                    "endColumn": 12,
+                    "endOffset": 3532
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 41,
+                        "startColumn": 4,
+                        "startOffset": 2898,
+                        "endLine": 45,
+                        "endColumn": 12,
+                        "endOffset": 3301
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 50,
+                    "startColumn": 4,
+                    "startOffset": 3537,
+                    "endLine": 54,
+                    "endColumn": 12,
+                    "endOffset": 3952
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 46,
+                        "startColumn": 4,
+                        "startOffset": 3306,
+                        "endLine": 50,
+                        "endColumn": 12,
+                        "endOffset": 3721
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 55,
+                    "startColumn": 4,
+                    "startOffset": 3957,
+                    "endLine": 59,
+                    "endColumn": 12,
+                    "endOffset": 4374
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 51,
+                        "startColumn": 4,
+                        "startOffset": 3726,
+                        "endLine": 55,
+                        "endColumn": 12,
+                        "endOffset": 4143
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 60,
+                    "startColumn": 4,
+                    "startOffset": 4379,
+                    "endLine": 61,
+                    "endColumn": 12,
+                    "endOffset": 4481
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 56,
+                        "startColumn": 4,
+                        "startOffset": 4148,
+                        "endLine": 57,
+                        "endColumn": 12,
+                        "endOffset": 4250
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 62,
+                    "startColumn": 4,
+                    "startOffset": 4486,
+                    "endLine": 63,
+                    "endColumn": 12,
+                    "endOffset": 4610
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 58,
+                        "startColumn": 4,
+                        "startOffset": 4255,
+                        "endLine": 59,
+                        "endColumn": 12,
+                        "endOffset": 4379
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 64,
+                    "startColumn": 4,
+                    "startOffset": 4615,
+                    "endLine": 67,
+                    "endColumn": 8,
+                    "endOffset": 4780
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\src\\main\\res\\values-v11\\styles.xml",
+                    "position": {
+                        "startLine": 20,
+                        "startColumn": 1,
+                        "startOffset": 639,
+                        "endLine": 23,
+                        "endColumn": 8,
+                        "endOffset": 807
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 68,
+                    "startColumn": 4,
+                    "startOffset": 4785,
+                    "endColumn": 70,
+                    "endOffset": 4851
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 60,
+                        "startColumn": 4,
+                        "startOffset": 4384,
+                        "endColumn": 70,
+                        "endOffset": 4450
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 69,
+                    "startColumn": 4,
+                    "startOffset": 4856,
+                    "endColumn": 82,
+                    "endOffset": 4934
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 61,
+                        "startColumn": 4,
+                        "startOffset": 4455,
+                        "endColumn": 82,
+                        "endOffset": 4533
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 70,
+                    "startColumn": 4,
+                    "startOffset": 4939,
+                    "endLine": 122,
+                    "endColumn": 12,
+                    "endOffset": 8873
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 62,
+                        "startColumn": 4,
+                        "startOffset": 4538,
+                        "endLine": 114,
+                        "endColumn": 12,
+                        "endOffset": 8472
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 123,
+                    "startColumn": 4,
+                    "startOffset": 8878,
+                    "endLine": 176,
+                    "endColumn": 12,
+                    "endOffset": 12955
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 115,
+                        "startColumn": 4,
+                        "startOffset": 8477,
+                        "endLine": 168,
+                        "endColumn": 12,
+                        "endOffset": 12554
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 177,
+                    "startColumn": 4,
+                    "startOffset": 12960,
+                    "endColumn": 90,
+                    "endOffset": 13046
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\build\\intermediates\\exploded-aar\\com.android.support\\appcompat-v7\\25.0.0\\res\\values-v11\\values-v11.xml",
+                    "position": {
+                        "startLine": 169,
+                        "startColumn": 4,
+                        "startOffset": 12559,
+                        "endColumn": 90,
+                        "endOffset": 12645
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 178,
+                    "startColumn": 4,
+                    "startOffset": 13051,
+                    "endLine": 179,
+                    "endColumn": 11,
+                    "endOffset": 13136
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\src\\main\\res\\values-v11\\styles.xml",
+                    "position": {
+                        "startLine": 17,
+                        "startColumn": 7,
+                        "startOffset": 548,
+                        "endLine": 18,
+                        "endColumn": 11,
+                        "endOffset": 634
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 180,
+                    "startColumn": 4,
+                    "startOffset": 13141,
+                    "endLine": 183,
+                    "endColumn": 12,
+                    "endOffset": 13330
+                },
+                "from": {
+                    "file": "C:\\Users\\ingressus\\AndroidStudioProjects\\WorkdayScheduler1\\app\\src\\main\\res\\values-v11\\styles.xml",
+                    "position": {
+                        "startLine": 12,
+                        "startColumn": 4,
+                        "startOffset": 345,
+                        "endLine": 15,
+                        "endColumn": 12,
+                        "endOffset": 537
+                    }
+                }
+            }
+        ]
+    }
+]

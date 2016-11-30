@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Atpūtu atgādinātājs</string>
+    <string name="menu_settings">Iestatījumi</string>
+    <string name="close">Aizvērt</string>
+    <string name="menu_help">Pamācība</string>
+    <string name="menu_feedback">Sūtīt atsauksmes</string>
+    <string name="intro_title">Sveiki!</string>
+    <string name="intro_description">Jūs esat atvēris Apūtu atgādinātāju - programmu, kas atgādina lietotājiem par regulāriem atpūtas mirkļiem darba laikā</string>
+    <string name="intro_give_it_a_go">Programmu var sākt lietot tūlītēji ar 45 minūšu darba periodiem un 15 minūšu atpūtas pauzēm</string>
+    <string name="intro_go_to_settings">Programmu var pielāgot savām vajadzībām iestatījumu sadaļā</string>
+    <string name="intro_go_to_manual">(Pilnu programmas iespēju un norādījumu aprakstu var atrast pamācībā)</string>
+   
+    <string name="to_preferences">Iestatījumi</string>
+    <string name="start_work">Sākt strādāt</string>
+    <string name="counter_on">Atpūtu atgādinātājs ir ieslēgts</string>
+    <string name="notification_sample_text">Sample text for period end notification</string>
+    <string name="close_notification">Aizvērt</string>
+    <string name="on_work_period">Darba periods</string>
+    <string name="on_rest_period">Atpūtas periods</string>
+    <string name="description_extended">pagarināts %1$d reizes</string>
+    <string name="extend_current_period">pagarināt periodu</string>
+    <string name="toast_period_end_forced">Tekošais periods tika pārtraukts</string>
+    <string name="toast_period_end_extended">Tekošais periods ir pagarināts</string>
+    <string name="hint_dialog_text">i</string>
+    <string name="swipe_area_text">sākt %1$s</string>
+    <string name="swipe_area_text_land">s\nā\nk\nt\n\n%1$s</string>
+    <string name="swipe_area_text_land_work">d\na\nr\nb\ns</string>
+    <string name="swipe_area_text_land_rest">a\nt\np\nū\nt\na</string>
+    <string name="release_text">Atlaist, lai beigtu tekošo periodu</string>
+    <string name="timer_layout_colon_string">:</string>
+    <string name="timer_layout_point_string">.</string>
+    <string name="turning_off_text">Izslēdzas&#8230;</string>
+    <string name="swipe_area_work">strādāt</string>
+    <string name="swipe_area_rest">atpūsties</string>
+
+    <!-- Notification -->
+    <string name="notify_work_period_end_ticker_message">Laiks atpūtai</string>
+    <string name="notify_work_period_end_message_part_one">Darba periods</string>
+    <string name="notify_period_end_message_extend">(pagarināšanas reižu skaits: %1$d)\u0020</string>
+    <string name="notify_work_period_end_message_part_two">ir beidzies</string>
+    <string name="notify_rest_period_end_ticker_message">Atgriezties pie darba</string>
+    <string name="notify_rest_period_end_message_part_one">Atpūtas periods</string>
+    <string name="notify_rest_period_end_message_part_two">ir noslēdzies</string>
+    <string name="notify_turn_off">Izslēgt</string>
+    <!-- IsOn notification -->
+    <string name="notify_reminder_is_on_title">Atpūtu atgādinātājs ir ieslēgts</string>
+    <string name="notify_reminder_is_on_work_message">pašreizējais perids: darbs</string>
+    <string name="notify_reminder_is_on_rest_message">pašreizējais periods: atpūta</string>
+    <!-- Notification activity -->
+    <string name="notification_work_end_title">Laiks atpūtai</string>
+    <string name="notification_rest_end_title">Atsākt strādāt</string>
+    <string name="notification_toast_period_extended">Iepriekšējais periods ir paildzināts</string>
+    <string name="start_next_period">Sākt nākamo periodu</string>
+    <!-- Extend Dialog -->
+    <string name="extend_dialog_title">Pagarināt periodu</string>
+    <string name="extend_dialog_close_dialog_text">Atcelt</string>
+    <string name="extend_dialog_button">Pagarināt par %1$d minūtēm</string>
+    <!-- Preferences -->
+    <string name="pref_mode_title">Atgādinātāja režīms</string>
+    <string name="pref_mode_summary_manual">Periodi tiek sākti ar apstiprinājumu</string>
+    <string name="pref_mode_summary_automatic">Sekojošie periodi sākas automātiski</string>
+    <string name="pref_mode_key">scheduler_mode</string>
+    <string name="pref_category_basic_settings_key">basic_settings_category</string>
+    <string name="pref_category_basic_settings_title">Vispārējie iestatījumi</string>
+    <string name="pref_screen_periods_key">screen_period_length</string>
+    <string name="pref_screen_periods_title">Darba un atpūtas periodu iestatījumi</string>
+    <string name="pref_work_period_length_key">work_period_length</string>
+    <string name="pref_work_period_length_title">Darba perioda ilgums</string>
+    <string name="pref_work_period_length_dialog_text">Ievadīt perioda ilgumu (stundas un minūtes)</string>
+    <string name="pref_rest_period_length_key">rest_period_length</string>
+    <string name="pref_rest_period_length_title">Atpūtas perioda ilgums</string>
+    <string name="pref_rest_period_length_dialog_text">Ievadīt atpūtas perioda ilgumu (stundas un minūtes)</string>
+    <string name="pref_work_period_start_sound_key">work_period_start_sound</string>
+    <string name="pref_work_period_start_sound_title">Darba atsākšanas signāls</string>
+    <string name="pref_rest_period_start_sound_key">rest_period_start_sound</string>
+    <string name="pref_category_features_key">features_category</string>
+    <string name="pref_category_features_title">Programmas iespēju iestatījumi</string>
+    <string name="pref_approx_time_sound_key">approx_time_sound</string>
+    <string name="pref_approx_time_sound_title">Perioda beigu tuvuma atgādinājuma tonis</string>
+    <string name="title_activity_notification">NotificationActivity</string>
+    <string name="pref_end_period_key">enable_end_period</string>
+    <string name="pref_end_period_title">Pārtraukt tekošo periodu</string>
+    <string name="pref_end_period_summary">Pārtraukt tekošo periodu</string>
+    <string name="pref_enable_approx_notification_key">enable_approx_notification_key</string>
+    <string name="pref_enable_approx_notification_title">Tuvuma atgādinātājs</string>
+    <string name="pref_enable_approx_notification_summary">Skaņas signāls atgādina par drīzu perioda beigšanos</string>
+    <string name="pref_approx_notification_length_key">approx_notification_length_key</string>
+    <string name="pref_approx_notification_length_title">Laika apjoms pirms perioda beigām</string>
+    <string name="pref_approx_notification_length_summary">Pašreizējā vērtība:</string>
+    <string name="pref_approx_notification_length_dialog_text">Ievadīt laika apjomu minūtēs un sekundēs</string>
+    <string name="pref_enable_vibrate_key">enable_end_vibrate</string>
+    <string name="pref_enable_vibrate_title">Atļaut vibrāciju</string>
+    <string name="pref_screen_period_extend_key">pref_screen_period_extend_key</string>
+    <string name="pref_screen_period_extend_title">Periodu pagarināšanas iestatījumi</string>
+    <string name="pref_enable_extend_key">enable_end_extend</string>
+    <string name="pref_enable_extend_summary">Pagarināt tekošo periodu</string>
+    <string name="pref_enable_extend_title">Pagarināt periodu</string>
+    <string name="pref_period_extend_length_key">end_extend_length_key</string>
+    <string name="pref_period_extend_length_title">Perioda paildzināšanas ilgums</string>
+    <string name="pref_period_extend_length_summary">Ievadīt perioda atlikšanas ilgumu minūtēs</string>
+    <string name="pref_period_extend_length_dialog_text">Ievadīt perioda paildzināšanas ilgumu minūtes (1–120)</string>
+    <string name="pref_period_extend_options_key">end_extend_options_key</string>
+    <string name="pref_period_extend_options_title">Perioda pagarināšanas opciju skaits</string>
+    <string name="pref_period_extend_options_dialog_text">Izvēlies perioda paildzināšanas iespēju skaitu</string>
+    <string name="pref_screen_approx_settings_key">pref_screen_approx_settings</string>
+    <string name="pref_screen_approx_settings_title">Perioda beigu tuvuma signāla iestatījumi</string>
+    <string name="pref_show_is_on_icon_key">pref_show_is_on_icon</string>
+    <string name="pref_show_is_on_icon_title">Attēlot programmas ikonu ierīces statusa joslā</string>
+    <string name="pref_show_stop_counter_hint_key">pref_show_stop_counter_hint</string>
+    <string name="pref_show_stop_counter_hint_title">Mājiens par atgādinātāja atslēgšanu</string>
+    <string name="pref_show_led_key">pref_show_led_hint</string>
+    <string name="pref_show_led_title">Izmantot LED indikatoru</string>
+    <string name="pref_hour_single">1 stunda</string>
+    <string name="pref_hour_multiple">%1$d stundas</string>
+    <string name="pref_minute_single">1 minūte</string>
+    <string name="pref_minute_multiple">%1$d minūtes</string>
+    <string name="pref_second_single">sekunde</string>
+    <string name="pref_second_multiple">%1$d sekundes</string>
+    <string name="pref_summary_and">un</string>
+    <string name="pref_options_single">1 opcija</string>
+    <string name="pref_options_multiple">%1$d opcijas</string>
+    <string name="pref_ringtone_silent">Kluss</string>
+    <string name="pref_fragment_tag">preference_fragment</string>
+    
+    <!-- Manual activity -->
+    <string name="back_to_top">^</string>
+    <string name="manual_activity_title">Pamācība</string>
+    
+    <!--  Preference default string values -->
+    <string name="default_work_length_string">00:05</string>
+    <string name="default_rest_length_string">00:10</string>
+    <string name="default_approx_length_string">00:30</string>
+    <!-- TimePreference -->
+    <string name="time_preference_set_text">Ievadīt</string>
+    <string name="time_preference_cancel_text">Atcelt</string>
+    <string name="title_activity_manual">Lietošanas pamācība</string>
+    <string name="dialog_set_number">Saglabāt</string>
+    <string name="dialog_cancel">Atcelt</string>
+    <string name="dialog_picker_title">Izvēlies numuru</string>
+    <string name="description_extended_one_time">pagarināts</string>
+    <string name="next_period_end_description">Nākamais (%1$s) periods beigsies %2$s</string>
+    <string name="notification_end_extend_description_multiple">Iepriekšējais %1$s periods tika pagarināts %2$d reizes</string>
+    <string name="notification_end_extend_description_once">Iepriekšējais %1$s periods tika pagarināts 1 reizi</string>
+    <string name="notification_end_manual_title">Spied \"Sākt nākamo periodu\" pogu, lai sāktu %1$s periodu</string>
+    <string name="pref_rest_period_start_sound_title">Atpūtas perioda skaņas signāls</string>
+    <string name="showcase_close">Aizvērt</string>
+    <string name="showcase_extend_description">Lai pagarinātu tekošo periodu, izvēlies vienu no perioda pagarināšanas opcijām</string>
+    <string name="showcase_extend_title">Pagarināt tekošo periodu</string>
+    <string name="showcase_force_end_description">Lai izbeigtu tekošo periodu priekšlaicīgi, ar pirkstu piespied un velc norādītajā virzienā</string>
+    <string name="showcase_force_end_title">Priekšlaicīgi izbeigt tekošo periodu</string>
+    <string name="showcase_menu_description">Pielāgo atpūtu atgādinātāju pēc savām vajadzībām \"Iestatījumi\" sadaļā. Sadaļā \"Pamācība\"Ir pieejams paplašināts programmas apraksts.</string>
+    <string name="showcase_menu_title">Iestatījumi un pamācība</string>
+    <string name="showcase_next">Tālāk</string>
+    <string name="showcase_start_description">Spied taimera pogu, lai sāktu atpūtu atgādinātāja darbību. (Lai izslēgtu atgādinātāju, nospied un turi taimera pogu.)</string>
+    <string name="reminder_off_title">Nospied taimeri, lai sāktu darbu</string>
+    <string name="rest">atpūtas</string>
+    <string name="showcase_stop_description">Nospied un turi taimera pogu, lai izbeigtu atgādinātāja darbību</string>
+    <string name="showcase_start_title">Ieslēgt atpūtu atgādinātāju</string>
+    <string name="showcase_stop_title">Izslēgt atpūtu atgādinātāju</string>
+    <string name="toast_period_end_extended_previous">Iepriekšējais periods tika pagarināts</string>
+    <string name="work">darba</string>
+    <string name="eula_accept">Es piekrītu</string>
+    <string name="eula_reject">Nē paldies</string>
+    <string name="pref_mode_title_automatic">automātiskais</string>
+    <string name="pref_mode_title_manual">manuālais</string>
+    <string name="pref_mode_title_first_part">Atgādinātāja režīms: %1$s</string>
+    <string name="extend_period_one_option">pagarināt par %1$d min</string>
+    <string name="notify_extend">Pagarināt</string>
+
+</resources>
