@@ -1,0 +1,25 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+
+    <style name="TimerFontWear" parent="@android:style/TextAppearance.Medium">
+        <item name="android:layout_height">match_parent</item> 
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/timer_layout_text_size</item>
+        <item name="android:gravity">center_vertical|right</item>
+    </style>
+    
+    <style name="NormalFontWear" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/description_text_text_size</item>
+    </style>
+
+    <style name="TitleFontWear" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textSize">@dimen/period_title_text_size</item>
+    </style>
+
+</resources>

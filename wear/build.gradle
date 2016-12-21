@@ -1,0 +1,36 @@
+apply plugin: 'com.android.application'
+
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "24.0.2"
+
+    defaultConfig {
+        applicationId "com.colormindapps.rest_reminder_alarm"
+        minSdkVersion 21
+        targetSdkVersion 25
+        versionName "1.0.1-pro"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    productFlavors {
+        pro {
+            applicationId "com.colormindapps.rest_reminder_alarm.pro"
+            versionName "1.0.1-pro"
+            minSdkVersion 21
+            targetSdkVersion 25
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.google.android.support:wearable:2.0.0-alpha3'
+    compile 'com.google.android.gms:play-services-wearable:10.0.1'
+    provided 'com.google.android.wearable:wearable:2.0.0-alpha3'
+}

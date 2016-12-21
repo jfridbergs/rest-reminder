@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Rest reminder Pro</string>
+    <string name="appIndexUrl">android-app://com.colormindapps.rest_reminder_alarm.pro/http/host/path</string>
+
+
+
+</resources>

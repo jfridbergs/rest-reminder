@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.wearable.view.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    tools:context="com.colormindapps.rest_reminder_alarm.MainActivity" tools:deviceIds="wear">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_box="all">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical|center"
+                style="@style/TitleFontWear" />
+
+            <TextView
+                android:id="@+id/description"
+                style="@style/NormalFontWear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/description_text_marginTop"
+                android:gravity="center_vertical|center" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/timer_layout"
+            android:layout_width="320dp"
+            android:layout_height="120dp"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/btn_timer_np"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="callStartScheduler" >
+
+            <TextView
+                android:id="@+id/timer_hour1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_width="@dimen/timer_digit_width"
+                style="@style/TimerFont" />
+
+            <TextView
+                android:id="@+id/timer_hour2"
+                style="@style/TimerFont"
+                android:layout_width="@dimen/timer_digit_width"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_toRightOf="@id/timer_hour1" />
+
+            <TextView
+                android:id="@+id/timer_colon"
+                style="@style/TimerFont"
+                android:layout_width="@dimen/timer_sepparator_width"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_sepparator_colon_marginTop"
+                android:layout_toRightOf="@id/timer_hour2"
+                android:text="@string/timer_layout_colon_string"/>
+
+            <TextView
+                android:id="@+id/timer_minute1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_toRightOf="@id/timer_colon"
+                android:layout_width="@dimen/timer_digit_width"
+                style="@style/TimerFont" />
+            <TextView
+                android:id="@+id/timer_minute2"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_toRightOf="@id/timer_minute1"
+                android:layout_width="@dimen/timer_digit_width"
+                style="@style/TimerFont" />
+
+            <TextView
+                android:id="@+id/timer_point"
+                style="@style/TimerFont"
+                android:layout_width="@dimen/timer_sepparator_width"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_sepparator_point_marginTop"
+                android:layout_toRightOf="@id/timer_minute2"
+                android:text="@string/timer_layout_point_string" />
+
+            <TextView
+                android:id="@+id/timer_second1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_toRightOf="@id/timer_point"
+                android:layout_width="@dimen/timer_digit_width"
+                style="@style/TimerFont" />
+            <TextView
+                android:id="@+id/timer_second2"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/timer_digit_marginTop"
+                android:layout_toRightOf="@id/timer_second1"
+                android:layout_width="@dimen/timer_digit_width"
+                style="@style/TimerFont" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+</android.support.wearable.view.BoxInsetLayout>

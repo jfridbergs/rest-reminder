@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:jf="http://schemas.android.com/apk/res/com.colormindapps.rest_reminder_alarm" >
+    xmlns:jf="http://schemas.android.com/apk/res-auto" >
     <PreferenceCategory
         android:key="@string/pref_category_basic_settings_key"
         android:title="@string/pref_category_basic_settings_title">

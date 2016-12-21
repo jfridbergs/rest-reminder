@@ -68,7 +68,7 @@
 
 		
 		<RelativeLayout
-		    android:id="@id/timer_layout"
+		    android:id="@+id/timer_layout"
 		    android:layout_width="@dimen/timer_layout_width"
 		    android:layout_height="@dimen/timer_layout_height"
 		    android:layout_centerInParent="true"

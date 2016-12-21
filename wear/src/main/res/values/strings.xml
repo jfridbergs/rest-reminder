@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Rest reminder Pro</string>
+    <string name="hello_world">Rest reminder Pro</string>
+    <string name="wear_main_title_off">Press to start</string>
+    <string name="work">work</string>
+    <string name="rest">rest</string>
+    <string name="extend">extend</string>
+    <string name="extended">extended</string>
+    <string name="extend_multiple">extend: %1$d</string>
+</resources>
