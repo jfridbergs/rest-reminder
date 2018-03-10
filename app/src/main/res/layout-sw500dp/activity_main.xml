@@ -4,7 +4,7 @@
     android:id="@+id/mainActivityLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.colormindapps.rest_reminder_alarm.MainActivity" >
+    tools:context="com.colormindapps.rest_reminder_alarm.wear.MainActivity" >
 	<android.support.v7.widget.Toolbar
 		android:layout_width="match_parent"
 		android:id="@+id/toolbar"
@@ -15,7 +15,7 @@
     <ImageView 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/transparent_layer"
+        android:src="@drawable/transparent_layer"
 		android:layout_below="@id/toolbar"
         android:id="@+id/transparentImageView"
         />

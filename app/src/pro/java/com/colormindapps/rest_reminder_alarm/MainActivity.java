@@ -1,5 +1,7 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,6 +25,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationManagerCompat;
@@ -46,6 +49,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.colormindapps.rest_reminder_alarm.CounterService.CounterBinder;
+import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
@@ -53,13 +58,19 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -77,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements
 		GoogleApiClient.ConnectionCallbacks {
 
 
-	public int periodType = 0;
+	public int periodType = RReminder.PERIOD_OFF;
 	public int extendCount;
 	private int requiredSwipeDistance;
 	private boolean turnOffIntent = false;
@@ -91,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements
 	public boolean swipeAreaListenerUsed;
 	private CounterService mService;
 	private boolean mBound = false;
-	private boolean isExtended = false;
 	private int screenOrientation;
 	private boolean turnedOff = true;
 	private static boolean isOnVisible;
@@ -129,8 +139,14 @@ public class MainActivity extends AppCompatActivity implements
 	private boolean turnOffFirstIntent;
 	private NotificationManagerCompat mgr;
 	private String debug = "MAIN_ACTIVITY";
+	private boolean wearOn = false;
+
+	private ValueAnimator bgAnimation;
 
 	private GoogleApiClient mGoogleApiClient;
+
+	private Node connectedNode;
+
 
 	//Request code for launching the Intent to resolve Google Play services errors.
 	private static final int REQUEST_RESOLVE_ERROR = 1000;
@@ -158,16 +174,6 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
-
-
-
-	
-	
-
-	
-
-    
-	
 	/*
 	private OnLongClickListener longClick = new OnLongClickListener(){
 		@Override
@@ -217,8 +223,9 @@ public class MainActivity extends AppCompatActivity implements
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
 			long timeRemaining = mService.getCounterTimeValue();
 			//checking for special case where the reminder was turned off from notification bar after the the app was removed from active task list
+			Log.d(debug, "onServiceConnected");
 			if(getIntent().hasExtra(RReminder.TURN_OFF)){
-				if(getIntent().getAction().equals(RReminder.CUSTOM_INTENT_TURN_OFF) && periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
+				if(getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
 					turnOffFirstIntent = true;
 				}
 
@@ -230,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements
 			} else {
 					turnOffIntent = false;
 				//If the activity was opened while the countdown was already finished(manual mode), jump to NotificationActivity
-				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.CUSTOM_INTENT_TURN_OFF)) {
+				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
 					startNotificationActivity(periodType, extendCount, periodEndTimeValue, false);
 				} else {
 					if(getVisibleState()){
@@ -258,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements
 	private GoogleApiClient client;
 
 
-	public void startNotificationActivity(int type, int extendCount, long periodEndTimeValue, boolean redirectScreenOff) {
+	public void startNotificationActivity(@RReminder.PeriodType int type, int extendCount, long periodEndTimeValue, boolean redirectScreenOff) {
 		Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
 		intent.putExtra(RReminder.PERIOD_TYPE, type);
 		intent.putExtra(RReminder.PERIOD_END_TIME, periodEndTimeValue);
@@ -266,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements
 		intent.putExtra(RReminder.PLAY_SOUND, false);
 		intent.putExtra(RReminder.REDIRECT_SCREEN_OFF, redirectScreenOff);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		intent.setAction(RReminder.CUSTOM_INTENT_VIEW_NOTIFICATION_ACTIVITY);
+		intent.setAction(RReminder.ACTION_VIEW_NOTIFICATION_ACTIVITY);
 		startActivity(intent);
 	}
 
@@ -281,6 +288,7 @@ public class MainActivity extends AppCompatActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(debug, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		String intentAction = getIntent().getAction();
@@ -292,12 +300,6 @@ public class MainActivity extends AppCompatActivity implements
 		swipeWorkLand = getString(R.string.swipe_area_text_land_work);
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
-
-		if (intentAction!= null && intentAction.equals(RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY)) {
-			isExtended = true;
-		}
-
-
 
 		if (savedInstanceState != null) {
 			dialogOnScreen = savedInstanceState.getBoolean("dialogOnScreen");
@@ -323,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
+
 
 		if (!mResolvingError) {
 			mGoogleApiClient.connect();
@@ -422,7 +425,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		setVisibleState(true);
 		//dismissExtendDialog();
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			turnedOff = false;
 		}
 
@@ -486,7 +489,7 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
 		}
 	}
@@ -557,14 +560,14 @@ public class MainActivity extends AppCompatActivity implements
 	@TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 	private void manageUiOnStart(){
 		if(buildNumber>=Build.VERSION_CODES.KITKAT_WATCH){
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
 				Intent intent = new Intent(this, CounterService.class);
 				bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 			} else {
 				manageUI(false);
 			}
 		} else {
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
 				Intent intent = new Intent(this, CounterService.class);
 				bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 			} else {
@@ -576,7 +579,7 @@ public class MainActivity extends AppCompatActivity implements
 	@TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 	private void manageUiOnResume(){
 		if(buildNumber >= Build.VERSION_CODES.KITKAT_WATCH){
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
 				if(!mBound) {
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -585,7 +588,7 @@ public class MainActivity extends AppCompatActivity implements
 				}
 			}
 		} else {
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
 				if(!mBound){
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -605,6 +608,8 @@ public class MainActivity extends AppCompatActivity implements
 		Wearable.MessageApi.addListener(mGoogleApiClient, this);
 		Wearable.CapabilityApi.addListener(
 				mGoogleApiClient, this, Uri.parse("wear://"), CapabilityApi.FILTER_REACHABLE);
+		getConnectedNode();
+
 	}
 
 	@Override
@@ -653,12 +658,29 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	private void setReminderOn() {
+		Log.d(debug, "setReminderOn");
 		periodType = 1;
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-		new PeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
-		RReminder.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
+		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
 
-		updateReminderStatus(periodType,mCalendar,0);
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,mCalendar,0, true, wearOn);
+		updateWearPreferences();
+		if(bgAnimation!=null){
+			bgAnimation.removeAllUpdateListeners();
+		}
+		bgAnimation = ValueAnimator.ofObject(new ArgbEvaluator(),colorBlack, colorWork);
+		bgAnimation.setDuration(200);
+		bgAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+			@Override
+			public void onAnimationUpdate(ValueAnimator animator) {
+				rootLayout.setBackgroundColor((int) animator.getAnimatedValue());
+			}
+
+		});
+		bgAnimation.start();
+
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -675,19 +697,20 @@ public class MainActivity extends AppCompatActivity implements
 	*/
 
 	private void setReminderOff(long periodEndTime) {
+		Log.d(debug, "setReminderOff");
 		setReminderOffCounter++;
 		stopCountDownTimer();
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
 		}
-		RReminder.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
 		cancelNotification(periodEndTimeValue,true);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
 		}
-		RReminder.stopCounterService(MainActivity.this, periodType);
+		RReminderMobile.stopCounterService(MainActivity.this, periodType);
 		if (isOnVisible) {
 			manageUI(false);
 		}
@@ -696,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements
 		storedPeriodEndTime = 0;
 		periodEndTimeValue = 0;
 
-		updateReminderStatus(periodType,0L,0);
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,0L,0, false, false);
 	}
 
 
@@ -709,20 +732,28 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	@Override
-	public void updateWearStatus(int type, long periodEndTimeValue, int extendCount){
-		updateReminderStatus(type, periodEndTimeValue,extendCount);
+	public void updateWearStatus(int type, long periodEndTimeValue, int extendCount, boolean mobileOn){
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,type, periodEndTimeValue,extendCount, mobileOn, wearOn);
 	}
 
-	private void updateReminderStatus(int type, long periodEndValue, int extendCount){
-		Log.d(debug, "extend counter value in updateReminderStatus: "+extendCount);
-		PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/reminder_status");
-		putDataMapRequest.getDataMap().putInt(RReminder.PERIOD_TYPE,type);
-		putDataMapRequest.getDataMap().putLong(RReminder.PERIOD_END_TIME,periodEndValue);
-		putDataMapRequest.getDataMap().putInt(RReminder.EXTEND_COUNT, extendCount);
+	private void updateReminderStatus(int updateSource,int type, long periodEndValue, int extendCount, boolean mobileOn, boolean wearOn){
+		Log.d(debug, "updating Data API. type: "+type + ", periodEndValue: "+ periodEndValue+ ", extendCount: "+extendCount );
+		PendingResult<DataApi.DataItemResult> pendingResult =
+				Wearable.DataApi.putDataItem(mGoogleApiClient,RReminder.createStatusData(updateSource,type,periodEndValue,extendCount, mobileOn, wearOn));
+
+	}
+
+	private void updateWearPreferences(){
+		Context context  = getApplicationContext();
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+		PutDataMapRequest putDataMapRequest = PutDataMapRequest.create(RReminder.DATA_API_REMINDER_PREFERENCES_PATH);
+		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_WORK_LENGTH,prefs.getString(context.getString(R.string.pref_work_period_length_key),RReminder.DEFAULT_WORK_PERIOD_STRING));
+		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_REST_LENGTH,prefs.getString(context.getString(R.string.pref_rest_period_length_key),RReminder.DEFAULT_REST_PERIOD_STRING));
+		putDataMapRequest.getDataMap().putInt(RReminder.WEAR_PREF_EXTEND_LENGTH,prefs.getInt(context.getString(R.string.pref_period_extend_length_key),RReminder.DEFAULT_EXTEND_BASE_LENGTH));
 		PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
 		PendingResult<DataApi.DataItemResult> pendingResult =
 				Wearable.DataApi.putDataItem(mGoogleApiClient,putDataRequest);
-
 	}
 
 	@Override
@@ -730,7 +761,135 @@ public class MainActivity extends AppCompatActivity implements
 		Log.d(debug, "onDataChanged: " + dataEvents);
 
 		for (DataEvent event : dataEvents) {
+			if (event.getType() == DataEvent.TYPE_CHANGED) {
+				DataItem item = event.getDataItem();
+
+				if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_STATUS_PATH)==0){
+					DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+					wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
+					Log.d(debug, "ONDATACHANGED reminder status values, sources ID: " + dataMap.getInt(RReminder.DATA_API_SOURCE) + ", type: "+ dataMap.getInt(RReminder.PERIOD_TYPE)+ ", periodEndTime: "+
+					dataMap.getLong(RReminder.PERIOD_END_TIME)+ ", extend count: "+ dataMap.getInt(RReminder.EXTEND_COUNT)+ ", MOBILE_ON: "+ dataMap.getBoolean(RReminder.DATA_API_MOBILE_ON)+ ", WEAR_ON: "+ dataMap.getBoolean(RReminder.DATA_API_WEAR_ON));
+					if(dataMap.getInt(RReminder.DATA_API_SOURCE)==RReminder.DATA_API_SOURCE_WEAR){
+						int periodType = dataMap.getInt(RReminder.PERIOD_TYPE);
+						long periodEndTime = dataMap.getLong(RReminder.PERIOD_END_TIME);
+						int extendCount = dataMap.getInt(RReminder.EXTEND_COUNT);
+						boolean wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
+						updateMobileReminder(periodType, periodEndTime, extendCount, wearOn);
+						// updating reminder status with mobile is on, except when update from wear comes about turning off reminder
+						if(periodType!=0){
+							updateReminderStatus(RReminder.DATA_API_SOURCE_LINKED_MOBILE_ON,periodType, periodEndTime, extendCount, true, wearOn);
+						}
+
+
+					} else if(dataMap.getInt(RReminder.DATA_API_SOURCE)==RReminder.DATA_API_SOURCE_LINKED_WEAR_ON){
+						Log.d(debug, "mobile app is notified that wear app is up and running" );
+						wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
+					}
+				}
+
+			}
 		}
+	}
+
+	public void updateMobileReminder(int updatedType, long updatedPeriodEndTime, int updatedExtendCount, boolean wearOn){
+
+		//TODO:
+		//1. cancel current alarm
+		//2. update service
+		//3. launch new alarm
+		//4. update UI
+
+		this.wearOn = wearOn;
+
+		Log.d(debug, "updateMobileReminder");
+		Log.d(debug, "extend count value: "+updatedExtendCount);
+
+		//check if countdown wasn 't stopped
+		if(updatedType!=0) {
+			stopCountDownTimer();
+			Log.d(debug, "updatedType: "+ updatedType);
+			if (mBound) {
+				unbindService(mConnection);
+				mBound = false;
+			}
+
+			//call to cancel already running period countdown on mobile in order to set up new period with values from wear device
+			if(periodType!=0){
+				RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+			}
+
+
+			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount, false);
+			RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
+
+			Intent intent = new Intent(this, CounterService.class);
+			bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+		} else {
+			setReminderOff(periodEndTimeValue);
+		}
+
+	}
+
+	private void getData(final String pathToContent) {
+		Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
+			@Override
+			public void onResult(NodeApi.GetLocalNodeResult getLocalNodeResult) {
+				String nodeID;
+				final String nodeSource;
+				if (connectedNode != null){
+					nodeID = connectedNode.getId();
+					nodeSource = "connected";
+				} else {
+					nodeID = getLocalNodeResult.getNode().getId();
+					nodeSource = "local";
+				}
+
+				Uri uri = new Uri.Builder()
+						.scheme(PutDataRequest.WEAR_URI_SCHEME)
+						.path(pathToContent)
+						.authority(nodeID)
+						.build();
+
+				Wearable.DataApi.getDataItem(mGoogleApiClient, uri)
+						.setResultCallback(
+								new ResultCallback<DataApi.DataItemResult>() {
+									@Override
+									public void onResult(DataApi.DataItemResult dataItemResult) {
+
+										if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+											DataMap data = DataMap.fromByteArray(dataItemResult.getDataItem().getData());
+											Log.d(debug, "node source: "+ nodeSource);
+
+											//update main activity with google api data only if its not outdated and if countdown on mobile isnt already running
+											if(!RReminderMobile.isCounterServiceRunning(MainActivity.this.getApplicationContext()) && data.getInt(RReminder.DATA_API_SOURCE)!= RReminder.DATA_API_SOURCE_MOBILE && data.getLong(RReminder.PERIOD_END_TIME) > Calendar.getInstance().getTimeInMillis()) {
+												Log.d(debug, "update UI with google api data upon connecting to google api");
+												int periodType = data.getInt(RReminder.PERIOD_TYPE);
+												long periodEndTime = data.getLong(RReminder.PERIOD_END_TIME);
+												int extendCount = data.getInt(RReminder.EXTEND_COUNT);
+												boolean wearOn = data.getBoolean(RReminder.DATA_API_WEAR_ON);
+												updateMobileReminder(periodType, periodEndTime, extendCount, wearOn);
+												//update DATA API node, that mobile is also on
+												updateReminderStatus(RReminder.DATA_API_SOURCE_LINKED_MOBILE_ON,periodType, periodEndTime, extendCount, true, wearOn);
+											}
+										}
+									}
+								}
+						);
+			}
+		});
+	}
+
+	private void getConnectedNode()
+	{
+		Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+			@Override
+			public void onResult(NodeApi.GetConnectedNodesResult nodes) {
+				for (Node node : nodes.getNodes()) {
+					connectedNode = node;
+				}
+				getData(RReminder.DATA_API_REMINDER_STATUS_PATH);
+			}
+		});
 	}
 
 
@@ -756,6 +915,7 @@ public class MainActivity extends AppCompatActivity implements
 					activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(colorWork);
 					infoButton.setTextColor(colorWork);
+					description.setText("");
 					if(RReminder.isPortrait(this)){
 						swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
 					} else {
@@ -766,6 +926,7 @@ public class MainActivity extends AppCompatActivity implements
 					activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(colorRest);
 					infoButton.setTextColor(colorRest);
+					description.setText("");
 					if(RReminder.isPortrait(this)){
 						swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
 					} else {
@@ -788,17 +949,9 @@ public class MainActivity extends AppCompatActivity implements
 						swipeArea.setText(swipeRestLand);
 					}
 					if (extendCount <= 1) {
-						if (isExtended) {
-							description.setText(getString(R.string.description_extended_one_time));
-						} else {
-							description.setText(getString(R.string.description_extended_one_time));
-						}
+						description.setText(getString(R.string.description_extended_one_time));
 					} else {
-						if (isExtended) {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						}
+						description.setText(String.format(getString(R.string.description_extended),extendCount));
 					}
 					break;
 				case 4:
@@ -816,18 +969,9 @@ public class MainActivity extends AppCompatActivity implements
 						swipeArea.setText(swipeWorkLand);
 					}
 					if (extendCount <= 1) {
-						if (isExtended) {
 							description.setText(getString(R.string.description_extended_one_time));
-						} else {
-							description.setText(getString(R.string.description_extended_one_time));
-						}
-
 					} else {
-						if (isExtended) {
 							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						}
 					}
 					break;
 				default:
@@ -972,7 +1116,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
 		if (isOn) {
-			countdown = new MyCountDownTimer(getApplicationContext(), counterTimeValue, 1000, timerHour1, timerHour2, colon, timerMinute1, timerMinute2, point, timerSecond1, timerSecond2);
+			countdown = new MyCountDownTimer(getApplicationContext(), counterTimeValue, 1000, timerHour1, timerHour2, colon, timerMinute1, timerMinute2, point, timerSecond1, timerSecond2, false);
 			countdown.start();
 			timerButtonLayout.setOnTouchListener(new TimerButtonListener());
 			timerButtonLayout.setBackgroundResource(R.drawable.btn_timer_idle_np);
@@ -1053,7 +1197,7 @@ public class MainActivity extends AppCompatActivity implements
 
 	public String getWorkPeriodLengthString() {
 		String result;
-		result = RReminder.getPreferencePeriodLength(MainActivity.this, 1) + ".00";
+		result = RReminder.getPreferencePeriodLength(MainActivity.this, RReminder.WORK) + ".00";
 		return result;
 	}
 
@@ -1082,7 +1226,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
 
-			mgr.notify(1, RReminder.updateOnGoingNotification(MainActivity.this, periodType,periodEndTime, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,periodEndTime, true));
 		} else {
 
 			mgr.cancel(1);
@@ -1123,7 +1267,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 
 
-		RReminder.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
 
 		String toastText;
 		if(flag==RReminder.EXTEND_PERIOD_SINGLE_OPTION){
@@ -1140,10 +1284,10 @@ public class MainActivity extends AppCompatActivity implements
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new PeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
-		RReminder.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
-		updateReminderStatus(functionType,functionCalendar,extendCount);
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1167,7 +1311,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		//replacing hint dialog with showcaseview
 
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			if (RReminder.isExtendEnabled(MainActivity.this)) {
 				if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
 					createShowcaseView(RReminder.SHOWCASEVIEW_EXTEND, RReminder.SHOWCASEVIEW_FORCE_END);
@@ -1187,13 +1331,13 @@ public class MainActivity extends AppCompatActivity implements
 
 	}
 
-	public void createShowcaseView(int type, int nextShowcaseView) {
+	public void createShowcaseView(int showcaseType, int nextShowcaseView) {
 		int targetId;
 		int titleId;
 		int descriptionId;
 		Target viewTarget;
 
-		switch (type) {
+		switch (showcaseType) {
 			case RReminder.SHOWCASEVIEW_START: {
 				targetId = R.id.timer_layout;
 				titleId = R.string.showcase_start_title;
@@ -1233,7 +1377,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 
 
-		if (type == RReminder.SHOWCASEVIEW_MENU) {
+		if (showcaseType == RReminder.SHOWCASEVIEW_MENU) {
 			View menu3dots;
 			if (toolBar != null) {
 				// 0 - title
@@ -1364,7 +1508,7 @@ public class MainActivity extends AppCompatActivity implements
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
-		RReminder.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
@@ -1372,13 +1516,13 @@ public class MainActivity extends AppCompatActivity implements
 
 		long functionCalendar;
 		switch (periodType) {
-			case 1:
-			case 3:
-				periodType = 2;
+			case RReminder.WORK:
+			case RReminder.WORK_EXTENDED:
+				periodType = RReminder.REST;
 				break;
-			case 2:
-			case 4:
-				periodType = 1;
+			case RReminder.REST:
+			case RReminder.REST_EXTENDED:
+				periodType = RReminder.WORK;
 				break;
 			default:
 				break;
@@ -1387,14 +1531,13 @@ public class MainActivity extends AppCompatActivity implements
 
 		extendCount = 0;
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
-			mgr.notify(1, RReminder.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
 
-		new PeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType, functionCalendar,extendCount, true, wearOn);
 
-		updateReminderStatus(periodType, functionCalendar,extendCount);
-
-		RReminder.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
+		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
 		cancelNotification(functionCalendar,false);
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1425,7 +1568,7 @@ public class MainActivity extends AppCompatActivity implements
 
 	@Override
 	public void startReminder() {
-		if (!RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (!RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			setReminderOn();
 		}
 	}
@@ -1441,7 +1584,7 @@ public class MainActivity extends AppCompatActivity implements
 		Bundle data = intent.getExtras();
 		String intentAction = intent.getAction();
 		Log.d(debug, "onNewIntent action: "+intentAction);
-		Log.d(debug, "wear extend action name: "+RReminder.CUSTOM_INTENT_WEAR_EXTEND_PERIOD);
+		Log.d(debug, "wear extend action name: "+RReminder.ACTION_WEAR_NOTIFICATION_EXTEND);
 
 	   /* if(introFragment!=null){
 	    	introFragment.dismiss();
@@ -1459,13 +1602,13 @@ public class MainActivity extends AppCompatActivity implements
 			Log.d(debug,"intent has data");
 			switch(intentAction) {
 				//intent after turning off countdown from notification activity
-				case RReminder.CUSTOM_INTENT_TURN_OFF: {
+				case RReminder.ACTION_TURN_OFF: {
 
 					turnOffValue = data.getInt(RReminder.TURN_OFF);
 					long periodEndTime = data.getLong(RReminder.PERIOD_END_TIME);
 					if (turnOffValue == 1) {
 
-						if(RReminder.getMode(getApplicationContext())==1  && !RReminder.isCounterServiceRunning(getApplicationContext())){
+						if(RReminder.getMode(getApplicationContext())==1  && !RReminderMobile.isCounterServiceRunning(getApplicationContext())){
 							finish();
 						} else {
 							if(mBound){
@@ -1487,20 +1630,20 @@ public class MainActivity extends AppCompatActivity implements
 					break;
 				}
 				//intent after calling next period start from notification activity
-				case RReminder.CUSTOM_INTENT_MANUAL_START_NEXT_PERIOD: {
-					int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
+				case RReminder.ACTION_MANUAL_START_NEXT_PERIOD: {
+					@RReminder.PeriodType int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
 					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 
-					new PeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
-					RReminder.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
+					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
+					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {
 						manageTimer(true);
 					}
 					break;
 				}
-				case RReminder.CUSTOM_INTENT_WEAR_EXTEND_PERIOD: {
+				case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
 					//dismissing notification after selecting to extend last ended period
 					//mgr.cancel(1);
 					//code for extending previously ended period
@@ -1512,11 +1655,7 @@ public class MainActivity extends AppCompatActivity implements
 					//extendPeriod(RReminder.EXTEND_PERIOD_WEAR, periodToExtend);
 					break;
 				}
-				case RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY: {
-					isExtended = true;
-					break;
-				}
-				case RReminder.CUSTOM_INTENT_VIEW_MAIN_ACTIVITY:{
+				case RReminder.ACTION_VIEW_MAIN_ACTIVITY:{
 					if(RReminder.isActiveModeNotificationEnabled(this)){
 						if(mBound){
 							Bundle serviceData = getDataFromService();
@@ -1525,7 +1664,7 @@ public class MainActivity extends AppCompatActivity implements
 						} else {
 							periodType = data.getInt(RReminder.PERIOD_TYPE);
 						}
-						mgr.notify(1, RReminder.updateOnGoingNotification(this, periodType,periodEndTimeValue, true));
+						mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, periodType,periodEndTimeValue, true));
 					}
 					break;
 				}
@@ -1915,15 +2054,15 @@ public class MainActivity extends AppCompatActivity implements
 		return input;
 	}
 
-	public String getSwipeSwapTitle(int type) {
+	public String getSwipeSwapTitle(@RReminder.PeriodType int type) {
 		String output;
 		switch (type) {
-			case 1:
-			case 3:
+			case RReminder.WORK:
+			case RReminder.WORK_EXTENDED:
 				output = getString(R.string.on_rest_period);
 				break;
-			case 2:
-			case 4:
+			case RReminder.REST:
+			case RReminder.REST_EXTENDED:
 				output = getString(R.string.on_work_period);
 				break;
 			default:
@@ -2113,18 +2252,12 @@ public class MainActivity extends AppCompatActivity implements
 					}
 
 					addSwipeListener();
-
-
 				}
 
 
 			};
-
-
 			new Thread(runnableOffMain).start();
 		}
-
-
 	}
 
 	public void addSwipeListener() {
@@ -2204,12 +2337,8 @@ public class MainActivity extends AppCompatActivity implements
 						Thread.sleep(3);
 
 					} catch (InterruptedException e) {
-
 						e.printStackTrace();
-
 					}
-
-
 				}
 
 			}
@@ -2219,10 +2348,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
 		new Thread(runnableOffMain).start();
-
-
 	}
-
 
 	public int getCurrentColorId(int type, int multiplier) {
 		int red;

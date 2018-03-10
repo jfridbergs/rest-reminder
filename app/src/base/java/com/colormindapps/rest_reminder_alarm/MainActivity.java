@@ -1,5 +1,7 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,13 +15,11 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v4.app.DialogFragment;
@@ -30,7 +30,6 @@ import android.support.v4.view.MotionEventCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -45,13 +44,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.colormindapps.rest_reminder_alarm.CounterService.CounterBinder;
+import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
@@ -63,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public int periodType = 0;
 	public int extendCount;
 	private int requiredSwipeDistance;
-	private boolean turnOffIntent = false;
+	boolean turnOffIntent = false;
 	public MyCountDownTimer countdown;
 	long periodEndTimeValue;
 	private long counterTimeValue;
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public boolean swipeAreaListenerUsed;
 	CounterService mService;
 	boolean mBound = false;
-	boolean isExtended = false;
 	int screenOrientation;
 	public boolean turnedOff = true;
 	public static boolean isOnVisible;
@@ -87,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	private PowerManager powerManager;
 	private CharSequence titleForRestore, titleSequence;
 	private int fullSwipeLength;
-	private long storedPeriodEndTime = 0;
+	long storedPeriodEndTime = 0;
 	public float swipeStartX, swipeStartY;
 	private Toolbar toolBar;
 	boolean animateInfo;
@@ -110,7 +107,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	int turnOffValue=0;
 	private boolean turnOffFirstIntent;
 	private NotificationManagerCompat mgr;
-	public String debug = "MAIN_ACTIVITY";
+
+	private ValueAnimator bgAnimation;
 
 	//for testing purposes only. remove before release
 	//boolean isOngoingNotificationOn;
@@ -120,19 +118,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	DialogFragment introFragment, extendFragment;
 
 	private static class MyHandler extends Handler {
-		private final WeakReference<MainActivity> mActivity;
+		 final WeakReference<MainActivity> mActivity;
 
-		public MyHandler(MainActivity activity) {
-			mActivity = new WeakReference<MainActivity>(activity);
+		MyHandler(MainActivity activity) {
+			mActivity = new WeakReference<>(activity);
 		}
 
-		@Override
-		public void handleMessage(Message msg) {
-			MainActivity activity = mActivity.get();
-			if (activity != null) {
-				// ...
-			}
-		}
 	}
 
 
@@ -193,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			long timeRemaining = mService.getCounterTimeValue();
 			//checking for special case where the reminder was turned off from notification bar after the the app was removed from active task list
 			if(getIntent().hasExtra(RReminder.TURN_OFF)){
-				if(getIntent().getAction().equals(RReminder.CUSTOM_INTENT_TURN_OFF) && periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
+				if(getIntent().getAction()!=null && getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && getIntent().getExtras()!=null &&periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
 					turnOffFirstIntent = true;
 				}
 
@@ -205,8 +196,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			} else {
 					turnOffIntent = false;
 				//If the activity was opened while the countdown was already finished(manual mode), jump to NotificationActivity
-				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.CUSTOM_INTENT_TURN_OFF)) {
-					startNotificationActivity(periodType, extendCount, periodEndTimeValue, false);
+				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
+					startNotificationActivity(periodType, extendCount, periodEndTimeValue);
 				} else {
 					if(getVisibleState()){
 						manageUI(true);
@@ -228,15 +219,15 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	};
 
 
-	public void startNotificationActivity(int type, int extendCount, long periodEndTimeValue, boolean redirectScreenOff) {
+	public void startNotificationActivity(int type, int extendCount, long periodEndTimeValue) {
 		Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
 		intent.putExtra(RReminder.PERIOD_TYPE, type);
 		intent.putExtra(RReminder.PERIOD_END_TIME, periodEndTimeValue);
 		intent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		intent.putExtra(RReminder.PLAY_SOUND, false);
-		intent.putExtra(RReminder.REDIRECT_SCREEN_OFF, redirectScreenOff);
+		intent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		intent.setAction(RReminder.CUSTOM_INTENT_VIEW_NOTIFICATION_ACTIVITY);
+		intent.setAction(RReminder.ACTION_VIEW_NOTIFICATION_ACTIVITY);
 		startActivity(intent);
 	}
 
@@ -253,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		String intentAction = getIntent().getAction();
 		toolBar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolBar);
 		buildNumber = Build.VERSION.SDK_INT;
@@ -263,9 +253,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 
-		if (intentAction!= null && intentAction.equals(RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY)) {
-			isExtended = true;
-		}
 
 
 
@@ -383,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		setVisibleState(true);
 		//dismissExtendDialog();
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			turnedOff = false;
 		}
 
@@ -447,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onPause() {
 		super.onPause();
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
 
 		}
@@ -456,19 +443,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStop() {
 		super.onStop();
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		Action viewAction = Action.newAction(
-				Action.TYPE_VIEW, // TODO: choose an action type.
-				"Main Page", // TODO: Define a title for the content shown.
-				// TODO: If you have web page content that matches this app activity's content,
-				// make sure this auto-generated web page URL is correct.
-				// Otherwise, set the URL to null.
-				Uri.parse("http://host/path"),
-				// TODO: Make sure this auto-generated app deep link URI is correct.
-				Uri.parse(getString(R.string.appIndexUrl))
-		);
-		AppIndex.AppIndexApi.end(client, viewAction);
 		setVisibleState(false);
 		//stopCountDownTimer();
 		if (mBound) {
@@ -512,9 +486,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		am = null;
 
 
-		// ATTENTION: This was auto-generated to implement the App Indexing API.
-		// See https://g.co/AppIndexing/AndroidStudio for more information.
-		client.disconnect();
 	}
 
 	@Override
@@ -526,14 +497,14 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 	private void manageUiOnStart(){
 		if(buildNumber>=Build.VERSION_CODES.KITKAT_WATCH){
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
 				Intent intent = new Intent(this, CounterService.class);
 				bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 			} else {
 				manageUI(false);
 			}
 		} else {
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
 				Intent intent = new Intent(this, CounterService.class);
 				bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 			} else {
@@ -545,7 +516,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 	private void manageUiOnResume(){
 		if(buildNumber >= Build.VERSION_CODES.KITKAT_WATCH){
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isInteractive()) {
 				if(!mBound) {
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -554,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				}
 			}
 		} else {
-			if (RReminder.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this) && powerManager.isScreenOn()) {
 				if(!mBound){
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -570,8 +541,23 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	private void setReminderOn() {
 		periodType = 1;
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-		new PeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
-		RReminder.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
+		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+
+		if(bgAnimation!=null){
+			bgAnimation.removeAllUpdateListeners();
+		}
+		bgAnimation = ValueAnimator.ofObject(new ArgbEvaluator(),colorBlack, colorWork);
+		bgAnimation.setDuration(200);
+		bgAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+			@Override
+			public void onAnimationUpdate(ValueAnimator animator) {
+				rootLayout.setBackgroundColor((int) animator.getAnimatedValue());
+			}
+
+		});
+		bgAnimation.start();
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -594,13 +580,13 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			unbindService(mConnection);
 			mBound = false;
 		}
-		RReminder.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
 		cancelNotification(periodEndTimeValue,true);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
 		}
-		RReminder.stopCounterService(MainActivity.this, periodType);
+		RReminderMobile.stopCounterService(MainActivity.this, periodType);
 		if (isOnVisible) {
 			manageUI(false);
 		}
@@ -674,17 +660,10 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 						swipeArea.setText(swipeRestLand);
 					}
 					if (extendCount <= 1) {
-						if (isExtended) {
 							description.setText(getString(R.string.description_extended_one_time));
-						} else {
-							description.setText(getString(R.string.description_extended_one_time));
-						}
 					} else {
-						if (isExtended) {
 							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						}
+
 					}
 					break;
 				case 4:
@@ -702,22 +681,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 						swipeArea.setText(swipeWorkLand);
 					}
 					if (extendCount <= 1) {
-						if (isExtended) {
 							description.setText(getString(R.string.description_extended_one_time));
-						} else {
-							description.setText(getString(R.string.description_extended_one_time));
-						}
-
 					} else {
-						if (isExtended) {
 							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-						}
 					}
 					break;
 				default:
-					activityTitle.setText("No title".toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.blue));
 					break;
 
@@ -858,7 +827,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		if (isOn) {
-			countdown = new MyCountDownTimer(getApplicationContext(), counterTimeValue, 1000, timerHour1, timerHour2, colon, timerMinute1, timerMinute2, point, timerSecond1, timerSecond2);
+			countdown = new MyCountDownTimer(getApplicationContext(), counterTimeValue, 1000, timerHour1, timerHour2, colon, timerMinute1, timerMinute2, point, timerSecond1, timerSecond2, false);
 			countdown.start();
 			timerButtonLayout.setOnTouchListener(new TimerButtonListener());
 			timerButtonLayout.setBackgroundResource(R.drawable.btn_timer_idle_np);
@@ -968,7 +937,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
 
-			mgr.notify(1, RReminder.updateOnGoingNotification(MainActivity.this, periodType,periodEndTime, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,periodEndTime, true));
 		} else {
 
 			mgr.cancel(1);
@@ -1009,7 +978,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 
 
-		RReminder.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
 
 		String toastText;
 		if(flag==RReminder.EXTEND_PERIOD_SINGLE_OPTION){
@@ -1026,8 +995,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new PeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
-		RReminder.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1051,7 +1020,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		//replacing hint dialog with showcaseview
 
-		if (RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			if (RReminder.isExtendEnabled(MainActivity.this)) {
 				if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
 					createShowcaseView(RReminder.SHOWCASEVIEW_EXTEND, RReminder.SHOWCASEVIEW_FORCE_END);
@@ -1162,7 +1131,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		private int showcaseType;
 
-		public MyShowcaseViewListener(int showcase) {
+		MyShowcaseViewListener(int showcase) {
 			this.showcaseType = showcase;
 		}
 
@@ -1248,7 +1217,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
-		RReminder.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
@@ -1271,12 +1240,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		extendCount = 0;
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
-			mgr.notify(1, RReminder.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
 
-		new PeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
 
-		RReminder.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
+		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
 		cancelNotification(functionCalendar,false);
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1298,7 +1267,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		if(eulaAccepted){
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
-			editor.putBoolean(RReminder.EULA_ACCEPTED, eulaAccepted);
+			editor.putBoolean(RReminder.EULA_ACCEPTED, true);
 			editor.apply();
 		}
 
@@ -1307,7 +1276,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	public void startReminder() {
-		if (!RReminder.isCounterServiceRunning(MainActivity.this)) {
+		if (!RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			setReminderOn();
 		}
 	}
@@ -1322,8 +1291,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		super.onNewIntent(intent);
 		Bundle data = intent.getExtras();
 		String intentAction = intent.getAction();
-		Log.d(debug, "onNewIntent action: "+intentAction);
-		Log.d(debug, "wear extend action name: "+RReminder.CUSTOM_INTENT_WEAR_EXTEND_PERIOD);
 
 	   /* if(introFragment!=null){
 	    	introFragment.dismiss();
@@ -1337,17 +1304,15 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	    }
 
 		*/
-		if (data != null) {
-			Log.d(debug,"intent has data");
+		if (data != null && intentAction!=null) {
 			switch(intentAction) {
 				//intent after turning off countdown from notification activity
-				case RReminder.CUSTOM_INTENT_TURN_OFF: {
+				case RReminder.ACTION_TURN_OFF: {
 
 					turnOffValue = data.getInt(RReminder.TURN_OFF);
-					long periodEndTime = data.getLong(RReminder.PERIOD_END_TIME);
 					if (turnOffValue == 1) {
 
-						if(RReminder.getMode(getApplicationContext())==1  && !RReminder.isCounterServiceRunning(getApplicationContext())){
+						if(RReminder.getMode(getApplicationContext())==1  && !RReminderMobile.isCounterServiceRunning(getApplicationContext())){
 							finish();
 						} else {
 							if(mBound){
@@ -1369,36 +1334,30 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					break;
 				}
 				//intent after calling next period start from notification activity
-				case RReminder.CUSTOM_INTENT_MANUAL_START_NEXT_PERIOD: {
+				case RReminder.ACTION_MANUAL_START_NEXT_PERIOD: {
 					int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
 					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 
-					new PeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
-					RReminder.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
+					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
+					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {
 						manageTimer(true);
 					}
 					break;
 				}
-				case RReminder.CUSTOM_INTENT_WEAR_EXTEND_PERIOD: {
+				case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
 					//dismissing notification after selecting to extend last ended period
 					//mgr.cancel(1);
 					//code for extending previously ended period
-					Log.d(debug, "extend wear notification received");
 					periodType = data.getInt(RReminder.PERIOD_TYPE);
 					periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-					int periodToExtend = data.getInt(RReminder.EXTENDED_PERIOD_TYPE);
 					extendCount = data.getInt(RReminder.EXTEND_COUNT);
 					//extendPeriod(RReminder.EXTEND_PERIOD_WEAR, periodToExtend);
 					break;
 				}
-				case RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY: {
-					isExtended = true;
-					break;
-				}
-				case RReminder.CUSTOM_INTENT_VIEW_MAIN_ACTIVITY:{
+				case RReminder.ACTION_VIEW_MAIN_ACTIVITY:{
 					if(RReminder.isActiveModeNotificationEnabled(this)){
 						if(mBound){
 							Bundle serviceData = getDataFromService();
@@ -1407,7 +1366,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 						} else {
 							periodType = data.getInt(RReminder.PERIOD_TYPE);
 						}
-						mgr.notify(1, RReminder.updateOnGoingNotification(this, periodType,periodEndTimeValue, true));
+						mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, periodType,periodEndTimeValue, true));
 					}
 					break;
 				}
@@ -1566,26 +1525,25 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 					tempDescription = description.getText();
 					final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					mLastTouchX = startX = swipeStartX = x;
 					swipeStartX = x;
 					mLastTouchY = startY = swipeStartY = y;
 					swipeStartY = y;
 					titleForRestore = activityTitle.getText();
 
-					mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+					mActivePointerId = ev.getPointerId(0);
 					break;
 				}
 
 				case MotionEvent.ACTION_MOVE: {
 
-					final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					int currentColorId;
 
-					float colorMultiplierFloat;
 					int colorMultiplier;
 
 					final float dx = x - startX;
@@ -1713,9 +1671,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 					description.setText(tempDescription);
-					final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					float z;
 					int orientation;
 					vib.cancel();
@@ -1800,12 +1758,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public String getSwipeSwapTitle(int type) {
 		String output;
 		switch (type) {
-			case 1:
-			case 3:
+			case RReminder.WORK:
+			case RReminder.WORK_EXTENDED:
 				output = getString(R.string.on_rest_period);
 				break;
-			case 2:
-			case 4:
+			case RReminder.REST:
+			case RReminder.REST_EXTENDED:
 				output = getString(R.string.on_work_period);
 				break;
 			default:
@@ -1875,8 +1833,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			float timeFraction = dX / fullSwipeLength;
 			float multiplierFloat = timeFraction * 100;
 			int multiplier = (int) multiplierFloat;
-			if (multiplier < 0)
-				multiplier = 0;
+			if (multiplier < 1)
+				multiplier = 1;
 			if (multiplier > 99) {
 				multiplier = 99;
 			}

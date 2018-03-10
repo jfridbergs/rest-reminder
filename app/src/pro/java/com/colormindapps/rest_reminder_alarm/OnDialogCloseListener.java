@@ -6,7 +6,7 @@ public interface OnDialogCloseListener {
 	void cancelNotificationForDialog(long periodEndtime, boolean removeOnGoing);
 	void resumeCounter(boolean positiveDismissal);
 	void bindFromFragment(long newPeriondEndTimeValue);
-	void updateWearStatus(int type, long periodEndTime, int extendCount);
+	void updateWearStatus(int type, long periodEndTime, int extendCount, boolean mobileOn);
 	void unbindFromFragment();
 	void startReminder();
     void dialogIsClosed(boolean eulaAccepted);

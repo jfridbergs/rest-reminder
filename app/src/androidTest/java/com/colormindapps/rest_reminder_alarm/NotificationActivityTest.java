@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.robotium.solo.Solo;
 
 import java.util.Calendar;
@@ -98,10 +99,10 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
     }
 
     public void tearDown() throws Exception {
-        RReminder.stopCounterService(getActivity().getApplicationContext(),1);
-        RReminder.stopCounterService(getActivity().getApplicationContext(),2);
-        RReminder.stopCounterService(getActivity().getApplicationContext(),3);
-        RReminder.stopCounterService(getActivity().getApplicationContext(),4);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),1);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),2);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),3);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),4);
 
         editor = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit();
 
@@ -763,7 +764,7 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
         assertFalse(solo.searchText(notificationTitle));
         assertFalse(solo.searchButton(closeButtonText));
 
-        RReminder.stopCounterService(getActivity().getApplicationContext(),2);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),2);
         //RReminder.cancelCounterAlarm(getActivity().getApplicationContext(), 2,0);
 
     }
@@ -792,7 +793,7 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
 
         solo.sleep(5000);
 
-        assertFalse("in manual mode when notification is visible, service should not be running", RReminder.isCounterServiceRunning(getActivity().getApplicationContext()));
+        assertFalse("in manual mode when notification is visible, service should not be running", RReminderMobile.isCounterServiceRunning(getActivity().getApplicationContext()));
 
         notificationButton = (Button) getActivity().findViewById(com.colormindapps.rest_reminder_alarm.R.id.notification_button);
 
@@ -800,7 +801,7 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
         instr.waitForIdleSync();
         solo.sleep(2000);
 
-        assertTrue("in manual mode after pressing button to start next period, service should not be running", RReminder.isCounterServiceRunning(getActivity().getApplicationContext()));
+        assertTrue("in manual mode after pressing button to start next period, service should not be running", RReminderMobile.isCounterServiceRunning(getActivity().getApplicationContext()));
 
     }
 

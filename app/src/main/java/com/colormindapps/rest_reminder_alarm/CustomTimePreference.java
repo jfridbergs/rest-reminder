@@ -11,15 +11,12 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-
-
-
-
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
 public class CustomTimePreference extends DialogPreference {
 	
-	public NumberPicker firstPicker, secondPicker;
+	private NumberPicker firstPicker, secondPicker;
 	
 	private int lastHour = 0;
 	private int lastMinute = 15;
@@ -32,12 +29,12 @@ public class CustomTimePreference extends DialogPreference {
 
 	
 	
-	public static int getHour(String time){
+	static int getHour(String time){
 		String[] pieces = time.split(":");
 		return (Integer.parseInt(pieces[0]));
 	}
 	
-	public static int getMinute(String time){
+	static int getMinute(String time){
 		String[] pieces = time.split(":");
 		return (Integer.parseInt(pieces[1]));
 	}
@@ -181,11 +178,11 @@ public class CustomTimePreference extends DialogPreference {
 	    // Change this data type to match the type saved by your Preference
 	    String value;
 
-	    public SavedState(Parcelable superState) {
+	    SavedState(Parcelable superState) {
 	        super(superState);
 	    }
 
-	    public SavedState(Parcel source) {
+	    SavedState(Parcel source) {
 	        super(source);
 	        // Get the current preference's value
 	        value = source.readString();  // Change this to read the appropriate data type

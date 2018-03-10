@@ -2,301 +2,184 @@
 <items version="2" >
 
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\incremental-runtime-classes\pro\debug\instant-run.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\animated-vector-drawable-25.2.0.aar\57f74b5e18d830883024750976309ab4\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="fe7063ff9c4f5b1d0c87f75380bd048de41e9bd2">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\instant-run_6b31fef2c37353a56822d0d881e8ed4821ee6b0e\classes.dex" />
+        revision="26.0.2"
+        sha1="cb454b52545859ed2f24a6c01366805b0fa04b22">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\10.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-v4\25.0.0\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-vector-drawable-25.2.0.aar\0dcac5983fc3b056afd88a3b5b362a39\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
+        revision="26.0.2"
+        sha1="810f41e5b7fd99f196ebeabe865ba2c54e7e76dc">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\11.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\play-services-tasks-9.2.0.aar\d291e6c97be58dbeb953fbcb89867eb9\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
+        optimize="true"
+        revision="26.0.2"
+        sha1="593fbaec1c3e100480a2bd72457b64b7dde6ac2d">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\7.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-fragment-25.2.0.aar\c816f9ce0f667291aad654521d49e7b3\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
+        optimize="true"
+        revision="26.0.2"
+        sha1="8fe8a8f77d651982ce5e18f6187dc4daf914ac57">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\12.jar" />
+    </item>
+    <item
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-v4-25.2.0.aar\0cbc6454aed290168ec492095e3278aa\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
+        optimize="true"
+        revision="26.0.2"
         sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-v4-25.0.0_3e9e783bbfec72f6f1ed1c26ec760af909a833bf\classes.dex" />
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\9.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-wearable\10.0.1\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\play-services-wearable-9.2.0.aar\23ca48df6a5436af3e43bd1e458f213c\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="408a599ac77cd17fe8e8919326bec617b3d005bd">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-wearable-10.0.1_128014b65ffc15027e4942dbe428faca1c43b756\classes.dex" />
+        revision="26.0.2"
+        sha1="08cdd337d1d9247eb915f0ab365624dd7966e7fa">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\2.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-fragment\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\play-services-basement-9.2.0.aar\dbdf2929c0201ffcb7605c922af90658\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="ee5faf4dee5b6a4364bf51587871047dde7c703a">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-25.0.0_709fdc243457b4b79d3092985d0140f72a27e62d\classes.dex" />
+        revision="26.0.2"
+        sha1="dd7676ac12aa6653718b7ea33d93ce9d6915d526">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\8.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.android.support\support-v4\24.0.0\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-core-utils-25.2.0.aar\1fa16d819861ee135a47499138de821d\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="2f7e6e2dad1bccaf68a8820820adc6c0d5b96d37">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-v4-24.0.0_88bf4e96edb0f836a1b9d237662a9299969d7ccd\classes.dex" />
+        revision="26.0.2"
+        sha1="e820b7be8c035dd522da4bc822e8a76c8e27921a">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\14.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\incremental-classes\pro\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\25.2.0\support-annotations-25.2.0.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="10a59434f965440ea48692dcda65ef8c03c8c82c">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\instant-run-bootstrap_b054e585b781c993b1c38386f7f2162c4ed79d64\classes.dex" />
+        revision="26.0.2"
+        sha1="4a5a82a027706397fff621b22fd6fa796e91d7c5">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\17.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.android.support\support-v4\24.0.0\jars\libs\internal_impl-24.0.0.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\play-services-base-9.2.0.aar\327c2aea9f32c9f3c2b0929553579078\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="fcaf463e10e69c1923ccf1edeba3b4196d239e00">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-24.0.0_1a652b557e3697bdae719af5fd07fe428d26a675\classes.dex" />
+        revision="26.0.2"
+        sha1="30489a97b06cc3945bdbcc1770089af9e3b3b64d">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\6.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\25.0.0\support-annotations-25.0.0.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\shared\build\intermediates\intermediate-jars\release\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="a22d2cc94da87b254451fa8ed28afc30b4653773">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\support-annotations-25.0.0_6bd4182d16ad87c028627bb478701220025bcb57\classes.dex" />
+        revision="26.0.2"
+        sha1="be3ae520ee18acbc23429a989588fd576a60840a">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\18.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\24.0.0\support-annotations-24.0.0.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\percent-23.0.1.aar\ced0228f0cddedb00ba3d44996c91ddf\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="2943c74db6d4346ab8c6531adac91fa05c137c40">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\support-annotations-24.0.0_b776177c6d212724d72ea3da744ada0f081fe7cf\classes.dex" />
+        revision="26.0.2"
+        sha1="cddfbb68753c7b1222ffb7af97bfd9ecf413aba7">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\4.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.google.android.gms\play-services-tasks\10.0.1\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\wearable-2.0.0.aar\69d478404a848cd85aee917e33dd7665\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="6addaba208e21c6da776d0ca75b6b23a6ccd5499">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-tasks-10.0.1_5978c2ac45052d0fe15e26a041df72c258f44133\classes.dex" />
+        revision="26.0.2"
+        sha1="d4d699dd197929286d19b015f4c142b8360f2137">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\1.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.google.android.gms\play-services-wearable\10.0.1\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\appcompat-v7-25.2.0.aar\221279b05ca949ff1142f4efccf26548\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="408a599ac77cd17fe8e8919326bec617b3d005bd">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-wearable-10.0.1_c7c93f3d178b6ccec7617adc7389ed4ab27b6d93\classes.dex" />
+        revision="26.0.2"
+        sha1="702d339bc0a81d21354cd7e2cf2b67225fa4a16c">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\3.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\incremental-runtime-classes\pro\debug\instant-run.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-media-compat-25.2.0.aar\a810928435852d3799d748dda80e6a1f\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="8a29d2077da31219774bae69d807de1218673ba9">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\instant-run_d2ad3d5eed128efe0d99e5940adb477fc5e66453\classes.dex" />
+        revision="26.0.2"
+        sha1="ee394a892dd21c03a528139c1e8d4e0e1264ac84">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\13.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-core-ui-25.2.0.aar\3215f03aad37538f82ecd1430bfba52e\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="26674000177e45447a0326a6ad84612761199a13">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-core-ui-25.0.0_38871e4595d8b4471e1294ef2af867a0a582f643\classes.dex" />
+        revision="26.0.2"
+        sha1="fa0446a14ed5dd3725047d6399ffea771a564b30">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\15.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-fragment\25.0.0\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\recyclerview-v7-23.0.1.aar\e18a8a1a86aa7a418a7e94cf4b8de49d\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="23.0.3"
-        sha1="07daa0b6e1d455c82a38422ffe287c18823d339a">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-fragment-25.0.0_f9abc612fa22a62e4f53dc08918e6fbcf57fbc16\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.google.android.gms\play-services-base\10.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.2"
-        sha1="25438f55fc6d906a0e72f30b21487541430ede43">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-base-10.0.1_3fa68ad2a3cbaa60a293362e54b30079df807ae5\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\10.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="756f6297eef79784f5e356dcd4f39865028b2bd0">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-basement-10.0.1_b2deacf7fec9cccbfb39bb2f5ca31ca43b7e6161\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-tasks\10.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="6addaba208e21c6da776d0ca75b6b23a6ccd5499">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-tasks-10.0.1_583beb9df7315f1bc9e0471d8b6367fbe3049f90\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="3b61a70884adaf0be3fc06c70c801e3e6df13133">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-25.0.0_e33f77327bfce18672415f8ff9092e67e7607b8f\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="4ccbcda5c72027c7f7c14be9ff8640d9cb0d8da0">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-core-utils-25.0.0_40fc85f5ca33a03e2fc62140e902c2db531c1380\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="8bc45ce1f63d1a391fd38b32a201be5a42f9c95d">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-appcompat-v7-25.0.0_19af25e573058285f0d79bffed2f46bcef20fc80\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-media-compat\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="76fb65a4b41ea42dab8a1310ed772a2420c96b52">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-media-compat-25.0.0_17ecc6d70311b866839ffbcf595265f8d0c9c64f\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="53a420cd4f49274db6bd43475f8006ba67ef6bbd">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-animated-vector-drawable-25.0.0_ba79cc473ed76a6a9f3449485b4535e2987992bc\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-vector-drawable-25.0.0_b18dabd0362fe2bad120ee5f3f600ba709116531\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.github.amlcurran.showcaseview\library\5.4.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="531fe4dfc3733418fcaa4a7608e20bfc5e64b2e7">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.github.amlcurran.showcaseview-library-5.4.0_84bfe2d9c8a8132246c43f75f5ee8ab4306d495b\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-media-compat\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="665d21a8a069c96b4d9e8b434f5096d865b4e261">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-25.0.0_793096699ae3b9e8110b9ac1dc690d432f0d5c6c\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\incremental-classes\pro\debug\instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.2"
-        sha1="762669035a6f9f2f8d4a07537e734f0182668f5c">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\instant-run-bootstrap_b8da192acc82e4c278544b41e79d95291ae61a85\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-base\10.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="25438f55fc6d906a0e72f30b21487541430ede43">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-base-10.0.1_bac0c3f148b0ec1dc9f4f26e85f279fa2e1186ff\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="f2e3b9bc1ec25f652e8007ce7774c991e38f6a00">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-25.0.0_2b374dd3fbfb01599b4f6f43112a32045c8b9a2d\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\10.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.2"
-        sha1="756f6297eef79784f5e356dcd4f39865028b2bd0">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.gms-play-services-basement-10.0.1_61439f36ba317482fa2cd744d103ed8bba6f3728\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\internal_impl-25.0.0_1e638c6cd522e14ff370d4bf24054f151f3d332b\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="23.0.3"
-        sha1="75b1f366ff0bbc78f8b1f7cf0dc82e7c53afef6a">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\app\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-support-compat-25.0.0_b7b3c2426c3a09d6cebade10e86958a41621fd19\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\23.0.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.2"
+        revision="26.0.2"
         sha1="4356e230a981d1bbf047d848b91bc0d9b7c5bacc">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.android.support-recyclerview-v7-23.0.1_40995a1dad4387e4e84ebde5dff884a4d0345a00\classes.dex" />
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\5.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\exploded-aar\com.google.android.support\wearable\2.0.0-alpha3\jars\classes.jar"
-        jumboMode="true"
+        is-multidex="false"
+        jar="C:\Users\ingressus\.gradle\caches\transforms-1\files-1.1\support-compat-25.2.0.aar\039a3d5f9d83737cd69014dfc48d872d\jars\classes.jar"
+        jumboMode="false"
+        min-sdk-version="21"
         optimize="true"
-        revision="24.0.2"
-        sha1="3202db513a724413357b6189c481d88004a97b79">
-        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\dex\pro\debug\folders\1000\10\com.google.android.support-wearable-2.0.0-alpha3_956414ee8e4c2a3d3dbaf70b941cfa08b8623394\classes.dex" />
+        revision="26.0.2"
+        sha1="67eb33110dbacb46a48175b08ae0c96761d2c17d">
+        <dex dex="C:\Users\ingressus\AndroidStudioProjects\WorkdayScheduler1\wear\build\intermediates\transforms\preDex\pro\release\16.jar" />
     </item>
 
 </items>

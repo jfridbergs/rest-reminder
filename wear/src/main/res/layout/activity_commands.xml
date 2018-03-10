@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/container"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    tools:context="com.colormindapps.rest_reminder_alarm.wear.CommandsActivity" tools:deviceIds="wear">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/transparent_layer"
+        android:id="@+id/transparentImageView"
+        />
+
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/btn_wear_commands_up"
+        android:onClick="closeCommands" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/wear_command_padding_top">
+
+        <Button
+            android:id="@+id/button_extend_period"
+            style="@style/ExtendButton"
+            android:layout_gravity="center"
+            android:onClick="extendCurrent"
+            android:text="@string/wear_extend"
+            />
+
+        <Button
+            android:id="@+id/button_end_period"
+            style="@style/ExtendButton"
+            android:layout_gravity="center"
+            android:onClick="startNext"
+            android:text="@string/wear_start_next" />
+    </LinearLayout>
+
+
+</RelativeLayout>

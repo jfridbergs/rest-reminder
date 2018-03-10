@@ -2,14 +2,16 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '26.0.2'
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
         targetSdkVersion 25
-        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+        versionCode 9
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        //android.test.InstrumentationTestRunner for robotium tests
     }
 
     buildTypes {
@@ -20,18 +22,24 @@ android {
 
     }
 
+    flavorDimensions "default"
+
     productFlavors {
         base {
-            applicationId "com.colormindapps.rest_reminder_alarm.base"
-            versionName "1.0.1-base"
+            applicationId "com.colormindapps.rest_reminder_alarm"
+            versionName "1.0.1d-base"
             minSdkVersion 16
             targetSdkVersion 25
+            dimension "default"
+            proguardFile 'flavor-rules-base.pro'
         }
         pro {
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "1.0.1-pro"
+            versionName "1.0.1d-pro"
             minSdkVersion 16
             targetSdkVersion 25
+            dimension "default"
+            proguardFile 'flavor-rules-pro.pro'
         }
     }
 
@@ -41,11 +49,13 @@ android {
 
 
 dependencies {
+
+    compile project(':shared')
     proWearApp project (':wear')
     //support v4
-    compile 'com.android.support:support-v4:25.0.0'
+    compile 'com.android.support:support-v4:25.2.0'
     //support v7
-    compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:appcompat-v7:25.2.0'
     //ShowCaseView
     compile 'com.github.amlcurran.showcaseview:library:5.4.0'
     //Robotium
@@ -54,9 +64,16 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
     testCompile 'org.apache.maven:maven-ant-tasks:2.1.3'
+
+    //Espresso
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    androidTestCompile 'com.android.support.test:runner:0.5'
     // fixes issue on linux/mac
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.robolectric:shadows-play-services:3.0'
     testCompile 'org.robolectric:shadows-support-v4:3.0'
-    compile 'com.google.android.gms:play-services-wearable:10.0.1'
+
+    compile 'com.google.android.gms:play-services-wearable:9.2.0'
+
+    androidTestCompile 'com.android.support:support-annotations:25.2.0'
 }

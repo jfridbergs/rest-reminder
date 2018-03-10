@@ -6,6 +6,7 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.webkit.WebView;
 import android.widget.Button;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.robotium.solo.Solo;
 
 /**

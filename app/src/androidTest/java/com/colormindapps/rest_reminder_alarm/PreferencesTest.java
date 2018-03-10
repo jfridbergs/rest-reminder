@@ -21,6 +21,8 @@ import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.robotium.solo.Solo;
 
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
     SharedPreferences.Editor editor;
     float scaledDensity;
     NumberPicker numberPicker1, numberPicker2, numberPicker21, numberPicker22;
-    String debug = "PREFERENCE_ACTIVITY_TEST";
+    String debug = "PREFERENCE_ACT_TEST";
     IntentFilter filter;
     MyReceiver receiver;
 
@@ -126,8 +128,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
     @Override
     public void tearDown() throws Exception{
-        RReminder.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
-        RReminder.stopCounterService(appContext, mActivity.periodType);
+        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.stopCounterService(appContext, mActivity.periodType);
         mActivity.unregisterReceiver(receiver);
 
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), false);
@@ -1179,19 +1181,15 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
         solo.clickOnView(timerLayout);
         instr.waitForIdleSync();
-        solo.clickOnView(extendButton);
-        instr.waitForIdleSync();
 
-        String optionOneButton, optionTwoButton, optionThreeButton;
+
+        String extendButtonOneOption,optionOneButton, optionTwoButton, optionThreeButton;
+        extendButtonOneOption = String.format(mActivity.getResources().getString(R.string.extend_period_one_option),extendBaseLength);
         optionOneButton =String.format(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.extend_dialog_button),extendBaseLength);
         optionTwoButton = String.format(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.extend_dialog_button),extendBaseLength*2);
         optionThreeButton =String.format(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.extend_dialog_button),extendBaseLength*3);
-        assertTrue("the first extend option button should be visible",solo.searchText(optionOneButton, true));
-        assertFalse("the second extend option button should not be visible",solo.searchText(optionTwoButton, true));
-        assertFalse("the third extend option button should not be visible",solo.searchText(optionThreeButton, true));
+        assertTrue("with extend count 1 the extend button direclty calls first option",solo.searchText(extendButtonOneOption, true));
 
-        solo.clickOnButton("Cancel");
-        instr.waitForIdleSync();
 
         Intent intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);

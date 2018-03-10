@@ -1,6 +1,5 @@
 package com.colormindapps.rest_reminder_alarm;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -15,6 +14,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
 
@@ -158,11 +159,11 @@ public class ExtendDialog extends DialogFragment{
 			case 0:
 				timeRemaining = periodEndTimeValue - Calendar.getInstance().getTimeInMillis();
 				parentActivity.unbindFromFragment();
-				RReminder.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
 				toastText = getString(R.string.toast_period_end_extended);
 				break;
 			case 1:
-				RReminder.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
 				toastText = getString(R.string.notification_toast_period_extended);
 				break;
 			default:
@@ -175,15 +176,15 @@ public class ExtendDialog extends DialogFragment{
 
 		
 		switch(functionType){
-		case 1:  functionType = 3; break;
-		case 2:  functionType = 4; break;
+		case RReminder.WORK:  functionType = RReminder.WORK_EXTENDED; break;
+		case RReminder.REST:  functionType = RReminder.REST_EXTENDED; break;
 		default: break;
 		}
 		
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
-		new PeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
-		RReminder.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){
 		case 0:
@@ -210,13 +211,13 @@ public class ExtendDialog extends DialogFragment{
 
 	
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnDialogCloseListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
         }
     }
 

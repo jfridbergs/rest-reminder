@@ -11,16 +11,23 @@ import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.CapabilityApi;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataEvent;
 import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -43,8 +50,12 @@ public class PreferenceActivity extends FragmentActivity implements
 	private boolean mResolvingError = false;
 
 	private GoogleApiClient mGoogleApiClient;
+	private Node connectedNode;
+	private boolean wearOn = false;
 
 	private String debug = "PREFERENCE_ACTIVITY";
+
+
 
 	//Request code for launching the Intent to resolve Google Play services errors.
 	private static final int REQUEST_RESOLVE_ERROR = 1000;
@@ -78,7 +89,7 @@ public class PreferenceActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 	       if (savedInstanceState == null)
 	        {
-				if(RReminder.isCounterServiceRunning(this)){
+				if(RReminderMobile.isCounterServiceRunning(this)){
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {
@@ -135,15 +146,26 @@ public class PreferenceActivity extends FragmentActivity implements
 
 	@Override
 	public void updateWearStatusFromPreference(int type, long periodEndTimeValue, int extendCount){
-		updateReminderStatus(type,periodEndTimeValue,extendCount);
+		updateReminderStatus(type,periodEndTimeValue,extendCount, true, wearOn);
 	}
 
-	private void updateReminderStatus(int type, long periodEndValue, int extendCount){
-		Log.d(debug, "extend counter value in updateReminderStatus: "+extendCount);
-		PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/reminder_status");
-		putDataMapRequest.getDataMap().putInt(RReminder.PERIOD_TYPE,type);
-		putDataMapRequest.getDataMap().putLong(RReminder.PERIOD_END_TIME,periodEndValue);
-		putDataMapRequest.getDataMap().putInt(RReminder.EXTEND_COUNT, extendCount);
+	private void updateReminderStatus(int type, long periodEndValue, int extendCount, boolean mobileOn, boolean wearOn){
+		PendingResult<DataApi.DataItemResult> pendingResult =
+				Wearable.DataApi.putDataItem(mGoogleApiClient,RReminder.createStatusData(RReminder.DATA_API_SOURCE_MOBILE, type,periodEndValue,extendCount, mobileOn, wearOn));
+
+	}
+	// cant update values in dataevent individually, with every preference update need to resubmit all preference batch
+	@Override
+	public void updateWearPreferences(String workLength, String restLength, int extendLength){
+
+		Log.d(debug, "work period: "+workLength);
+		Log.d(debug, "rest period: "+restLength);
+		Log.d(debug, "extend length: "+ extendLength);
+
+		PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/reminder_preferences");
+		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_WORK_LENGTH,workLength);
+		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_REST_LENGTH,restLength);
+		putDataMapRequest.getDataMap().putInt(RReminder.WEAR_PREF_EXTEND_LENGTH,extendLength);
 		PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
 		PendingResult<DataApi.DataItemResult> pendingResult =
 				Wearable.DataApi.putDataItem(mGoogleApiClient,putDataRequest);
@@ -152,10 +174,65 @@ public class PreferenceActivity extends FragmentActivity implements
 
 	@Override
 	public void onDataChanged(DataEventBuffer dataEvents) {
-		Log.d(debug, "onDataChanged: " + dataEvents);
 
 		for (DataEvent event : dataEvents) {
+			if (event.getType() == DataEvent.TYPE_CHANGED) {
+				DataItem item = event.getDataItem();
+
+				if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_STATUS_PATH)==0){
+					DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+					wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
+				}
+			}
 		}
+	}
+
+	private void getData(final String pathToContent) {
+		Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
+			@Override
+			public void onResult(NodeApi.GetLocalNodeResult getLocalNodeResult) {
+
+				String nodeID;
+				if (connectedNode != null){
+					nodeID = connectedNode.getId();
+				} else {
+					nodeID = getLocalNodeResult.getNode().getId();
+				}
+
+				Uri uri = new Uri.Builder()
+						.scheme(PutDataRequest.WEAR_URI_SCHEME)
+						.path(pathToContent)
+						.authority(nodeID)
+						.build();
+
+				Wearable.DataApi.getDataItem(mGoogleApiClient, uri)
+						.setResultCallback(
+								new ResultCallback<DataApi.DataItemResult>() {
+									@Override
+									public void onResult(DataApi.DataItemResult dataItemResult) {
+
+										if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+											DataMap data = DataMap.fromByteArray(dataItemResult.getDataItem().getData());
+											wearOn = data.getBoolean(RReminder.DATA_API_WEAR_ON);
+										}
+									}
+								}
+						);
+			}
+		});
+	}
+
+	private void getConnectedNode()
+	{
+		Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
+			@Override
+			public void onResult(NodeApi.GetConnectedNodesResult nodes) {
+				for (Node node : nodes.getNodes()) {
+					connectedNode = node;
+				}
+				getData(RReminder.DATA_API_REMINDER_STATUS_PATH);
+			}
+		});
 	}
 
 	@Override
@@ -166,6 +243,8 @@ public class PreferenceActivity extends FragmentActivity implements
 		Wearable.MessageApi.addListener(mGoogleApiClient, this);
 		Wearable.CapabilityApi.addListener(
 				mGoogleApiClient, this, Uri.parse("wear://"), CapabilityApi.FILTER_REACHABLE);
+		//obtaining info about the state of wear app
+		getConnectedNode();
 	}
 
 	@Override

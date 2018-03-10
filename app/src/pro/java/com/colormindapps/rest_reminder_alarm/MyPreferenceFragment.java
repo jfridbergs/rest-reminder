@@ -14,6 +14,9 @@ import android.os.Vibrator;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,6 +28,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	Uri originalWorkUri, originalRestUri, originalApproxUri, newWorkUri, newRestUri, newApproxUri;
 	SharedPreferences sharedPreferences;
 	String workPeriodLength, restPeriodLength, approxLength;
+	String wearWorkLength, wearRestLength;
+	int wearExtendLength;
 	long periodEndTimeValue;
 	int periodType, extendCount;
 	SharedPreferences.Editor editor;
@@ -93,6 +98,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         
         preference = findPreference(workPeriodLengthKey);
     	workPeriodLength = sharedPreferences.getString(workPeriodLengthKey, getString(R.string.default_work_length_string));
+		wearWorkLength = workPeriodLength;
     	String output = RReminder.getFormatedValue(context, 0, workPeriodLength);
     	preference.setSummary(output);
 
@@ -100,6 +106,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	
         preference = findPreference(restPeriodLengthKey);
     	restPeriodLength = sharedPreferences.getString(restPeriodLengthKey,getString(R.string.default_rest_length_string));
+		wearRestLength = restPeriodLength;
     	String output1 =  RReminder.getFormatedValue(context, 0, restPeriodLength);
     	preference.setSummary(output1);
 
@@ -166,6 +173,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	
     	preference = findPreference(extendBaseLengthKey);
     	value = sharedPreferences.getInt(extendBaseLengthKey, RReminder.DEFAULT_EXTEND_BASE_LENGTH);
+		wearExtendLength = value;
     	if(value==1){
     		output=getString(R.string.pref_minute_single);
     	} else {
@@ -178,7 +186,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	
     	
         
-		if(RReminder.isCounterServiceRunning(context)){
+		if(RReminderMobile.isCounterServiceRunning(context)){
 			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(false);
 		} else {
 			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(true);
@@ -200,6 +208,15 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	int value;
     	String name, outputName;
     	Uri ringtoneUri;
+
+		//updating the preferences values on wear device
+		wearWorkLength = sharedPreferences.getString(workPeriodLengthKey, RReminder.DEFAULT_WORK_PERIOD_STRING);
+		wearRestLength = sharedPreferences.getString(restPeriodLengthKey, RReminder.DEFAULT_REST_PERIOD_STRING);
+		wearExtendLength = sharedPreferences.getInt(extendBaseLengthKey, RReminder.DEFAULT_EXTEND_COUNT);
+
+		parentActivity.updateWearPreferences(wearWorkLength, wearRestLength, wearExtendLength);
+
+
 		String updatedWorkPeriodLength, updatedRestPeriodLength, updatedApproxLength;
 		//updating preference summary after preferences are changed
         if (key.equals(changeSummaryKey)) {           
@@ -241,8 +258,9 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         		Preference approxPreference = findPreference(approxPeriodLengthKey);
 				output = RReminder.getFormatedValue(context, RReminder.PREFERENCE_SUMMARY_MMSS, time);
 				approxPreference.setSummary(output);
-        	}
 
+
+        	}
 
 
         } else if (key.equals(approxPeriodLengthKey)){
@@ -261,7 +279,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	preference.setSummary(output);
 			testExtendCountSummary = preference.getSummary().toString();
         } else if (key.equals(extendBaseLengthKey)) {
-        	value = sharedPreferences.getInt(key, RReminder.DEFAULT_EXTEND_COUNT);
+        	value = sharedPreferences.getInt(key, RReminder.DEFAULT_EXTEND_BASE_LENGTH);
         	String output;
         	if(value==1){
         		output=getString(R.string.pref_minute_single);
@@ -270,6 +288,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	}
         	preference.setSummary(output);
 			testExtendLengthSummary = preference.getSummary().toString();
+			//updating the preferences values on wear device
         } else if (key.equals(workPeriodSoundKey)){
         	
         	name = sharedPreferences.getString(key, "DEFAULT_RINGTONE_URI");
@@ -287,11 +306,12 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		//if work period length preference was updated while the current period is work, the current period will be updated according to new value
 		if(key.equals(workPeriodLengthKey)){
-			if(RReminder.isCounterServiceRunning(context) && Calendar.getInstance().getTimeInMillis()<periodEndTimeValue){
+			if(RReminderMobile.isCounterServiceRunning(context) && Calendar.getInstance().getTimeInMillis()<periodEndTimeValue){
+				Log.d("preference fragment", "updating current work  period length");
 				if(periodType ==1 || periodType ==3){
 					//cancelling the current service and alarms
-					RReminder.stopCounterService(context,periodType);
-					RReminder.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
+					RReminderMobile.stopCounterService(context,periodType);
+					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
 
 					//getting new values for service and alarm
 					updatedWorkPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
@@ -303,8 +323,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 
 					//starting counterservice and setting new alarms
-					new PeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
-					RReminder.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
+					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
 					parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
 
@@ -312,11 +332,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				}
 			}
 		} else if(key.equals(restPeriodLengthKey)){
-			if(RReminder.isCounterServiceRunning(context)&& Calendar.getInstance().getTimeInMillis()<periodEndTimeValue){
+			if(RReminderMobile.isCounterServiceRunning(context)&& Calendar.getInstance().getTimeInMillis()<periodEndTimeValue){
 				if(periodType ==2 || periodType ==4){
 					//cancelling the current service and alarms
-					RReminder.stopCounterService(context,periodType);
-					RReminder.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
+					RReminderMobile.stopCounterService(context,periodType);
+					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
 
 					//getting new values for service and alarm
 					updatedRestPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_REST_PERIOD_STRING);
@@ -324,8 +344,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 					long newPeriodEndValue = periodEndTimeValue + difference;
 
 					//starting counterservice and setting new alarms
-					new PeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
-					RReminder.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
+					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
 					parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
 
@@ -333,19 +353,21 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				}
 			}
 		} else if(key.equals(approxPeriodLengthKey)){
-			if(RReminder.isCounterServiceRunning(context) && RReminder.isApproxEnabled(context)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
+			if(RReminderMobile.isCounterServiceRunning(context) && RReminder.isApproxEnabled(context)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
 				//cancelling the current approx alarm
 				long oldApproxTimeValue = periodEndTimeValue - (CustomTimePreference.getHour(approxLength)*60*1000L+CustomTimePreference.getMinute(approxLength)*1000L);
-				RReminder.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue,true,oldApproxTimeValue);
-				new PeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
+				RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue,true,oldApproxTimeValue);
+				new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
 				approxLength = sharedPreferences.getString(key,"00:30");
 
 			}
 		} else if(key.equals(approxEnabledKey)){
-			if(RReminder.isCounterServiceRunning(context) && sharedPreferences.getBoolean(key, false)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
-				new PeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
+			if(RReminderMobile.isCounterServiceRunning(context) && sharedPreferences.getBoolean(key, false)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
+				new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
 			}
 		}
+
+
     }
 
 	@Override
@@ -445,7 +467,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
 			setParentActivity((OnPreferencesOpenListener) getActivity());
 		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString() + " must implement OnExtendDialogSelectedListener");
+			throw new ClassCastException(activity.toString() + " must implement OnPreferencesOpenListener");
 		}
 	}
 	

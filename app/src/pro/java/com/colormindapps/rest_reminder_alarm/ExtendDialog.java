@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 import java.util.Calendar;
 
 
@@ -52,7 +54,7 @@ public class ExtendDialog extends DialogFragment{
 	
 
 	
-	public static ExtendDialog newInstance(int title, int periodType, int extendCount, long periodEndTimeValue, int activityType){
+	public static ExtendDialog newInstance(int title, @RReminder.PeriodType int periodType, int extendCount, long periodEndTimeValue, int activityType){
 		ExtendDialog fragment = new ExtendDialog();
 		Bundle args = new Bundle();
 		args.putInt("title", title);
@@ -158,34 +160,34 @@ public class ExtendDialog extends DialogFragment{
 			case 0:
 				timeRemaining = periodEndTimeValue - Calendar.getInstance().getTimeInMillis();
 				parentActivity.unbindFromFragment();
-				RReminder.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
 				toastText = getString(R.string.toast_period_end_extended);
 				break;
 			case 1:
-				RReminder.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
 				toastText = getString(R.string.notification_toast_period_extended);
 				break;
 			default:
 				toastText = "activity type exception"; break;
 		}
 
-		int functionType = periodType;
+		@RReminder.PeriodType int functionType = periodType;
 		long functionCalendar;
 
 
 		
 		switch(functionType){
-		case 1:  functionType = 3; break;
-		case 2:  functionType = 4; break;
+		case RReminder.WORK:  functionType = RReminder.WORK_EXTENDED; break;
+		case RReminder.REST:  functionType = RReminder.REST_EXTENDED; break;
 		default: break;
 		}
 		
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
-		new PeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
-		RReminder.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
-		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount);
+		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount, true);
 
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){

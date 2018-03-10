@@ -92,11 +92,11 @@ public class NumberPreference extends DialogPreference {
 	    // Change this data type to match the type saved by your Preference
 	    int value;
 
-	    public NumberSavedState(Parcelable superState) {
+	    NumberSavedState(Parcelable superState) {
 	        super(superState);
 	    }
 
-	    public NumberSavedState(Parcel source) {
+	    NumberSavedState(Parcel source) {
 	        super(source);
 	        // Get the current preference's value
 	        value = source.readInt();  // Change this to read the appropriate data type

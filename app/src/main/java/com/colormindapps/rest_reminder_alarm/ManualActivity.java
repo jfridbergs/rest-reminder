@@ -3,7 +3,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -36,12 +35,12 @@ public class ManualActivity extends AppCompatActivity {
 
 		Toolbar toolbar = (Toolbar) findViewById(R.id.manualToolbar);
 		setSupportActionBar(toolbar);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		if(getSupportActionBar()!=null)
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		rootLayout = (RelativeLayout) findViewById(R.id.manual_root_layout);
-		if(Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB){
-			toolbar.setVisibility(View.GONE);
-			rootLayout.setPadding(0,0,0,0);
-		}
+		toolbar.setVisibility(View.GONE);
+		rootLayout.setPadding(0,0,0,0);
+
 		
 		manual.setWebViewClient(new WebViewClient() {
 

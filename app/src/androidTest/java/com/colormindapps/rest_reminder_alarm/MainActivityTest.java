@@ -27,6 +27,8 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.robotium.solo.Solo;
 
 import java.util.Calendar;
@@ -111,8 +113,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(2000);
         Log.d(debug, "TEARDOWN");
         solo.finishOpenedActivities();
-        RReminder.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
-        RReminder.stopCounterService(appContext, mActivity.periodType);
+        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.stopCounterService(appContext, mActivity.periodType);
 
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_mode_key), "0");
@@ -179,8 +181,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         assertFalse(solo.searchText(expectedOfflineTitle));
 
-        RReminder.stopCounterService(getActivity().getApplicationContext(),1);
-        RReminder.cancelCounterAlarm(getActivity().getApplicationContext(), 1,0,mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.stopCounterService(getActivity().getApplicationContext(),1);
+        RReminderMobile.cancelCounterAlarm(getActivity().getApplicationContext(), 1,0,mActivity.periodEndTimeValue, false,0L);
 
 
 
@@ -218,10 +220,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         String closeIntroductionDialogText = appContext.getResources().getString(R.string.eula_accept);
         solo.clickOnButton(closeIntroductionDialogText);
-        solo.sleep(1500);
+        solo.sleep(2000);
         assertFalse("after pressing i accept button the dialog should be dismissed", (solo.searchButton(closeIntroductionDialogText)));
 
-        assertFalse("after closing introduction dialog the countdown service shouldnt be running", RReminder.isCounterServiceRunning(appContext));
+        assertFalse("after closing introduction dialog the countdown service shouldnt be running", RReminderMobile.isCounterServiceRunning(appContext));
 
         String expectedTitle = expectedOfflineTitle;
         String actualTitle = title.getText().toString();
@@ -634,11 +636,11 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.clickOnView(timerLayout);
         int restoreFunctionCount = mActivity.restoreAnimateCounter;
         instr.waitForIdleSync();
-        assertTrue("the service is running", RReminder.isCounterServiceRunning(appContext));
-        Intent intent = new Intent (appContext, OnAlarmReceiver.class);
+        assertTrue("the service is running", RReminderMobile.isCounterServiceRunning(appContext));
+        Intent intent = new Intent (appContext, MobileOnAlarmReceiver.class);
         intent.putExtra(RReminder.PERIOD_TYPE, 1);
         intent.putExtra(RReminder.EXTEND_COUNT, 0);
-        intent.setAction(RReminder.CUSTOM_INTENT_ALARM_PERIOD_END);
+        intent.setAction(RReminder.ACTION_ALARM_PERIOD_END);
         boolean alarmUp = (PendingIntent.getBroadcast(appContext, (int)mActivity.periodEndTimeValue, intent, PendingIntent.FLAG_ONE_SHOT) != null);
         assertTrue("the alarm manager is running", alarmUp);
         solo.clickLongOnView(timerLayout, 700);
@@ -650,14 +652,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.clickLongOnView(timerLayout, 1500);
         instr.waitForIdleSync();
         solo.sleep(3000);
-        assertFalse("the service is not running", RReminder.isCounterServiceRunning(appContext));
+        assertFalse("the service is not running", RReminderMobile.isCounterServiceRunning(appContext));
         alarmUp = (PendingIntent.getBroadcast(appContext, (int)mActivity.periodEndTimeValue, intent,PendingIntent.FLAG_ONE_SHOT) != null);
         //assertFalse("the alarm manager was not running anymore", alarmUp);
         boolean periodService = false;
         boolean playSoundService = false;
         ActivityManager manager = (ActivityManager) appContext.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (PeriodService.class.getName().equals(service.service.getClassName())) {
+            if (MobilePeriodService.class.getName().equals(service.service.getClassName())) {
                 periodService = true;
             }
             if (PlaySoundService.class.getName().equals(service.service.getClassName())) {
@@ -1266,13 +1268,13 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertFalse("extend button should be invisible in inactive mode", extendButton.isShown());
         assertFalse("swipe area should be invisible in inactive mode", swipeArea.isShown());
         assertEquals("title was expected to be and actual it was", expectedOfflineTitle, actualOfflineTitle);
-        assertFalse("at the launch of app the service shoulnt be running", RReminder.isCounterServiceRunning(appContext));
+        assertFalse("at the launch of app the service shoulnt be running", RReminderMobile.isCounterServiceRunning(appContext));
         assertTrue("the countdown timer should not run at the launch of app", mActivity.countdown == null);
 
-        Intent intent = new Intent (appContext, OnAlarmReceiver.class);
+        Intent intent = new Intent (appContext, MobileOnAlarmReceiver.class);
         intent.putExtra(RReminder.PERIOD_TYPE, 1);
         intent.putExtra(RReminder.EXTEND_COUNT, 0);
-        intent.setAction(RReminder.CUSTOM_INTENT_ALARM_PERIOD_END);
+        intent.setAction(RReminder.ACTION_ALARM_PERIOD_END);
         solo.sleep(2000);
         boolean alarmUp = (PendingIntent.getBroadcast(appContext, 0, intent,PendingIntent.FLAG_NO_CREATE) != null);
         Log.d(debug, "is alarm up in offline mode: "+alarmUp);
@@ -1291,7 +1293,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             Log.d(debug, "Alarm is already active");
             Log.d(debug, "PendingIntent after lauching reminder: "+PendingIntent.getBroadcast(appContext, (int)mActivity.periodEndTimeValue, intent,PendingIntent.FLAG_ONE_SHOT).toString());
         }
-        assertTrue("after pressing timer button the service should be started", RReminder.isCounterServiceRunning(appContext));
+        assertTrue("after pressing timer button the service should be started", RReminderMobile.isCounterServiceRunning(appContext));
         assertTrue("the countdown timer should  run after pressing button", mActivity.countdown.isRunning);
         actualOnlineTitle = title.getText().toString().toUpperCase();
         assertEquals("after launching reminder the title should be work period",expectedOnlineWorkTitle,actualOnlineTitle);
@@ -1579,7 +1581,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         editor.commit();
         solo.clickOnView(timerLayout);
         solo.sleep(2000);
-        assertTrue("after pressing timer button the service should be started", RReminder.isCounterServiceRunning(appContext));
+        assertTrue("after pressing timer button the service should be started", RReminderMobile.isCounterServiceRunning(appContext));
         Instrumentation.ActivityMonitor monitor = instr.addMonitor(NotificationActivity.class.getName(), null, false);
 
         Activity nActivity = instr.waitForMonitor(monitor);
@@ -1622,7 +1624,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(1000);
 
         Intent notificationIntent = new Intent(appContext, MainActivity.class);
-        notificationIntent.setAction(RReminder.CUSTOM_INTENT_VIEW_MAIN_ACTIVITY);
+        notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
         notificationIntent.putExtra(RReminder.START_COUNTER, false);
 
         mActivity.startActivity(notificationIntent);
@@ -1646,7 +1648,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(1000);
 
         Intent turnOffIntent = new Intent (appContext, MainActivity.class);
-        turnOffIntent.setAction(RReminder.CUSTOM_INTENT_TURN_OFF);
+        turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
         turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
 
         mActivity.startActivity(turnOffIntent);

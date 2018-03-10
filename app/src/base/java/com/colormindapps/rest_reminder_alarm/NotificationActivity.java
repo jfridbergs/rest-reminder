@@ -17,6 +17,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 import java.util.Calendar;
 
 
@@ -62,17 +64,19 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
             hasntRestored = savedInstanceState.getBoolean("hasntRestored");
             restoredType = savedInstanceState.getInt("restoredType");
         }
+		if(getIntent().getExtras()!=null){
+			type = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
+			extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
+			playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
+			mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
+			redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
+		}
 
-        type = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
-        extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
-        playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
-        mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
-        redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
 		work = getString(R.string.work);
 		rest = getString(R.string.rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 		if(RReminder.isActiveModeNotificationEnabled(this)){
-			mgr.notify(1, RReminder.updateOnGoingNotification(this, RReminder.getNextType(type),mCalendar, false));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, RReminder.getNextType(type),mCalendar, false));
 		}
 
 
@@ -95,12 +99,12 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
         notificationButton.setTypeface(buttonFont);
         rootLayout = (RelativeLayout) findViewById(R.id.root_layout);
         switch(type){
-            case 1:
+            case RReminder.WORK:
                 notificationTitle.setText(getString(R.string.notification_work_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.rest));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_coffee_mug));
                 break;
-            case 2:
+            case RReminder.REST:
                 notificationTitle.setText(getString(R.string.notification_rest_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.work));
                 if(screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
@@ -109,7 +113,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
                     image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_gears));
                 }
                 break;
-            case 3:
+            case RReminder.WORK_EXTENDED:
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.rest));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_coffee_mug));
 				notificationTitle.setText(getString(R.string.notification_work_end_title));
@@ -121,7 +125,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
                 }
 				extendDescription.setVisibility(View.VISIBLE);
                 break;
-            case 4:
+            case RReminder.REST_EXTENDED:
 				notificationTitle.setText(getString(R.string.notification_rest_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.work));
                 if(screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
@@ -166,11 +170,11 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
             notificationButton.setText(getString(R.string.close_notification));
 
             switch(type){
-                case 1: case 3:
+                case RReminder.WORK: case RReminder.WORK_EXTENDED:
                     notificationDescription.setText(String.format(getString(R.string.next_period_end_description), rest,RReminder.getTimeString(this, mCalendar)));
 
                     break;
-                case 2: case 4:
+                case RReminder.REST: case RReminder.REST_EXTENDED:
 
                     notificationDescription.setText(String.format(getString(R.string.next_period_end_description), work, RReminder.getTimeString(this, mCalendar)));
                     break;
@@ -183,10 +187,10 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 			extendPeriodEnd.setVisibility(View.INVISIBLE);
 
             switch(type){
-                case 1:
+                case RReminder.WORK:
                     notificationDescription.setText(String.format(getString(R.string.notification_end_manual_title), rest));
                     break;
-                case 2:
+                case RReminder.REST:
 					notificationDescription.setText(String.format(getString(R.string.notification_end_manual_title), work));
 
                     break;
@@ -227,13 +231,13 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 			
-			new PeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount, false);
-			RReminder.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
+			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount, false);
+			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 
 		}
 		
 		if(RReminder.isActiveModeNotificationEnabled(this)){
-			mgr.notify(1, RReminder.updateOnGoingNotification(this, RReminder.getNextType(type),nextPeriodEnd, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, RReminder.getNextType(type),nextPeriodEnd, true));
 		}
 		
 		
@@ -242,7 +246,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	
 	public void notificationTurnOff(View v){
 		Intent intent = new Intent(this, MainActivity.class);
-		intent.setAction(RReminder.CUSTOM_INTENT_TURN_OFF);
+		intent.setAction(RReminder.ACTION_TURN_OFF);
 		intent.putExtra(RReminder.START_COUNTER, false);
 		intent.putExtra(RReminder.TURN_OFF, 1);
 		intent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);
@@ -266,7 +270,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	@Override
 	public void cancelNotificationForDialog(long periodEndTime,boolean removeOnGoing){
 		if (RReminder.isActiveModeNotificationEnabled(this)){
-			mgr.notify(RReminder.NOTIFICATION_ID, RReminder.updateOnGoingNotification(this, type, periodEndTime,true));
+			mgr.notify(RReminder.NOTIFICATION_ID, RReminderMobile.updateOnGoingNotification(this, type, periodEndTime,true));
 		} else {
 			
 			mgr.cancel(RReminder.NOTIFICATION_ID);

@@ -13,6 +13,8 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 import java.util.Calendar;
 
 
@@ -23,7 +25,6 @@ public class CounterService extends Service {
 	private long periodLength;
 	private int type;
 	private int extendCount;
-	private boolean excludeOngoing;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
 
@@ -59,28 +60,31 @@ public class CounterService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
+		boolean excludeOngoing = false;
 		started = true;
 		onStartCommandCount++;
 		editor   = preferences.edit();
 		editor.putBoolean(RReminder.COUNTERSERVICE_STATUS, true);
-		editor.commit();
+		editor.apply();
 		startTime = Calendar.getInstance();
-		type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
-		extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
-		periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
-		excludeOngoing = intent.getExtras().getBoolean(RReminder.EXCLUDE_ONGOING);
+		if(intent.getExtras()!=null){
+			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
+			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
+			periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+			excludeOngoing = intent.getExtras().getBoolean(RReminder.EXCLUDE_ONGOING);
+		}
 		periodLength = periodEndTime - startTime.getTimeInMillis();
 
 		if(RReminder.isActiveModeNotificationEnabled(this) && !excludeOngoing){
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 			Intent notificationIntent = new Intent(this, MainActivity.class);
-			notificationIntent.setAction(RReminder.CUSTOM_INTENT_VIEW_MAIN_ACTIVITY);
+			notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
 			notificationIntent.putExtra(RReminder.START_COUNTER, false);
 			PendingIntent pi = PendingIntent.getActivity(this, 15, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 				Intent turnOffIntent = new Intent (this, MainActivity.class);
-				turnOffIntent.setAction(RReminder.CUSTOM_INTENT_TURN_OFF);
+				turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
 				turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
 				turnOffIntent.putExtra(RReminder.PERIOD_END_TIME,periodEndTime);
 				PendingIntent pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
@@ -90,7 +94,7 @@ public class CounterService extends Service {
 			//note = new Notification(android.R.drawable.stat_notify_sync, null, System.currentTimeMillis());
 			builder.setSmallIcon(R.drawable.ic_notify_work_period);
 			builder.setContentTitle(this.getString(R.string.notify_reminder_is_on_title));
-			if(type ==1 || type == 3){
+			if(type ==RReminder.WORK || type == RReminder.WORK_EXTENDED){
 				builder.setContentText(this.getString(R.string.notify_reminder_is_on_work_message));
 				builder.setSmallIcon(R.drawable.ic_notify_work_period);
 			} else {

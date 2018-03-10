@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 
 public class PreferenceActivity extends FragmentActivity {
 
@@ -28,7 +30,6 @@ public class PreferenceActivity extends FragmentActivity {
 			periodType = data.getInt(RReminder.PERIOD_TYPE);
 			extendCount = data.getInt(RReminder.EXTEND_COUNT);
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-			long timeRemaining = mService.getCounterTimeValue();
 			getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance(periodType, extendCount,periodEndTimeValue)).commit();
 			unbindFromService();
 		}
@@ -45,7 +46,7 @@ public class PreferenceActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 	       if (savedInstanceState == null)
 	        {
-				if(RReminder.isCounterServiceRunning(this)){
+				if(RReminderMobile.isCounterServiceRunning(this)){
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {

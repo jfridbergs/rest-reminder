@@ -3,14 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.colormindapps.rest_reminder_alarm.MainActivity"
+    tools:context="com.colormindapps.rest_reminder_alarm.wear.MainActivity"
     android:id="@+id/mainActivityLayout" >
 
 
 	<RelativeLayout
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-	    android:background="@drawable/transparent_layer"
+	    android:src="@drawable/transparent_layer"
 	    android:id="@+id/transparentImageView" >
 	
 		<ImageView

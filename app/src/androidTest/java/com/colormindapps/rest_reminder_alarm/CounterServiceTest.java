@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.test.ServiceTestCase;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 import java.util.Calendar;
 
 /**

@@ -34,6 +34,8 @@ import android.os.Vibrator;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 
 /**
  * Manages alarms and vibe. Runs as a service so that it can continue to play
@@ -175,11 +177,11 @@ public class PlaySoundService extends Service {
         }
 
         /* Start the vibrator after everything is ok with the media player */
-		if(audioManager.getRingerMode()!=AudioManager.RINGER_MODE_SILENT && type!=99){
+		if(audioManager.getRingerMode()!=AudioManager.RINGER_MODE_SILENT && type!=RReminder.APPROXIMATE){
    			if (Build.VERSION.SDK_INT >= 11) {
 				if(RReminder.isVibrateEnabled(this, mVibrator)){
 					// Vibrate for 300 milliseconds
-					if(type ==99){
+					if(type ==RReminder.APPROXIMATE){
 						mVibrator.vibrate(100);
 					} else {
 						mVibrator.vibrate(300);
@@ -188,7 +190,7 @@ public class PlaySoundService extends Service {
 			} else {
 				if(RReminder.isVibrateEnabledSupport(this)){
 					// Vibrate for 300 milliseconds
-					if(type ==99){
+					if(type ==RReminder.APPROXIMATE){
 						mVibrator.vibrate(100);
 					} else {
 						mVibrator.vibrate(300);

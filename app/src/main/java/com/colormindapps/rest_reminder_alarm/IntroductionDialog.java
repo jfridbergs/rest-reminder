@@ -4,6 +4,7 @@ package com.colormindapps.rest_reminder_alarm;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,13 +25,13 @@ public class IntroductionDialog extends DialogFragment {
 
 	
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnDialogCloseListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
         }
     }
     

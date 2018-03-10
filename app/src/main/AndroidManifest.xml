@@ -38,10 +38,10 @@
                 android:value="com.colormindapps.rest_reminder_alarm.MainActivity" />
         </activity>
 
-        <receiver android:name=".OnAlarmReceiver" />
+        <receiver android:name=".MobileOnAlarmReceiver" />
 
-        <service android:name=".PeriodService" />
         <service android:name=".PlaySoundService" />
+        <service android:name=".MobilePeriodService"/>
         <service
             android:name=".CounterService"
             android:icon="@drawable/ic_launcher"

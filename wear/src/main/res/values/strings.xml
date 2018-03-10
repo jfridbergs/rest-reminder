@@ -7,4 +7,14 @@
     <string name="extend">extend</string>
     <string name="extended">extended</string>
     <string name="extend_multiple">extend: %1$d</string>
+    <string name="timer_layout_point_string">.</string>
+    <string name="timer_layout_colon_string">:</string>
+    <string name="title_activity_commands">CommandsActivity</string>
+    <string name="hello_round">Hello Round World!</string>
+    <string name="hello_square">Hello Square World!</string>
+
+    //Commands activity
+    <string name="wear_extend">extend</string>
+    <string name="wear_start_next">start next</string>
+    <string name="wear_start_period">start %1$s</string>
 </resources>

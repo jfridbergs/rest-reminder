@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="inactive_digit">#FF8a8a8a</color>
+    <color name="blue">#FF0000FF</color>
+    <color name="white">#FFFFFFFF</color>
+   	<color name="work">#FFCCFF33</color>
+   	<color name="rest">#FF69D2FF</color>
+   	<color name="off">#FF575757</color>
+   	<color name="black">#FF000000</color>
+   	<color name="red">#FFFF1919</color>
+	<color name="toolbar">#ca454545</color>
+	<color name="showcase_button">#00d9ff</color>
+    
+</resources>

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.ImageView;
 
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
