@@ -227,6 +227,7 @@ public class MobilePeriodService extends Service implements
 
 
 
+
 			//PowerManager pm = (PowerManager)
 			//getSystemService(Context.POWER_SERVICE);
 			//boolean isScreenOn = pm.isScreenOn();
@@ -235,11 +236,13 @@ public class MobilePeriodService extends Service implements
 			}
 			if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
 				gotoMainActivity();
+
 			} else {
 
 
 				new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
 				RReminderMobile.startCounterService(this, type, 0, mCalendar, true);
+
 
 				launchNotification();
 			}
@@ -268,6 +271,7 @@ public class MobilePeriodService extends Service implements
 
 		//Set the next period end alarms and start service, if any automatical mode is selected
 		if(RReminder.getMode(this) != 1){
+			Log.d(debug, "PERIOD_SERVICE new period values: type: "+ type+ ", endtime: "+mCalendar);
 			new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
 			RReminderMobile.startCounterService(this, type, 0, mCalendar, false);
 		}
@@ -314,7 +318,7 @@ public class MobilePeriodService extends Service implements
 		NotificationCompat.Action extendAction = new NotificationCompat.Action.Builder(R.drawable.ic_notify_wear_extend, getString(R.string.notify_extend),extendPendingIntent)
 				.build();
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, RReminder.CHANNEL_PERIOD_END_ID);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			if(RReminder.getMode(this)==1){
 				Intent startNextPeriod = new Intent (this, MainActivity.class);
@@ -386,19 +390,19 @@ public class MobilePeriodService extends Service implements
 					builder.setSound(Scheduler.getRingtone(getBaseContext(),typeForNotification));
 				}
 				*/
-		Vibrator v = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		if(am.getRingerMode()!=AudioManager.RINGER_MODE_SILENT){
-			if (Build.VERSION.SDK_INT >= 11) {
-				if(RReminder.isVibrateEnabled(this, v)){
-					// Vibrate for 300 milliseconds
-					builder.setVibrate(new long[] {0,300});
-				}
-			} else {
-				if(RReminder.isVibrateEnabledSupport(this)){
-					// Vibrate for 300 milliseconds
-					builder.setVibrate(new long[] {0,300});
-				}
+		if(am!=null && am.getRingerMode()!=AudioManager.RINGER_MODE_SILENT){
+
+			if(RReminder.isVibrateEnabledSupport(this)){
+				// Vibrate for 300 milliseconds
+				builder.setVibrate(new long[] {0,300});
+
 			}
+		}
+
+		//setting up background color for notification
+		if(RReminder.isNotificationColorizeEnabled(this)){
+			builder.setColorized(true);
+			builder.setColor(RReminder.getNotificationBackgroundColorId(this.getApplicationContext(), typeForNotification,extendCount));
 		}
 
 		builder.setContentIntent(pi);

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.colormindapps.rest_reminder_alarm.R;
@@ -36,6 +37,7 @@ public class CommandsActivity extends Activity implements
     private int colorRest, colorWork, colorRed;
     private RelativeLayout mContainerView;
     private String debug = "COMMAND_ACTIVITY";
+    private Button startNextButton, extendButton;
 
     private GoogleApiClient mGoogleApiClient;
 
@@ -52,10 +54,25 @@ public class CommandsActivity extends Activity implements
                 .build();
 
         mContainerView = (RelativeLayout) findViewById(R.id.container);
+        startNextButton = (Button) findViewById(R.id.button_end_period);
+        extendButton = (Button) findViewById(R.id.button_extend_period);
 
         colorWork = ContextCompat.getColor(CommandsActivity.this,R.color.work);
         colorRest = ContextCompat.getColor(CommandsActivity.this,R.color.rest);
         colorRed = ContextCompat.getColor(CommandsActivity.this,R.color.red);
+
+        //checking preferences, whether or not show each button
+        if(RReminder.isExtendEnabled(this.getApplicationContext())){
+            extendButton.setVisibility(View.VISIBLE);
+        } else {
+            extendButton.setVisibility(View.GONE);
+        }
+
+        if(RReminder.isEndPeriodEnabled(this.getApplicationContext())){
+            startNextButton.setVisibility(View.VISIBLE);
+        } else {
+            startNextButton.setVisibility(View.GONE);
+        }
 
         if(getIntent().getExtras()!=null){
             periodType = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
@@ -97,18 +114,13 @@ public class CommandsActivity extends Activity implements
     @Override
     protected void onPause() {
         Log.d(debug,"onPause");
-        if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
-            Wearable.DataApi.removeListener(mGoogleApiClient, this);
-            Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
-            mGoogleApiClient.disconnect();
-        }
+        disconnectGoogleAPI();
 
         super.onPause();
         finish();
     }
 
     public void closeCommands(View view){
-
         Intent intent = new Intent(this, WearMainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
@@ -132,6 +144,14 @@ public class CommandsActivity extends Activity implements
         this.periodType = type;
         this.extendCount = extendCount;
         setBgColor();
+    }
+
+    private void disconnectGoogleAPI(){
+        if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
+            Wearable.DataApi.removeListener(mGoogleApiClient, this);
+            Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -171,6 +191,10 @@ public class CommandsActivity extends Activity implements
                 if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_STATUS_PATH)==0){
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
                     updateActivityStatus(dataMap.getInt(RReminder.PERIOD_TYPE), dataMap.getInt(RReminder.EXTEND_COUNT));
+                }
+
+                if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_PREFERENCES_PATH)==0){
+                    finish();
                 }
 
 

@@ -60,6 +60,10 @@
 	           android:key="@string/pref_show_led_key"
 	           android:title="@string/pref_show_led_title"
 	           android:defaultValue="true" />
+		<CheckBoxPreference
+			android:key="@string/pref_colorize_notifications_key"
+			android:title="@string/pref_colorize_notifications_title"
+			android:defaultValue="true" />
    		</PreferenceCategory>
 
         <PreferenceCategory

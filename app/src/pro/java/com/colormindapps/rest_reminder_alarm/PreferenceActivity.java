@@ -156,16 +156,23 @@ public class PreferenceActivity extends FragmentActivity implements
 	}
 	// cant update values in dataevent individually, with every preference update need to resubmit all preference batch
 	@Override
-	public void updateWearPreferences(String workLength, String restLength, int extendLength){
+	public void updateWearPreferences(String reminderMode, String workLength, String restLength, int extendLength, boolean extendEnabled, boolean startNextEnabled){
 
+		Log.d(debug, "reminder mode: "+reminderMode);
 		Log.d(debug, "work period: "+workLength);
 		Log.d(debug, "rest period: "+restLength);
 		Log.d(debug, "extend length: "+ extendLength);
+		Log.d(debug, "extend enabled: "+ extendEnabled);
+		Log.d(debug, "start next enabled: "+ startNextEnabled);
+
 
 		PutDataMapRequest putDataMapRequest = PutDataMapRequest.create("/reminder_preferences");
+		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_REMINDER_MODE,reminderMode);
 		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_WORK_LENGTH,workLength);
 		putDataMapRequest.getDataMap().putString(RReminder.WEAR_PREF_REST_LENGTH,restLength);
 		putDataMapRequest.getDataMap().putInt(RReminder.WEAR_PREF_EXTEND_LENGTH,extendLength);
+		putDataMapRequest.getDataMap().putBoolean(RReminder.WEAR_PREF_EXTEND_ENABLED,extendEnabled);
+		putDataMapRequest.getDataMap().putBoolean(RReminder.WEAR_PREF_START_NEXT_ENABLED,startNextEnabled);
 		PutDataRequest putDataRequest = putDataMapRequest.asPutDataRequest();
 		PendingResult<DataApi.DataItemResult> pendingResult =
 				Wearable.DataApi.putDataItem(mGoogleApiClient,putDataRequest);

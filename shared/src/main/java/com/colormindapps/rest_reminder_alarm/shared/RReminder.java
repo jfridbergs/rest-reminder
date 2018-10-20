@@ -1,13 +1,18 @@
 package com.colormindapps.rest_reminder_alarm.shared;
 
+import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 
@@ -46,6 +51,11 @@ public class RReminder {
 	public static final int DEFAULT_EXTEND_COUNT = 1;
 	public static final int DEFAULT_EXTEND_BASE_LENGTH = 5;
 	public static final int NOTIFICATION_ID = 1;
+
+	public static final String CHANNEL_ONGOING_ID = "notification_channel_ongoing";
+	public static final String CHANNEL_PERIOD_END_ID = "notification_channel_period_end";
+	public static final int NOTIFICATION_CHANNEL_ONGOING = 1;
+	public static final int NOTIFICATION_CHANNEL_PERIOD_END = 0;
 	//
 	public static final String DEFAULT_WORK_PERIOD_STRING = "00:45";
 	public static final String DEFAULT_REST_PERIOD_STRING = "00:15";
@@ -83,12 +93,18 @@ public class RReminder {
 	public static final int WEAR_ANIMATE_REST_TO_OFF = 2;
 	public static final int WEAR_ANIMATE_RED_TO_OFF = 3;
 
+	public static final String WEAR_PREF_REMINDER_MODE = "wear_pref_reminder_mode";
 	public static final String WEAR_PREF_WORK_LENGTH = "wear_pref_work_length";
 	public static final String WEAR_PREF_REST_LENGTH = "wear_pref_rest_length";
 	public static final String WEAR_PREF_EXTEND_LENGTH = "wear_pref_extend_length";
+	public static final String WEAR_PREF_EXTEND_ENABLED = "wear_pref_extend_enabled";
+	public static final String WEAR_PREF_START_NEXT_ENABLED = "wear_pref_start_next_enabled";
 
+	public static final String PREF_REMINDER_MODE_KEY = "reminder_mode";
 	public static final String PREF_WORK_LENGTH_KEY = "work_period_length";
 	public static final String PREF_REST_LENGTH_KEY = "rest_period_length";
+	public static final String PREF_EXTEND_ENABLED_KEY = "enable_end_extend";
+	public static final String PREF_START_NEXT_ENABLED_KEY = "enable_end_period";
 	public static final String PREF_EXTEND_BASE_LENGTH_KEY = "end_extend_length_key";
 	public static final String PREF_EXTEND_OPTIONS_KEY = "end_extend_options_key";
 	public static final String PREF_APPROX_LENGTH_KEY = "approx_notification_length_key";
@@ -218,8 +234,12 @@ public class RReminder {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
 		return v.hasVibrator() && prefs.getBoolean(key, true);
+	}
 
-		
+	public static boolean isNotificationColorizeEnabled(Context context){
+		String key = context.getString(R.string.pref_colorize_notifications_key);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getBoolean(key, true);
 	}
 	
 	public static boolean isVibrateEnabledSupport(Context context){
@@ -292,6 +312,30 @@ public class RReminder {
 		}
 		return uri;
 	}
+
+	public static int getNotificationBackgroundColorId(Context context, int periodType, int extendCount){
+		switch(periodType){
+			case 1: case 3:
+			{
+				if(extendCount>3){
+					return ContextCompat.getColor(context, R.color.notif_bg_red);
+				} else {
+					return ContextCompat.getColor(context, R.color.notif_bg_rest);
+				}
+			}
+			case 2: case 4:
+			{
+				if(extendCount>3){
+					return ContextCompat.getColor(context, R.color.notif_bg_red);
+				} else {
+					return ContextCompat.getColor(context, R.color.notif_bg_work);
+				}
+
+			}
+			default: return 0;
+
+		}
+	}
 	
 
 	
@@ -333,6 +377,37 @@ public class RReminder {
 		default: type = WORK; break;
 		}
 		return type;
+	}
+
+	@TargetApi(Build.VERSION_CODES.O)
+	public static NotificationChannel createNotificationChannel(Context context, int type) {
+		// Create the NotificationChannel, but only on API 26+ because
+		// the NotificationChannel class is new and not in the support library
+
+		CharSequence name;
+		String description;
+		int importance;
+		String channel_ID;
+		if(type == RReminder.NOTIFICATION_CHANNEL_ONGOING){
+			importance = NotificationManager.IMPORTANCE_LOW;
+			name = context.getString(R.string.channel_name_ongoing);
+			description = context.getString(R.string.channel_description_ongoing);
+			channel_ID = RReminder.CHANNEL_ONGOING_ID;
+		} else {
+			importance = NotificationManager.IMPORTANCE_HIGH;
+			name = context.getString(R.string.channel_name_period_end);
+			description = context.getString(R.string.channel_description_period_end);
+			channel_ID = RReminder.CHANNEL_PERIOD_END_ID;
+		}
+
+		NotificationChannel channel = new NotificationChannel(channel_ID, name, importance);
+		channel.setDescription(description);
+		if(type==RReminder.NOTIFICATION_CHANNEL_PERIOD_END){
+			channel.setSound(null, null);
+		}
+
+		return channel;
+
 	}
 	
 

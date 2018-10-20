@@ -82,7 +82,7 @@ public class RReminderMobile {
 	}
 
 	public static Notification updateOnGoingNotification(Context context, int type, long periodEndTime, boolean showTurnOff){
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, RReminder.CHANNEL_ONGOING_ID);
 		Intent notificationIntent = new Intent(context, MainActivity.class);
 		notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
 		notificationIntent.putExtra(RReminder.START_COUNTER, false);

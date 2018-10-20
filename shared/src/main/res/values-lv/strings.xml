@@ -44,6 +44,11 @@
     <string name="notify_rest_period_end_message_part_one">Atpūtas periods</string>
     <string name="notify_rest_period_end_message_part_two">ir noslēdzies</string>
     <string name="notify_turn_off">Izslēgt</string>
+
+    <string name="channel_name_ongoing">Pastāvīgā ikona statusu joslā</string>
+    <string name="channel_description_ongoing">Lai neizjauktu Aptūtu atgādinātāja korektu darbību, ieteicams paziņojumu regulējumus mainīt Atpūtu atgādinātja lietotnes iestatījumu sadaļā</string>
+    <string name="channel_name_period_end">Perioda beigu paziņojumu kanāls</string>
+    <string name="channel_description_period_end">Lai neizjauktu Aptūtu atgādinātāja korektu darbību, ieteicams paziņojumu regulējumus mainīt Atpūtu atgādinātja lietotnes iestatījumu sadaļā</string>
     <!-- IsOn notification -->
     <string name="notify_reminder_is_on_title">Atpūtu atgādinātājs ir ieslēgts</string>
     <string name="notify_reminder_is_on_work_message">pašreizējais perids: darbs</string>
@@ -112,6 +117,8 @@
     <string name="pref_show_stop_counter_hint_title">Mājiens par atgādinātāja atslēgšanu</string>
     <string name="pref_show_led_key">pref_show_led_hint</string>
     <string name="pref_show_led_title">Izmantot LED indikatoru</string>
+    <string name="pref_colorize_notifications_key">pref_colorize_notifications</string>
+    <string name="pref_colorize_notifications_title">Paziņojumi uz krāsu fona</string>
     <string name="pref_hour_single">1 stunda</string>
     <string name="pref_hour_multiple">%1$d stundas</string>
     <string name="pref_minute_single">1 minūte</string>

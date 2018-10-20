@@ -18,6 +18,7 @@ class PlaySoundWakeLock {
         if (pm!=null)
         sCpuWakeLock = pm.newWakeLock(
         		PowerManager.PARTIAL_WAKE_LOCK, LOCK_NAME_STATIC_SOUND);
+        //NOTE: adding a timeout value ended up in inconsistent behaviour, which sometimes ended in problems with launching periodservice
         sCpuWakeLock.acquire();
     }
 

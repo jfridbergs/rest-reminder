@@ -5,10 +5,12 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -55,6 +57,16 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	        // subclass.
 	            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 						| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+			//Initiate a countdown to turn off screen after certain ammount of time in order to avoid burning out battery
+			new CountDownTimer(30000, 1000) {
+
+				public void onTick(long millisUntilFinished) {
+				}
+
+				public void onFinish() {
+					win.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+				}
+			}.start();
 	        
 		}
 

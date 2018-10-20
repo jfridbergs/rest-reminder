@@ -50,6 +50,7 @@ public class WearPeriodService extends Service implements
 
     private String debug = "WEAR_PERIOD_SERVICE";
     Intent periodIntent;
+    private NotificationCompat.Action extendAction, endPeriodAction;
 
     ReminderStatus statusData;
 
@@ -127,41 +128,48 @@ public class WearPeriodService extends Service implements
         //NotificationCompat.WearableExtender wearableExtender = new NotificationCompat.WearableExtender();
 
         //EXTEND ACTION
-
         //extend period action intent
-        Intent extendIntent = new Intent(this,WearMainActivity.class);
-        extendIntent.setAction(RReminder.ACTION_WEAR_NOTIFICATION_EXTEND);
+        //check if extend option is enabled on parent device
+        if(RReminder.isExtendEnabled(this.getApplicationContext())){
+            Intent extendIntent = new Intent(this,WearMainActivity.class);
+            extendIntent.setAction(RReminder.ACTION_WEAR_NOTIFICATION_EXTEND);
 
-        // type of currently running period, that needs to be cancelled
-        extendIntent.putExtra(RReminder.PERIOD_TYPE,typeOFF);
-        //period type, that needs to extended
-        extendIntent.putExtra(RReminder.EXTENDED_PERIOD_TYPE, type);
-        //data needed to cancel the current running period
-        extendIntent.putExtra(RReminder.PERIOD_END_TIME,nextPeriodEndTime);
-        extendIntent.putExtra(RReminder.EXTEND_COUNT,extendCount);
-        PendingIntent extendPendingIntent = PendingIntent.getActivity(this,pIntentId,extendIntent,0);
+            // type of currently running period, that needs to be cancelled
+            extendIntent.putExtra(RReminder.PERIOD_TYPE,typeOFF);
+            //period type, that needs to extended
+            extendIntent.putExtra(RReminder.EXTENDED_PERIOD_TYPE, type);
+            //data needed to cancel the current running period
+            extendIntent.putExtra(RReminder.PERIOD_END_TIME,nextPeriodEndTime);
+            extendIntent.putExtra(RReminder.EXTEND_COUNT,extendCount);
+            PendingIntent extendPendingIntent = PendingIntent.getActivity(this,pIntentId,extendIntent,0);
 
 
-        //action itself
-        NotificationCompat.Action extendAction = new NotificationCompat.Action.Builder(
-                R.drawable.ic_notify_wear_extend, getString(R.string.notify_extend),extendPendingIntent).build();
+            //action itself
+             extendAction = new NotificationCompat.Action.Builder(
+                    R.drawable.ic_notify_wear_extend, getString(R.string.notify_extend),extendPendingIntent).build();
+        }
+
 
 
         //END PERIOD ACTION
 
         //extend period action intent
-        Intent endPeriodIntent = new Intent(this,WearMainActivity.class);
-        endPeriodIntent.setAction(RReminder.ACTION_WEAR_NOTIFICATION_START_NEXT);
-        //required data to cancel current running period
-        endPeriodIntent.putExtra(RReminder.PERIOD_TYPE, typeOFF);
-        endPeriodIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
+        //check, if endPeriod option is enabled on parent device
+        if(RReminder.isEndPeriodEnabled(this.getApplicationContext())){
+            Intent endPeriodIntent = new Intent(this,WearMainActivity.class);
+            endPeriodIntent.setAction(RReminder.ACTION_WEAR_NOTIFICATION_START_NEXT);
+            //required data to cancel current running period
+            endPeriodIntent.putExtra(RReminder.PERIOD_TYPE, typeOFF);
+            endPeriodIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 
-        PendingIntent endPeriodPendingIntent = PendingIntent.getActivity(this,pIntentId+5,endPeriodIntent,0);
+            PendingIntent endPeriodPendingIntent = PendingIntent.getActivity(this,pIntentId+5,endPeriodIntent,0);
 
 
-        //action itself
-        NotificationCompat.Action endPeriodAction = new NotificationCompat.Action.Builder(
-                R.drawable.ic_notify_end_period, getString(R.string.notify_end_period),endPeriodPendingIntent).build();
+            //action itself
+            endPeriodAction = new NotificationCompat.Action.Builder(
+                    R.drawable.ic_notify_end_period, getString(R.string.notify_end_period),endPeriodPendingIntent).build();
+        }
+
 
 
         //TURN_OFF ACTION
@@ -205,7 +213,7 @@ public class WearPeriodService extends Service implements
                 PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(this);
+                new NotificationCompat.Builder(this, RReminder.CHANNEL_PERIOD_END_ID);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
@@ -230,8 +238,13 @@ public class WearPeriodService extends Service implements
         notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
 
         notificationBuilder.addAction(turnOffAction);
-        notificationBuilder.addAction( extendAction);
-        notificationBuilder.addAction(endPeriodAction);
+        if(RReminder.isExtendEnabled(this.getApplicationContext())){
+            notificationBuilder.addAction( extendAction);
+        }
+        if(RReminder.isEndPeriodEnabled(this.getApplicationContext())){
+            notificationBuilder.addAction(endPeriodAction);
+        }
+
 
 
 

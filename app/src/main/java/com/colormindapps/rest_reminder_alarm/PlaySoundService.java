@@ -178,7 +178,6 @@ public class PlaySoundService extends Service {
 
         /* Start the vibrator after everything is ok with the media player */
 		if(audioManager.getRingerMode()!=AudioManager.RINGER_MODE_SILENT && type!=RReminder.APPROXIMATE){
-   			if (Build.VERSION.SDK_INT >= 11) {
 				if(RReminder.isVibrateEnabled(this, mVibrator)){
 					// Vibrate for 300 milliseconds
 					if(type ==RReminder.APPROXIMATE){
@@ -187,16 +186,7 @@ public class PlaySoundService extends Service {
 						mVibrator.vibrate(300);
 					}
 				}
-			} else {
-				if(RReminder.isVibrateEnabledSupport(this)){
-					// Vibrate for 300 milliseconds
-					if(type ==RReminder.APPROXIMATE){
-						mVibrator.vibrate(100);
-					} else {
-						mVibrator.vibrate(300);
-					}	
-				}
-			}
+
 		}
 
         mPlaying = true;

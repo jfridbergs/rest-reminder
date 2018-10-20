@@ -2,10 +2,13 @@ package com.colormindapps.rest_reminder_alarm.wear;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationManagerCompat;
@@ -164,6 +167,7 @@ public class WearMainActivity extends WearableActivity implements
         notificationManager =
                 NotificationManagerCompat.from(this);
 
+        setUpNotificationChannel();
 
         manageUI(false);
 
@@ -175,29 +179,7 @@ public class WearMainActivity extends WearableActivity implements
         mGoogleApiClient.connect();
         Log.d(debug, "onResume");
         //skip over intent check, if coming from onNewIntent call (received intent from CommandsActivity)
-        if(!skipOnResumeIntentSection){
-            Log.d(debug, " onResume intent action: " + getIntent().getAction());
-            String intentAction = getIntent().getAction();
-            if(intentAction!=null){
-                switch(intentAction){
-                    case RReminder.ACTION_TURN_OFF: {
-                        actionTurnOff();
-                        break;
-                    }
-                    case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
-                        actionExtendFinished();
-                        break;
-                    }
-                    case RReminder.ACTION_WEAR_NOTIFICATION_START_NEXT: {
-                        actionEndPeriod(START_NEXT_FROM_NOTIFICATION);
-                        break;
-                    }
-                    default: break;
-                }
-            }
-        }
-   //reset boolean for skipping intent section
-    skipOnResumeIntentSection = false;
+
 
     }
 
@@ -234,6 +216,13 @@ public class WearMainActivity extends WearableActivity implements
     public void onExitAmbient() {
         super.onExitAmbient();
         manageUI(isOn);
+    }
+
+    private void setUpNotificationChannel(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(RReminder.createNotificationChannel(this.getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_PERIOD_END));
+        }
     }
 
     @Override
@@ -286,8 +275,11 @@ public class WearMainActivity extends WearableActivity implements
 
         // cancel the notification with notification manager.
         notificationManager.cancel(001);
+        //check preferences if extending period option is enabled
+        if(RReminder.isExtendEnabled(this.getApplicationContext())){
+            extendPeriod(EXTEND_FINISHED);
+        }
 
-        extendPeriod(EXTEND_FINISHED);
 
     }
 
@@ -358,36 +350,43 @@ public class WearMainActivity extends WearableActivity implements
         int cancelType, cancelExtendCount;
         long cancelPeriodEndTime;
         Log.d(debug, "actionEndPeriod()");
-        if (startNextType == START_NEXT_FROM_NOTIFICATION){
-            // cancel the notification with notification manager.
-            notificationManager.cancel(001);
+        //check if starting next period option is enabled
+        if(RReminder.isEndPeriodEnabled(this.getApplicationContext())){
+            if (startNextType == START_NEXT_FROM_NOTIFICATION){
+                // cancel the notification with notification manager.
+                notificationManager.cancel(001);
 
-            // 1. cancel current alarm
-            cancelType = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
-            //extend count for newly created period is 0
-            cancelExtendCount = 0;
-            cancelPeriodEndTime = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
+                // 1. cancel current alarm
+                cancelType = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
+                //extend count for newly created period is 0
+                cancelExtendCount = 0;
+                cancelPeriodEndTime = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
+            } else {
+                cancelType = periodType;
+                cancelExtendCount = extendCount;
+                cancelPeriodEndTime = periodEndTimeValue;
+            }
+
+
+            WearRReminder.cancelPeriodAlarm(this.getApplicationContext(),cancelType,cancelExtendCount,cancelPeriodEndTime);
+
+            // 2. gather data for new period
+            int newPeriodType = RReminder.getNextType(cancelType);
+            long newPeriodEndTime = RReminder.getNextPeriodEndTime(this, newPeriodType, Calendar.getInstance().getTimeInMillis(),1,0L);
+            Log.d(debug, "start next period. period type: "+newPeriodType);
+            Log.d(debug, "start next period. new period length: "+ (newPeriodEndTime - cancelPeriodEndTime));
+
+            // 3. update Data API
+            updateReminderStatus(RReminder.DATA_API_SOURCE_WEAR,newPeriodType,newPeriodEndTime,0, mobileOn, true);
+
+            // 4. dispatch new alarm
+            periodManager.setPeriod(newPeriodType,newPeriodEndTime,0);
+            // 5. update UI
         } else {
-            cancelType = periodType;
-            cancelExtendCount = extendCount;
-            cancelPeriodEndTime = periodEndTimeValue;
+            //if action to end current period was made from outdated notification action, remove it
+            notificationManager.cancel(001);
         }
 
-
-        WearRReminder.cancelPeriodAlarm(this.getApplicationContext(),cancelType,cancelExtendCount,cancelPeriodEndTime);
-
-        // 2. gather data for new period
-        int newPeriodType = RReminder.getNextType(cancelType);
-        long newPeriodEndTime = RReminder.getNextPeriodEndTime(this, newPeriodType, Calendar.getInstance().getTimeInMillis(),1,0L);
-        Log.d(debug, "start next period. period type: "+newPeriodType);
-        Log.d(debug, "start next period. new period length: "+ (newPeriodEndTime - cancelPeriodEndTime));
-
-        // 3. update Data API
-        updateReminderStatus(RReminder.DATA_API_SOURCE_WEAR,newPeriodType,newPeriodEndTime,0, mobileOn, true);
-
-        // 4. dispatch new alarm
-        periodManager.setPeriod(newPeriodType,newPeriodEndTime,0);
-        // 5. update UI
     }
 
 
@@ -500,20 +499,68 @@ public class WearMainActivity extends WearableActivity implements
         }
     }
 
-    private void updatePreferences(String workLength, String restLength, int extendLength){
+    private void updatePreferences(String reminderMode, String workLength, String restLength, int extendLength, boolean extendEnabled, boolean startNextEnabled){
         Log.d(debug, "updatePreferences");
+        Log.d(debug, "reminder mode "+reminderMode);
         Log.d(debug, "work period: "+workLength);
         Log.d(debug, "rest period: "+restLength);
         Log.d(debug, "extend length: "+ extendLength);
+        Log.d(debug, "extend enabled: "+ extendEnabled);
+        Log.d(debug, "start next enabled: "+ startNextEnabled);
+        editor.putString(RReminder.PREF_REMINDER_MODE_KEY, reminderMode);
         editor.putString(RReminder.PREF_WORK_LENGTH_KEY, workLength);
         editor.putString(RReminder.PREF_REST_LENGTH_KEY, restLength);
         editor.putInt(RReminder.PREF_EXTEND_BASE_LENGTH_KEY, extendLength);
+        editor.putBoolean(RReminder.PREF_EXTEND_ENABLED_KEY, extendEnabled);
+        editor.putBoolean(RReminder.PREF_START_NEXT_ENABLED_KEY, startNextEnabled);
         editor.apply();
-        if(periodType==0){
-            manageUI(false);
+
+        //handle notification action, when wear is connected to mobile and preferences are made up-to-date
+        if(!skipOnResumeIntentSection){
+            Log.d(debug, " handling intent actions after updating preferences from MOBILE: " + getIntent().getAction());
+            handleNotificationIntentActions();
         } else {
-            manageUI(true);
+            if(periodType==0){
+                manageUI(false);
+            } else {
+                manageUI(true);
+            }
         }
+        //reset boolean for skipping intent section
+        skipOnResumeIntentSection = false;
+
+    }
+
+    private void handleNotificationIntentActions(){
+
+            String intentAction = getIntent().getAction();
+            if(intentAction!=null){
+                switch(intentAction){
+                    case RReminder.ACTION_TURN_OFF: {
+                        actionTurnOff();
+                        break;
+                    }
+                    case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
+                        actionExtendFinished();
+                        break;
+                    }
+                    case RReminder.ACTION_WEAR_NOTIFICATION_START_NEXT: {
+                        actionEndPeriod(START_NEXT_FROM_NOTIFICATION);
+                        break;
+                    }
+                    default: {
+                        if(periodType==0){
+                            manageUI(false);
+                        } else {
+                            manageUI(true);
+                        }
+                        break;
+                    }
+                }
+            }
+
+        //reset boolean for skipping intent section
+        skipOnResumeIntentSection = false;
     }
 
     public void manageUI(Boolean isOn) {
@@ -557,7 +604,12 @@ public class WearMainActivity extends WearableActivity implements
             if(isAmbient()){
                 openCommands.setVisibility(View.GONE);
             } else {
-                openCommands.setVisibility(View.VISIBLE);
+                if(RReminder.isExtendEnabled(this.getApplicationContext())|| RReminder.isEndPeriodEnabled(this.getApplicationContext())) {
+                    openCommands.setVisibility(View.VISIBLE);
+                } else {
+                    openCommands.setVisibility(View.GONE);
+                }
+
             }
 
             manageTimer(true);
@@ -776,6 +828,8 @@ public class WearMainActivity extends WearableActivity implements
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         Log.e(debug, "onConnectionFailed(): Failed to connect, with result: " + result);
+
+
     }
 
 
@@ -818,7 +872,8 @@ public class WearMainActivity extends WearableActivity implements
 
                 if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_PREFERENCES_PATH)==0){
                     DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-                    updatePreferences(dataMap.getString(RReminder.WEAR_PREF_WORK_LENGTH),dataMap.getString(RReminder.WEAR_PREF_REST_LENGTH), dataMap.getInt(RReminder.WEAR_PREF_EXTEND_LENGTH));
+                    updatePreferences(dataMap.getString(RReminder.WEAR_PREF_REMINDER_MODE),dataMap.getString(RReminder.WEAR_PREF_WORK_LENGTH), dataMap.getString(RReminder.WEAR_PREF_REST_LENGTH),
+                            dataMap.getInt(RReminder.WEAR_PREF_EXTEND_LENGTH), dataMap.getBoolean(RReminder.WEAR_PREF_EXTEND_ENABLED),dataMap.getBoolean(RReminder.WEAR_PREF_START_NEXT_ENABLED));
                 }
 
 
@@ -867,6 +922,42 @@ public class WearMainActivity extends WearableActivity implements
                         );
             }
         });
+    }
+
+    private void getPreferenceData(final String pathToContent) {
+        Log.d(debug, "getPreferenceData");
+        Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
+            @Override
+            public void onResult(NodeApi.GetLocalNodeResult getLocalNodeResult) {
+
+
+
+                Uri uri = new Uri.Builder()
+                        .scheme(PutDataRequest.WEAR_URI_SCHEME)
+                        .path(pathToContent)
+                        .authority(connectedNode.getId())
+                        .build();
+
+                Wearable.DataApi.getDataItem(mGoogleApiClient, uri)
+                        .setResultCallback(
+                                new ResultCallback<DataApi.DataItemResult>() {
+                                    @Override
+                                    public void onResult(DataApi.DataItemResult dataItemResult) {
+
+                                        if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
+                                            DataMap data = DataMap.fromByteArray(dataItemResult.getDataItem().getData());
+                                            updatePreferences(data.getString(RReminder.WEAR_PREF_REMINDER_MODE),data.getString(RReminder.WEAR_PREF_WORK_LENGTH), data.getString(RReminder.WEAR_PREF_REST_LENGTH),
+                                                    data.getInt(RReminder.WEAR_PREF_EXTEND_LENGTH), data.getBoolean(RReminder.WEAR_PREF_EXTEND_ENABLED),data.getBoolean(RReminder.WEAR_PREF_START_NEXT_ENABLED));
+
+
+                                        }
+                                    }
+                                }
+                        );
+            }
+
+        });
+
     }
 
     private void getConnectedData(final String pathToContent) {
@@ -924,6 +1015,8 @@ public class WearMainActivity extends WearableActivity implements
 
     private void determineSourceAndGetData()
     {
+
+        Context appContext = this.getApplicationContext();
         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
             @Override
             public void onResult(NodeApi.GetConnectedNodesResult nodes) {
@@ -939,12 +1032,20 @@ public class WearMainActivity extends WearableActivity implements
                     connectedNode = node;
                 }
 
+                //if wear is connected to a mobile, we will update wear app with reminder status and preferences
                 if (connectedNode != null){
                     getConnectedData(RReminder.DATA_API_REMINDER_STATUS_PATH);
+                    getPreferenceData((RReminder.DATA_API_REMINDER_PREFERENCES_PATH));
                     //TO DO: consider enforcing getLocalNode when returning from commands screen
                 } else {
                     Log.d(debug, "mobile IS NOT connected and IS NOT running");
                     getLocalData(RReminder.DATA_API_REMINDER_STATUS_PATH);
+
+                    //if no device is connected to wear, check for wether or not execute action call from notification uses local wear preferences
+                    if(!skipOnResumeIntentSection) {
+                        Log.d(debug, " handling intent actions using WEAR preferences: " + getIntent().getAction());
+                        handleNotificationIntentActions();
+                    }
                 }
             }
         });

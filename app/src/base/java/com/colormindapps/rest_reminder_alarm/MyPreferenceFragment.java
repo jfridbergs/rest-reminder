@@ -8,9 +8,11 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 
@@ -21,7 +23,7 @@ import java.util.Calendar;
 
 
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener{
-	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, approxEnabledKey;
+	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, approxEnabledKey, enableColorizedNotificationsKey;
 	public String testModeSummary,testWorkLenghtSummary, testRestLenghtSummary, testWorkAudioSummary, testRestAudioSummary, testProximityLengthSummary, testProximityAudioSummary, testExtendCountSummary, testExtendLengthSummary;
 	Uri originalWorkUri, originalRestUri, originalApproxUri, newWorkUri, newRestUri, newApproxUri;
 	SharedPreferences sharedPreferences;
@@ -66,6 +68,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
 		approxSoundKey = getString(R.string.pref_approx_time_sound_key);
 		approxEnabledKey = getString(R.string.pref_enable_approx_notification_key);
+		enableColorizedNotificationsKey = getString(R.string.pref_colorize_notifications_key);
 		
         Preference preference = findPreference(changeSummaryKey);
         // Set summary to be the user-description for the selected value
@@ -169,6 +172,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	preference.setSummary(output);
 
 		testExtendLengthSummary = preference.getSummary().toString();
+
+		//display the preference for enabling notification color only on devices with oreo or newer
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+			PreferenceCategory mCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_basic_settings_key));
+			mCategory.removePreference(findPreference(enableColorizedNotificationsKey));
+		} else {
+
+			if(RReminderMobile.isCounterServiceRunning(context)){
+				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(false);
+			} else {
+				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(true);
+			}
+		}
     	
     	
     	

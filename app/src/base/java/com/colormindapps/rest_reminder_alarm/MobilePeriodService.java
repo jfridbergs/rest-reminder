@@ -8,6 +8,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -129,7 +130,7 @@ public class MobilePeriodService extends IntentService {
 
 		AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
 
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, RReminder.CHANNEL_PERIOD_END_ID);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 			if(RReminder.getMode(this)==1){
 				Intent startNextPeriod = new Intent (this, MainActivity.class);
@@ -196,18 +197,31 @@ public class MobilePeriodService extends IntentService {
 				break;
 		}
 				/*
+				//
 				if(am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && callState == TelephonyManager.CALL_STATE_IDLE){
 					builder.setSound(Scheduler.getRingtone(getBaseContext(),typeForNotification));
 				}
 				*/
 		if(am!=null && am.getRingerMode()!=AudioManager.RINGER_MODE_SILENT){
 
-		if(RReminder.isVibrateEnabledSupport(this)){
-			// Vibrate for 300 milliseconds
-			builder.setVibrate(new long[] {0,300});
+			if(RReminder.isVibrateEnabledSupport(this)){
+				// Vibrate for 300 milliseconds
+				builder.setVibrate(new long[] {0,300});
 
 			}
 		}
+
+		//setting up background color for notification
+		Log.d("MOBILE_PERIOD_SERVICE", "is notification colorize enabled: "+RReminder.isNotificationColorizeEnabled(this));
+		if(RReminder.isNotificationColorizeEnabled(this)){
+			builder.setColorized(true);
+			builder.setColor(RReminder.getNotificationBackgroundColorId(this.getApplicationContext(), typeForNotification,extendCount));
+			Log.d("MOBILE_PERIOD_SERVICE", "notification color ON");
+		} else {
+			builder.setColorized(false);
+			Log.d("MOBILE_PERIOD_SERVICE", "notification color OFF");
+		}
+
 
 		builder.setContentIntent(pi);
 		builder.setAutoCancel(true);

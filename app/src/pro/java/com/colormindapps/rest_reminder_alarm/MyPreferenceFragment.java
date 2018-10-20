@@ -23,13 +23,14 @@ import java.util.Calendar;
 
 
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener{
-	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, approxEnabledKey;
+	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, approxEnabledKey, extendEnabledKey, startNextEnabledKey;
 	public String testModeSummary,testWorkLenghtSummary, testRestLenghtSummary, testWorkAudioSummary, testRestAudioSummary, testProximityLengthSummary, testProximityAudioSummary, testExtendCountSummary, testExtendLengthSummary;
 	Uri originalWorkUri, originalRestUri, originalApproxUri, newWorkUri, newRestUri, newApproxUri;
 	SharedPreferences sharedPreferences;
 	String workPeriodLength, restPeriodLength, approxLength;
-	String wearWorkLength, wearRestLength;
+	String wearWorkLength, wearRestLength, wearReminderMode;
 	int wearExtendLength;
+	boolean wearExtendEnabled, wearStartNextEnabled;
 	long periodEndTimeValue;
 	int periodType, extendCount;
 	SharedPreferences.Editor editor;
@@ -76,6 +77,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
 		approxSoundKey = getString(R.string.pref_approx_time_sound_key);
 		approxEnabledKey = getString(R.string.pref_enable_approx_notification_key);
+		extendEnabledKey = getString(R.string.pref_enable_extend_key);
+		startNextEnabledKey = getString(R.string.pref_end_period_key);
 		
         Preference preference = findPreference(changeSummaryKey);
         // Set summary to be the user-description for the selected value
@@ -213,8 +216,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		wearWorkLength = sharedPreferences.getString(workPeriodLengthKey, RReminder.DEFAULT_WORK_PERIOD_STRING);
 		wearRestLength = sharedPreferences.getString(restPeriodLengthKey, RReminder.DEFAULT_REST_PERIOD_STRING);
 		wearExtendLength = sharedPreferences.getInt(extendBaseLengthKey, RReminder.DEFAULT_EXTEND_COUNT);
+		wearExtendEnabled = sharedPreferences.getBoolean(extendEnabledKey, true);
+		wearStartNextEnabled = sharedPreferences.getBoolean(startNextEnabledKey, true);
+		wearReminderMode = sharedPreferences.getString(changeSummaryKey, "0");
 
-		parentActivity.updateWearPreferences(wearWorkLength, wearRestLength, wearExtendLength);
+		parentActivity.updateWearPreferences(wearReminderMode, wearWorkLength, wearRestLength, wearExtendLength, wearExtendEnabled, wearStartNextEnabled);
 
 
 		String updatedWorkPeriodLength, updatedRestPeriodLength, updatedApproxLength;

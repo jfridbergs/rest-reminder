@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.colormindapps.rest_reminder_alarm"
-    android:versionCode="6"
-    android:versionName="1.0.1">
+    package="com.colormindapps.rest_reminder_alarm">
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="25" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />

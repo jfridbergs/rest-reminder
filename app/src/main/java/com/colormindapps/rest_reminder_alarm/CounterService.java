@@ -76,7 +76,7 @@ public class CounterService extends Service {
 		periodLength = periodEndTime - startTime.getTimeInMillis();
 
 		if(RReminder.isActiveModeNotificationEnabled(this) && !excludeOngoing){
-			NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+			NotificationCompat.Builder builder = new NotificationCompat.Builder(this, RReminder.CHANNEL_ONGOING_ID);
 			Intent notificationIntent = new Intent(this, MainActivity.class);
 			notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
 			notificationIntent.putExtra(RReminder.START_COUNTER, false);

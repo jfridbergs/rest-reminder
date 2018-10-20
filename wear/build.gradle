@@ -2,14 +2,14 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 26
+
 
     defaultConfig {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 21
-        targetSdkVersion 25
-        versionName "1.0.1-pro"
+        targetSdkVersion 26
+        versionName "1.0.2-pro"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,20 +25,25 @@ android {
         pro {
             dimension "default"
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "1.0.1-pro"
+            versionName "1.0.2-pro"
             minSdkVersion 21
-            targetSdkVersion 25
+            targetSdkVersion 26
         }
     }
 }
 
 dependencies {
-    compile project(':shared')
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.support:wearable:2.0.0'
-    compile 'com.google.android.gms:play-services-wearable:9.2.0'
-    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support:support-annotations:25.2.0'
-    provided 'com.google.android.wearable:wearable:2.0.0'
+    implementation project(':shared')
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.support:wearable:2.3.0'
+    implementation 'com.google.android.gms:play-services-wearable:15.0.1'
+    //support v7
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:support-fragment:26.1.0'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support:support-annotations:27.1.1'
+    compileOnly 'com.google.android.wearable:wearable:2.3.0'
 }
+
+

@@ -3,6 +3,8 @@ package com.colormindapps.rest_reminder_alarm;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -52,7 +54,9 @@ import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements OnDialogCloseListener {
@@ -252,6 +256,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		swipeWorkLand = getString(R.string.swipe_area_text_land_work);
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
+
+		//creating notification channel for API => Oreo
+		setUpNotificationChannels();
 
 
 
@@ -487,6 +494,19 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 	}
+
+	private void setUpNotificationChannels(){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			List<NotificationChannel> notifChannels =new ArrayList<>();
+			notifChannels.add(RReminder.createNotificationChannel(this.getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_PERIOD_END));
+			notifChannels.add(RReminder.createNotificationChannel(this.getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_ONGOING));
+
+
+			NotificationManager notificationManager = getSystemService(NotificationManager.class);
+			notificationManager.createNotificationChannels(notifChannels);
+		}
+	}
+
 
 	@Override
 	public void onUserInteraction() {

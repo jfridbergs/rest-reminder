@@ -52,6 +52,11 @@
     <string name="notify_extend">Extend previous</string>
     <string name="notify_end_period">Start next</string>
     <string name="notify_wear_big_text">This %1$s period will end at %2$s</string>
+
+    <string name="channel_name_ongoing">status bar icon</string>
+    <string name="channel_description_ongoing">In order to preserve the correct behaviour of Rest Reminder, it is advised to manage notifications inside Rest Reminder`s settings section </string>
+    <string name="channel_name_period_end">Period end notifications</string>
+    <string name="channel_description_period_end">In order to preserve the correct behaviour of Rest Reminder, it is advised to manage notifications inside Rest Reminder`s settings section</string>
     <!-- IsOn notification -->
     <string name="notify_reminder_is_on_title">Rest reminder is on</string>
     <string name="notify_reminder_is_on_work_message">Current period: work</string>
@@ -144,6 +149,8 @@
     <string name="pref_show_stop_counter_hint_title">Show stop counter hint</string>
     <string name="pref_show_led_key">pref_show_led_hint</string>
     <string name="pref_show_led_title">Enable LED indicator</string>
+    <string name="pref_colorize_notifications_key">pref_colorize_notifications</string>
+    <string name="pref_colorize_notifications_title">Colorize notifications</string>
     <string name="pref_hour_single">1 hour</string>
     <string name="pref_hour_multiple">%1$d hours</string>
     <string name="pref_minute_single">1 minute</string>
