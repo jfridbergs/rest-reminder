@@ -209,12 +209,10 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					if(getVisibleState()){
 						manageUI(true);
 						if (dialogOnScreen || stopTimerInServiceConnectedAfterPause) {
-							Log.d(debug, "timer set to off, stopTimerAfterPause: "+stopTimerInServiceConnectedAfterPause);
 							manageTimer(false);
 							if (stopTimerInServiceConnectedAfterPause)
 								stopTimerInServiceConnectedAfterPause = false;
 						} else {
-							Log.d(debug, "manageTimer true inside onServiceConnected");
 							manageTimer(true);
 						}
 					}
@@ -253,7 +251,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.d(debug, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		toolBar = findViewById(R.id.toolbar);
@@ -289,7 +286,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onStart() {
-		Log.d(debug, "onStart");
 		super.onStart();
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
@@ -409,7 +405,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Log.d(debug, "currentVersionNr: " + currentVersionNumber + ", savedVersionNr: "+savedVersionNumber);
 		if (!eulaAccepted || currentVersionNumber > savedVersionNumber) {
 			if(!dialogOnScreen){
 				showIntroductionDialog();
@@ -425,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onResume() {
-		Log.d(debug, "onResume");
 		super.onResume();
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
@@ -456,7 +450,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onPause() {
-		Log.d(debug, "onPause");
 		super.onPause();
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
@@ -468,7 +461,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStop() {
 		//dismissEulaDialog();
-		Log.d(debug, "onStop");
 
 		//dismiss EULA dialog
 
@@ -618,7 +610,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	*/
 
 	private void setReminderOff(long periodEndTime) {
-		Log.d("MAIN_ACTIVITY", "setSchedulerOff");
 		setReminderOffCounter++;
 		stopCountDownTimer();
 		if (mBound) {
@@ -852,7 +843,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	*/
 
 	public void manageTimer(Boolean isOn) {
-		Log.d("MAIN_ACTIVITY", "manageTimer with status: " + isOn);
 		timerButtonLayout = (RelativeLayout) findViewById(R.id.timer_layout);
 		timerHour1 = (TextView) findViewById(R.id.timer_hour1);
 		timerMinute1 = (TextView) findViewById(R.id.timer_minute1);
@@ -959,8 +949,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	}
 
 	public void showIntroductionDialog() {
-
-		Log.d(debug, "showIntroductionDialog");
 		introFragment = IntroductionDialog.newInstance(
 				R.string.intro_title);
 		introFragment.show(getSupportFragmentManager(), "introductionDialog");
@@ -992,7 +980,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	}
 
 	public void stopCountDownTimer() {
-		Log.d(debug, "stopCountdownTimer");
 		if (countdown != null) {
 			countdown.cancel();
 			countdown.isRunning = false;
@@ -1247,7 +1234,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		dialogOnScreen = false;
 		if (mBound && !positiveDismissal) {
 			counterTimeValue = mService.getCounterTimeValue();
-			Log.d(debug, "manageTimer true called in resumeCounter");
 			manageTimer(true);
 		}
 	}
@@ -1317,7 +1303,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			Editor editor = sharedPref.edit();
 			editor.putBoolean(RReminder.EULA_ACCEPTED, true);
 			editor.apply();
-			Log.d(debug, "EULA value is stored");
 		}
 
 
@@ -1392,7 +1377,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {
-						Log.d(debug, "manageTimer true called in onNewIntent");
 						manageTimer(true);
 					}
 					break;
@@ -2315,15 +2299,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 	}
 
-	public void dismissEulaDialog(){
-		Log.d(debug, "dismissEulaDialog is called");
-		Fragment prev = getSupportFragmentManager().findFragmentByTag("introductionDialog");
-		if (prev != null) {
-			IntroductionDialog df = (IntroductionDialog) prev;
-			df.dismiss();
-			Log.d(debug, "EULA dialog is closed");
-		}
-	}
 
 	//for testing purposes only, remove before release
 	/*

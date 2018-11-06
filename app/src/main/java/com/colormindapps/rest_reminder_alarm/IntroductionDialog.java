@@ -62,7 +62,6 @@ public class IntroductionDialog extends DialogFragment {
 	               public void onClick(DialogInterface dialog, int id) {
                        parentActivity.dialogIsClosed(true);
 	            	   IntroductionDialog.this.getDialog().cancel();
-	            	   Log.d("RREMINDER_EULA_DIALOG", "clicking I accept");
 	               }
 	           })
 				.setNegativeButton(R.string.eula_reject, new DialogInterface.OnClickListener() {

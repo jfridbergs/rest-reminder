@@ -57,7 +57,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 						| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 			//Initiate a countdown to turn off screen after certain ammount of time in order to avoid burning out battery
-			new CountDownTimer(30000, 1000) {
+			new CountDownTimer(15000, 1000) {
 
 				public void onTick(long millisUntilFinished) {
 				}

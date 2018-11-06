@@ -9,7 +9,7 @@ android {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 9
+        versionCode 10
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //android.test.InstrumentationTestRunner for robotium tests
     }
