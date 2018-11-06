@@ -78,6 +78,8 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         privateEditor = privatePreferences.edit();
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:01");
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:01");
+        editor.putInt(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 3);
+        editor.putInt(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_key), 5);
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
         editor.commit();
         scaledDensity = appContext.getResources().getDisplayMetrics().scaledDensity;
@@ -142,11 +144,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         privateEditor.commit();
         solo.sleep(500);
 
-        instr.callActivityOnPause(mActivity);
+
 
         mActivity.runOnUiThread(
                 new Runnable() {
                     public void run() {
+                        instr.callActivityOnPause(mActivity);
+                        instr.callActivityOnStop(mActivity);
+                        instr.callActivityOnStart(mActivity);
                         instr.callActivityOnResume(mActivity);
                     }
                 });
@@ -179,7 +184,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(1000);
 
 
-        assertFalse(solo.searchText(expectedOfflineTitle));
+
+
+        String closeIntroductionDialogText = appContext.getResources().getString(R.string.eula_accept);
+        solo.clickOnButton(closeIntroductionDialogText);
+        Log.d(debug, "clicking I accept button");
+        solo.sleep(1000);
+
+        assertTrue(solo.searchText(expectedOfflineTitle));
 
         RReminderMobile.stopCounterService(getActivity().getApplicationContext(),1);
         RReminderMobile.cancelCounterAlarm(getActivity().getApplicationContext(), 1,0,mActivity.periodEndTimeValue, false,0L);
@@ -196,11 +208,14 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         privateEditor.putBoolean(RReminder.EULA_ACCEPTED, false);
         privateEditor.commit();
         solo.sleep(500);
-        instr.callActivityOnPause(mActivity);
+
 
         mActivity.runOnUiThread(
                 new Runnable() {
                     public void run() {
+                        instr.callActivityOnPause(mActivity);
+                        instr.callActivityOnStop(mActivity);
+                        instr.callActivityOnStart(mActivity);
                         instr.callActivityOnResume(mActivity);
                     }
                 });
@@ -220,6 +235,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
 
         String closeIntroductionDialogText = appContext.getResources().getString(R.string.eula_accept);
         solo.clickOnButton(closeIntroductionDialogText);
+        Log.d(debug, "clicking I accept button");
         solo.sleep(2000);
         assertFalse("after pressing i accept button the dialog should be dismissed", (solo.searchButton(closeIntroductionDialogText)));
 
@@ -311,7 +327,16 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.clickOnView(timerLayout);
         solo.sleep(2000);
         assertTrue(mActivity.countdown.isRunning);
-        instr.callActivityOnPause(mActivity);
+
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        instr.callActivityOnPause(mActivity);
+                    }
+                });
+
+        solo.sleep(500);
+
         Log.d("TEST", "onPause called");
         assertFalse(mActivity.countdown.isRunning);
         /*
@@ -427,6 +452,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertEquals("the title size when offline",expectedSize,actualSize);
         solo.clickOnView(timerLayout);
         instr.waitForIdleSync();
+        solo.sleep(500);
         symbolCount = title.getText().length();
         expectedSize = RReminder.adjustTitleSize(appContext, symbolCount, false);
         actualSize = (int)(title.getTextSize()/scaledDensity);
@@ -722,7 +748,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         swipeArea.getLocationOnScreen(location);
         Log.d("TEST", "x value: "+ location[0]);
         Log.d("TEST", "y value: "+ location[1]);
-        expectedText =(RReminder.isPortrait(appContext)? mActivity.getResources().getString(R.string.swipe_area_text,rest) :  mActivity.getResources().getString(R.string.swipe_area_text_land,restLand));
+        expectedText =(RReminder.isPortrait(appContext)? mActivity.getResources().getString(R.string.swipe_area_text,rest) :  restLand);
         actualText = swipeArea.getText().toString();
         if(RReminder.isPortrait(appContext)){
             assertEquals("swipe area text in work period portrait",expectedText, actualText);
@@ -734,7 +760,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
             solo.sleep(2000);
         }
 
-        expectedText = (RReminder.isPortrait(appContext)? mActivity.getResources().getString(R.string.swipe_area_text,work) :  mActivity.getResources().getString(R.string.swipe_area_text_land,workLand));
+        expectedText = (RReminder.isPortrait(appContext)? mActivity.getResources().getString(R.string.swipe_area_text,work) :  workLand);
 
         actualText = swipeArea.getText().toString();
         if(RReminder.isPortrait(appContext)){
@@ -1201,6 +1227,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(5000);
         solo.clickOnView(timerLayout);
         instr.waitForIdleSync();
+        solo.sleep(500);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             Drawable recentBackground = rootLayout.getBackground();

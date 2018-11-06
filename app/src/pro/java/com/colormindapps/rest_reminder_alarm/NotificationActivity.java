@@ -99,6 +99,17 @@ public class NotificationActivity extends FragmentActivity implements
 	        // subclass.
 	            win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 						| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
+			//Initiate a countdown to turn off screen after certain ammount of time in order to avoid burning out battery
+			new CountDownTimer(30000, 1000) {
+
+				public void onTick(long millisUntilFinished) {
+				}
+
+				public void onFinish() {
+					win.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+				}
+			}.start();
 	        
 		}
 

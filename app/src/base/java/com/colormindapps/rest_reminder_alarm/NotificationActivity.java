@@ -10,7 +10,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -100,16 +99,16 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	protected void onStart(){
 		super.onStart();
 		RelativeLayout rootLayout;
-        TextView notificationTitle = (TextView) findViewById(R.id.notification_title);
-		TextView extendDescription = (TextView) findViewById(R.id.notification_extend_description);
+        TextView notificationTitle =  findViewById(R.id.notification_title);
+		TextView extendDescription = findViewById(R.id.notification_extend_description);
         notificationTitle.setTypeface(titleFont);
-        ImageView image = (ImageView) findViewById(R.id.notification_image);
-        TextView notificationDescription = (TextView) findViewById(R.id.notification_description);
+        ImageView image = findViewById(R.id.notification_image);
+        TextView notificationDescription = findViewById(R.id.notification_description);
         notificationDescription.setTypeface(descriptionFont);
-        Button notificationButton = (Button) findViewById(R.id.notification_button);
-		Button extendPeriodEnd = (Button) findViewById(R.id.button_notification_period_end_extend);
+        Button notificationButton =  findViewById(R.id.notification_button);
+		Button extendPeriodEnd = findViewById(R.id.button_notification_period_end_extend);
         notificationButton.setTypeface(buttonFont);
-        rootLayout = (RelativeLayout) findViewById(R.id.root_layout);
+        rootLayout = findViewById(R.id.root_layout);
         switch(type){
             case RReminder.WORK:
                 notificationTitle.setText(getString(R.string.notification_work_end_title));

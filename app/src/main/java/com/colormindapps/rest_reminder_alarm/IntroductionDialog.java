@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -61,6 +62,7 @@ public class IntroductionDialog extends DialogFragment {
 	               public void onClick(DialogInterface dialog, int id) {
                        parentActivity.dialogIsClosed(true);
 	            	   IntroductionDialog.this.getDialog().cancel();
+	            	   Log.d("RREMINDER_EULA_DIALOG", "clicking I accept");
 	               }
 	           })
 				.setNegativeButton(R.string.eula_reject, new DialogInterface.OnClickListener() {

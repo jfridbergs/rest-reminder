@@ -11,7 +11,12 @@ import java.util.Calendar;
 
 /**
  * Created by ingressus on 31.12.2015..
+ *
+ * IMPORTANT!!!
+ * Before running this test, comment out foreground calls in ConterService class
  */
+
+
 public class CounterServiceTest extends ServiceTestCase<CounterService> {
 
     long endTime;

@@ -91,8 +91,8 @@ public class ExtendDialog extends DialogFragment{
 		int extendBaseLength = RReminder.getExtendBaseLength(context);
 
 
-        TextView dialogTitle = (TextView) view.findViewById(R.id.extend_dialog_title);
-		Button extendOptionButton = (Button) view.findViewById(R.id.extend_dialog_button_extend);
+        TextView dialogTitle = view.findViewById(R.id.extend_dialog_title);
+		Button extendOptionButton =  view.findViewById(R.id.extend_dialog_button_extend);
         if(activityType==0){
             dialogTitle.setText(getString(R.string.extend_dialog_title));
             extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
@@ -108,7 +108,7 @@ public class ExtendDialog extends DialogFragment{
 		});
 		
 		if(RReminder.getExtendOptionsCount(context)>1){
-			Button extendOptionButton1 = (Button) view.findViewById(R.id.extend_dialog_button_extend1);
+			Button extendOptionButton1 = view.findViewById(R.id.extend_dialog_button_extend1);
             if(activityType==0){
                 extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*2));
             } else {
@@ -126,7 +126,7 @@ public class ExtendDialog extends DialogFragment{
 		}
 		
 		if(RReminder.getExtendOptionsCount(context)>2){
-			Button extendOptionButton2 = (Button) view.findViewById(R.id.extend_dialog_button_extend2);
+			Button extendOptionButton2 = view.findViewById(R.id.extend_dialog_button_extend2);
             if(activityType==0){
                 extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
             } else {

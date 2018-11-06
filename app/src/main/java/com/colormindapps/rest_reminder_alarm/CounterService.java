@@ -108,6 +108,8 @@ public class CounterService extends Service {
 			builder.setOngoing(true);
 			builder.setAutoCancel(false);
 			int id = 1;
+
+			//comment out foreground calls for testing purposes
 			startForeground(id,builder.build());
 		}
 
@@ -149,6 +151,7 @@ public class CounterService extends Service {
 		//when testing service, comment out the foreground service part
 
 		 if(RReminder.isActiveModeNotificationEnabled(context)){
+		 	//comment out foreground calls for testing purposes
 			 stopForeground(true);
 		 }
 

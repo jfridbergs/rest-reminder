@@ -68,12 +68,15 @@ dependencies {
     //Espresso
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
     // fixes issue on linux/mac
     testImplementation 'org.robolectric:robolectric:3.0'
     testImplementation 'org.robolectric:shadows-play-services:3.0'
     testImplementation 'org.robolectric:shadows-support-v4:3.0'
 
-    implementation 'com.google.android.gms:play-services-wearable:15.0.1'
+    implementation 'com.google.android.gms:play-services-wearable:16.0.1'
 
-    androidTestImplementation 'com.android.support:support-annotations:26.1.0'
+    androidTestImplementation 'com.android.support:support-annotations:27.1.1'
+
+    implementation 'com.android.support:support-annotations:27.1.1'
 }

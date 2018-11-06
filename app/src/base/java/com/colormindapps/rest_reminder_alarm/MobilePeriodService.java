@@ -38,7 +38,6 @@ public class MobilePeriodService extends IntentService {
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
 		}
 
-		
 
 
 
@@ -212,14 +211,11 @@ public class MobilePeriodService extends IntentService {
 		}
 
 		//setting up background color for notification
-		Log.d("MOBILE_PERIOD_SERVICE", "is notification colorize enabled: "+RReminder.isNotificationColorizeEnabled(this));
 		if(RReminder.isNotificationColorizeEnabled(this)){
 			builder.setColorized(true);
 			builder.setColor(RReminder.getNotificationBackgroundColorId(this.getApplicationContext(), typeForNotification,extendCount));
-			Log.d("MOBILE_PERIOD_SERVICE", "notification color ON");
 		} else {
 			builder.setColorized(false);
-			Log.d("MOBILE_PERIOD_SERVICE", "notification color OFF");
 		}
 
 

@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements
 	private boolean turnedOff = true;
 	private static boolean isOnVisible;
 	private boolean smallTitle = false;
+	private boolean stopTimerInServiceConnectedAfterPause = false;
 	private String swipeWork, swipeRest, swipeWorkLand, swipeRestLand;
 	private RelativeLayout rootLayout;
 	private Resources resources;
@@ -246,8 +247,10 @@ public class MainActivity extends AppCompatActivity implements
 				} else {
 					if(getVisibleState()){
 						manageUI(true);
-						if (dialogOnScreen) {
+						if (dialogOnScreen || stopTimerInServiceConnectedAfterPause) {
 							manageTimer(false);
+							if (stopTimerInServiceConnectedAfterPause)
+								stopTimerInServiceConnectedAfterPause = false;
 						} else {
 							manageTimer(true);
 						}
@@ -446,6 +449,8 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		//removing the flag for special case of serviceconnected after pause to resume
+		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
 		manageUiOnResume();
 
@@ -495,6 +500,8 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
+		//setting up a flag for special case in manual mode, when onPause, onStop is immediately called after onStart, onResume
+		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
 		}
