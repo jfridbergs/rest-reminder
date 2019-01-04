@@ -9,9 +9,11 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.view.WindowManager;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -27,6 +29,7 @@ public class CounterService extends Service {
 	private int extendCount;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
+	private Context context;
 
 	/* for testing purposes */
 	public boolean created = false;
@@ -67,6 +70,7 @@ public class CounterService extends Service {
 		editor.putBoolean(RReminder.COUNTERSERVICE_STATUS, true);
 		editor.apply();
 		startTime = Calendar.getInstance();
+		context = getApplicationContext();
 		if(intent.getExtras()!=null){
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
@@ -112,6 +116,18 @@ public class CounterService extends Service {
 			//comment out foreground calls for testing purposes
 			startForeground(id,builder.build());
 		}
+
+		new CountDownTimer(5*60*1000, 1000) {
+
+			public void onTick(long millisUntilFinished) {
+			}
+
+			public void onFinish() {
+				Intent playIntent = new Intent(context, PlaySoundService.class);
+				playIntent.putExtra(RReminder.PERIOD_TYPE,type);
+				context.startService(playIntent);
+			}
+		}.start();
 
 		return START_REDELIVER_INTENT;
 	}

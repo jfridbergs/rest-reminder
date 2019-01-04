@@ -7,17 +7,19 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
-public class PreferenceActivity extends FragmentActivity {
+public class PreferenceActivity extends FragmentActivity implements PreferenceActivityLinkedService{
 
 	CounterService mService;
 	boolean mBound = false;
 	CounterService.CounterBinder binder;
 	long periodEndTimeValue;
 	int periodType, extendCount;
+	String debug = "RREMINDER_PREFERENCE_ACTIVITY";
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
@@ -26,12 +28,8 @@ public class PreferenceActivity extends FragmentActivity {
 			binder = (CounterService.CounterBinder) service;
 			mService = binder.getService();
 			mBound = true;
-			Bundle data = getDataFromService();
-			periodType = data.getInt(RReminder.PERIOD_TYPE);
-			extendCount = data.getInt(RReminder.EXTEND_COUNT);
-			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-			getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance(periodType, extendCount,periodEndTimeValue)).commit();
-			unbindFromService();
+			getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance()).commit();
+
 		}
 
 		@Override
@@ -50,12 +48,19 @@ public class PreferenceActivity extends FragmentActivity {
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {
-					getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance(1,0,5000L)).commit();
+					getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance()).commit();
 				}
 	            // Display the fragment as the main content.
 
 	        }
 
+	}
+
+	@Override
+	protected void onStop(){
+		Log.d(debug, "onStop");
+		unbindFromService();
+		super.onStop();
 	}
 
 	public void unbindFromService(){
@@ -64,8 +69,9 @@ public class PreferenceActivity extends FragmentActivity {
 			mBound = false;
 		}
 	}
-
+	@Override
 	public Bundle getDataFromService() {
+		Log.d(debug, "getDataFromService");
 		if (mBound) {
 			return mService.getData();
 		}

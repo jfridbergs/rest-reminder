@@ -2,10 +2,12 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -15,7 +17,7 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.util.Calendar;
 
 
-public class MobilePeriodService extends IntentService {
+public class MobilePeriodService extends JobIntentService {
 	long mCalendar;
 	int type;
 	int extendCount;
@@ -23,19 +25,26 @@ public class MobilePeriodService extends IntentService {
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 
+	String debug = "RREMINDER_MOBILE_PERIOD_SERVICE";
 
+	static final int JOB_ID = 1000;
 
-	public MobilePeriodService() {
-		super("MobilePeriodService");
+	/**
+	 * Convenience method for enqueuing work in to this service.
+	 */
+	static void enqueueWork(Context context, Intent work) {
+		enqueueWork(context, MobilePeriodService.class, JOB_ID, work);
 	}
 	
 	
 	
 	@Override
-	protected void onHandleIntent(Intent intent){
+	protected void onHandleWork(Intent intent){
+		Log.d(debug, "onHandleWork");
 		if(intent.getExtras()!=null){
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
+			Log.d(debug, "period end value: "+ intent.getExtras().getLong(RReminder.PERIOD_END_TIME));
 		}
 
 
@@ -83,7 +92,6 @@ public class MobilePeriodService extends IntentService {
 				
 			}
 		}
-		MobileOnAlarmReceiver.completeWakefulIntent(intent);
 	}
 
 	public void gotoMainActivity(){

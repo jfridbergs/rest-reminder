@@ -275,36 +275,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title));
-        solo.sleep(1000);
+        changePeriodLengthPreference(RReminder.WORK,0,40);
 
-        ArrayList<View> currentViews = solo.getCurrentViews();
-        boolean nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(40);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
 
         solo.sleep(200);
         solo.goBack();
@@ -328,36 +300,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title));
-        solo.sleep(1000);
+        changePeriodLengthPreference(RReminder.WORK,0,30);
 
-        currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(30);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
 
         solo.sleep(200);
         solo.goBack();
@@ -391,13 +335,16 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
     }
 
-    public void testUpdatedRestPeriodAfterPreferenceChange(){
+    public void testMultiplePeriodChangesInOneSession(){
+
+        //testing work period preferences with 2 changes within one preference session
         solo.clickOnView(timerLayout);
         solo.sleep(3000);
-        swipePeriodEnd();
-        solo.sleep(2000);
+
         long periodEndTimeValue = mActivity.periodEndTimeValue;
-        long expectedPeriodEndTime1 = periodEndTimeValue + 35*60*1000;
+        //Since we are changing work period length to 8 mins, we need to add 3 mins to the expected time, because the original work period length is set to 5 mins
+        long expectedPeriodEndTime1 = periodEndTimeValue + 3*60*1000;
+
         Intent intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);
 
@@ -407,9 +354,96 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title));
+        changePeriodLengthPreference(RReminder.WORK,0,40);
+
+        solo.sleep(4000);
+
+        changePeriodLengthPreference(RReminder.WORK,0,8);
+
+        solo.sleep(200);
+        solo.goBack();
+        solo.sleep(1000);
+        solo.goBack();
+        solo.sleep(2000);
+
+        long actualEndTimeValue1 = mActivity.periodEndTimeValue;
+        long difference = Math.abs(actualEndTimeValue1-expectedPeriodEndTime1);
+        Log.d("PREFERENCE_TEST", "difference: "+difference);
+        assertTrue("after changing work length preference 2 times, the service should be updated and match the latest change", difference<1000);
+
+        //testing rest period preferences with 3 changes within 1 preference session
+        //switching to rest period
+        swipePeriodEnd();
+        solo.sleep(2000);
+
+        periodEndTimeValue = mActivity.periodEndTimeValue;
+        //Since we are changing final period length to 3 mins, we need to subtrack 2 mins from the expected time, because the original rest period length is set to 5 mins
+        expectedPeriodEndTime1 = periodEndTimeValue - 2*60*1000;
+
+        intent = new Intent(appContext,PreferenceActivity.class);
+        mActivity.startActivity(intent);
+
+        solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
         solo.sleep(1000);
 
+        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
+        solo.sleep(1000);
+
+        changePeriodLengthPreference(RReminder.REST, 0,10);
+
+        solo.sleep(4000);
+
+        changePeriodLengthPreference(RReminder.REST, 0,15);
+
+        solo.sleep(4000);
+
+        changePeriodLengthPreference(RReminder.REST, 0,3);
+
+        solo.sleep(200);
+        solo.goBack();
+        solo.sleep(1000);
+        solo.goBack();
+        solo.sleep(2000);
+
+        actualEndTimeValue1 = mActivity.periodEndTimeValue;
+        difference = Math.abs(actualEndTimeValue1-expectedPeriodEndTime1);
+        Log.d("PREFERENCE_TEST", "difference: "+difference);
+        assertTrue("after changing rest length preference 3 time, the service should be updated and match the latest change", difference<1000);
+
+    }
+
+    public void changeSingleNumberPickerPreference(int value){
+
+        setValueForOneNumberPicker(value);
+
+        solo.clickOnButton("Set");
+        solo.sleep(200);
+
+    }
+
+    public void setValueForOneNumberPicker(int value){
+        final int newValue = value;
+        ArrayList<View> currentViews = solo.getCurrentViews();
+        for (View v : currentViews) {
+            if (v instanceof NumberPicker) {
+                Log.d(debug, "NumberPicker object detected");
+                numberPicker1 = (NumberPicker)v;
+            }
+        }
+
+
+        mActivity.runOnUiThread(
+                new Runnable() {
+                    public void run() {
+                        numberPicker1.setValue(newValue);
+                    }
+                });
+        solo.sleep(200);
+    }
+
+    public void setValuesForTwoNumberPickers(int first, int second){
+        final int hours = first;
+        final int minutes = second;
         ArrayList<View> currentViews = solo.getCurrentViews();
         boolean nb1Picked = false;
         for (View v : currentViews) {
@@ -430,13 +464,55 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         mActivity.runOnUiThread(
                 new Runnable() {
                     public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(40);
+                        numberPicker1.setValue(hours);
+                        numberPicker2.setValue(minutes);
                     }
                 });
         solo.sleep(200);
+    }
+
+    public void changePeriodLengthPreference(int periodType, int hour, int mins){
+        switch (periodType){
+            case RReminder.WORK : {
+                solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title));
+                break;
+            }
+            case RReminder.REST : {
+                solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title));
+                break;
+            }
+            case 99 : {
+                solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_notification_length_title));
+                break;
+            }
+            default: break;
+        }
+
+        solo.sleep(1000);
+
+        setValuesForTwoNumberPickers(hour, mins);
 
         solo.clickOnButton("Set");
+    }
+
+    public void testUpdatedRestPeriodAfterPreferenceChange(){
+        solo.clickOnView(timerLayout);
+        solo.sleep(3000);
+        swipePeriodEnd();
+        solo.sleep(2000);
+        long periodEndTimeValue = mActivity.periodEndTimeValue;
+        //Since we are changing rest period lenght to 40 mins, we need to add 35 mins to the expected time, because the original rest period length is set to 5 mins
+        long expectedPeriodEndTime1 = periodEndTimeValue + 35*60*1000;
+        Intent intent = new Intent(appContext,PreferenceActivity.class);
+        mActivity.startActivity(intent);
+
+        solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
+        solo.sleep(1000);
+
+        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
+        solo.sleep(1000);
+
+        changePeriodLengthPreference(RReminder.REST, 0,40);
 
         solo.sleep(200);
         solo.goBack();
@@ -460,36 +536,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title));
-        solo.sleep(1000);
-
-        currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(30);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+       changePeriodLengthPreference(RReminder.REST,0,30);
 
         solo.sleep(200);
         solo.goBack();
@@ -518,69 +565,11 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title));
-        solo.sleep(1000);
-
-        ArrayList<View> currentViews = solo.getCurrentViews();
-        boolean nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(1);
-                        numberPicker2.setValue(30);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changePeriodLengthPreference(RReminder.WORK,1,30);
 
         solo.sleep(200);
 
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title));
-        solo.sleep(1000);
-
-       currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(2);
-                        numberPicker2.setValue(45);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changePeriodLengthPreference(RReminder.REST, 2,45);
 
         solo.sleep(200);
         /*
@@ -606,36 +595,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_approx_settings_title));
         solo.sleep(200);
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_notification_length_title));
-        solo.sleep(200);
 
-        currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(15);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changePeriodLengthPreference(99,0,15);
 
         solo.sleep(200);
 
@@ -648,46 +609,13 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title));
         solo.sleep(200);
 
-        currentViews = solo.getCurrentViews();
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                    numberPicker1 = (NumberPicker)v;
-            }
-        }
+        changeSingleNumberPickerPreference(2);
 
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(2);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
 
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_title));
         solo.sleep(200);
 
-        currentViews = solo.getCurrentViews();
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                numberPicker1 = (NumberPicker)v;
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(17);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changeSingleNumberPickerPreference(17);
 
 
 
@@ -779,32 +707,12 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title));
         solo.sleep(1000);
 
-        ArrayList<View> currentViews = solo.getCurrentViews();
-        boolean nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
+        setValuesForTwoNumberPickers(3,47);
+
+        solo.sleep(200);
+
         expectedHour = 3;
         expectedMinute = 47;
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(3);
-                        numberPicker2.setValue(47);
-                    }
-                });
-        solo.sleep(200);
 
         if(RReminder.isPortrait(appContext)){
             pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -819,7 +727,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
         solo.sleep(3000);
       ArrayList<View>  currentRotateViews = solo.getCurrentViews();
-        nb1Picked = false;
+       boolean nb1Picked = false;
         for (View v : currentRotateViews) {
             if (v instanceof NumberPicker) {
                 Log.d(debug, "NumberPicker object detected");
@@ -855,32 +763,11 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title));
         solo.sleep(1000);
 
-        currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
+        setValuesForTwoNumberPickers(2,29);
+        solo.sleep(200);
+
         expectedHour = 2;
         expectedMinute = 29;
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(2);
-                        numberPicker2.setValue(29);
-                    }
-                });
-        solo.sleep(200);
 
         if(RReminder.isPortrait(appContext)){
             pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -938,31 +825,10 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_notification_length_title));
         solo.sleep(1000);
 
-        currentViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker1 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker2 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
+        setValuesForTwoNumberPickers(0,19);
+
         expectedHour = 0;
         expectedMinute = 19;
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(0);
-                        numberPicker2.setValue(19);
-                    }
-                });
         solo.sleep(1000);
         if(RReminder.isPortrait(appContext)){
             pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -1023,22 +889,9 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title));
         solo.sleep(1000);
 
-        currentViews = solo.getCurrentViews();
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                numberPicker1 = (NumberPicker)v;
-            }
-        }
+        setValueForOneNumberPicker(3);
 
         int expectedCount = 3;
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(3);
-                    }
-                });
-        solo.sleep(200);
 
         if(RReminder.isPortrait(appContext)){
             pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -1084,22 +937,10 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_title));
         solo.sleep(1000);
 
-        currentViews = solo.getCurrentViews();
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                numberPicker1 = (NumberPicker)v;
-            }
-        }
+        setValueForOneNumberPicker(57);
+        solo.sleep(200);
 
         int expectedBaseDuration = 57;
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(57);
-                    }
-                });
-        solo.sleep(200);
 
         if(RReminder.isPortrait(appContext)){
             pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -1205,47 +1046,12 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title));
         solo.sleep(1000);
 
-        ArrayList<View> currentViews = solo.getCurrentViews();
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                numberPicker1 = (NumberPicker)v;
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(3);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changeSingleNumberPickerPreference(3);
 
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_title));
         solo.sleep(1000);
 
-        currentViews = solo.getCurrentViews();
-        solo.sleep(200);
-        for (View v : currentViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                numberPicker1 = (NumberPicker)v;
-            }
-        }
-
-
-        mActivity.runOnUiThread(
-                new Runnable() {
-                    public void run() {
-                        numberPicker1.setValue(15);
-                    }
-                });
-        solo.sleep(200);
-
-        solo.clickOnButton("Set");
+        changeSingleNumberPickerPreference(15);
 
 
         solo.goBack();

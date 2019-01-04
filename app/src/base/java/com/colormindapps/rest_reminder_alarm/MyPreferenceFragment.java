@@ -15,6 +15,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -28,19 +29,19 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	Uri originalWorkUri, originalRestUri, originalApproxUri, newWorkUri, newRestUri, newApproxUri;
 	SharedPreferences sharedPreferences;
 	String workPeriodLength, restPeriodLength, approxLength;
-	long periodEndTimeValue;
-	int periodType, extendCount;
 	SharedPreferences.Editor editor;
 	Preference workSoundPreference, restSoundPreference, approxSoundPreference;
 	Context context;
+	private PreferenceActivityLinkedService parentActivity;
 
-	public static MyPreferenceFragment newInstance(int periodType, int extendCount,long periodEndTimeValue){
+	String debug  = "RREMINDER_PREFERENCE_FRAGMENT";
+
+	private void setParentActivity(PreferenceActivityLinkedService activity){
+		parentActivity = activity;
+	}
+
+	public static MyPreferenceFragment newInstance(){
 		MyPreferenceFragment fragment = new MyPreferenceFragment();
-		Bundle args = new Bundle();
-		args.putLong(RReminder.PERIOD_END_TIME, periodEndTimeValue);
-		args.putInt(RReminder.PERIOD_TYPE, periodType);
-		args.putInt(RReminder.EXTEND_COUNT, extendCount);
-		fragment.setArguments(args);
 		return fragment;
 	}
 
@@ -48,10 +49,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 
-		Bundle data = getArguments();
-		periodType = data.getInt(RReminder.PERIOD_TYPE);
-		extendCount = data.getInt(RReminder.EXTEND_COUNT);
-		periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
 		
 		addPreferencesFromResource(R.xml.preferences);
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -207,11 +204,29 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		int periodType = 0;
+		int extendCount = 0;
+		long periodEndTimeValue = 0L;
+		Bundle dataFromCounterSerivce;
     	Preference preference = findPreference(key);
     	int value;
     	String name, outputName;
     	Uri ringtoneUri;
 		String updatedWorkPeriodLength, updatedRestPeriodLength, updatedApproxLength;
+
+		//after every preference change made while Rest reminder is running we are fetching the current period data from CounterService
+		if(RReminderMobile.isCounterServiceRunning(context)){
+			Log.d(debug, "accessing CounterService data from PreferenceFragment");
+			dataFromCounterSerivce = parentActivity.getDataFromService();
+			periodType = dataFromCounterSerivce.getInt(RReminder.PERIOD_TYPE);
+			extendCount = dataFromCounterSerivce.getInt(RReminder.EXTEND_COUNT);
+			periodEndTimeValue = dataFromCounterSerivce.getLong(RReminder.PERIOD_END_TIME);
+		}
+
+
+
+
+
 		//updating preference summary after preferences are changed
         if (key.equals(changeSummaryKey)) {           
             // Set summary to be the user-description for the selected value
@@ -314,6 +329,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 
 					//starting counterservice and setting new alarms
+					Log.d(debug, "new WORK period end value: "+newPeriodEndValue);
 					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
 					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
@@ -333,6 +349,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 					long newPeriodEndValue = periodEndTimeValue + difference;
 
 					//starting counterservice and setting new alarms
+					Log.d(debug, "new REST period end value: "+newPeriodEndValue);
 					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
 					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
@@ -344,6 +361,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				//cancelling the current approx alarm
 				long oldApproxTimeValue = periodEndTimeValue - (CustomTimePreference.getHour(approxLength)*60*1000L+CustomTimePreference.getMinute(approxLength)*1000L);
 				RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue,true,oldApproxTimeValue);
+
+				Log.d(debug, "new APPROX period end value: "+periodEndTimeValue);
 				new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
 				approxLength = sharedPreferences.getString(key,"00:30");
 
@@ -430,6 +449,16 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
+
+	@Override
+	public void onAttach(Context context) {
+		super.onAttach(context);
+		try {
+			setParentActivity((PreferenceActivityLinkedService) getActivity());
+		} catch (ClassCastException e) {
+			throw new ClassCastException(context.toString() + " must implement PreferenceActivityLinkedService");
+		}
+	}
 
 	public long getUpdatedDiffrerence(String oldString, String newString, boolean approx){
 		int difference;
