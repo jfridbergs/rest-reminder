@@ -46,52 +46,32 @@ public class MobilePeriodService extends JobIntentService {
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
 			Log.d(debug, "period end value: "+ intent.getExtras().getLong(RReminder.PERIOD_END_TIME));
 		}
+		//manage period end
+		RReminder.addDismissDialogFlag(this);
+		typeForNotification = type;
+
+		type = RReminder.getNextPeriodType(type);
+		//playSound();
+		mCalendar = RReminder.getNextPeriodEndTime(this, type, Calendar.getInstance().getTimeInMillis(), 1, 0L);
+
+		mgr = NotificationManagerCompat.from(getApplicationContext());
+		mgr.cancel(24);
 
 
 
 
-		
-		if (type==99){
-			//play approximate alarm sound
-			playSound();
-		} else {
-			//manage period end
-			RReminder.addDismissDialogFlag(this);
-
-			
-			typeForNotification = type;
-		
-			type = getNextPeriodType(type);
-			playSound();
-			mCalendar = RReminder.getNextPeriodEndTime(this, type, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-
-			mgr = NotificationManagerCompat.from(getApplicationContext());
-			mgr.cancel(24);
-				
-				
-
-							
-			//PowerManager pm = (PowerManager)
-			//getSystemService(Context.POWER_SERVICE);
-			//boolean isScreenOn = pm.isScreenOn();
-			if(RReminder.isActiveModeNotificationEnabled(this)){
-				mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, mCalendar, true));
-			}
-			if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
-				gotoMainActivity();
-			} else {
-
-
-				new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
-				RReminderMobile.startCounterService(this, type, 0, mCalendar, true);
-
-				launchNotification();
-
-
-
-				
-			}
+		//PowerManager pm = (PowerManager)
+		//getSystemService(Context.POWER_SERVICE);
+		//boolean isScreenOn = pm.isScreenOn();
+		if(RReminder.isActiveModeNotificationEnabled(this)){
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, mCalendar, true));
 		}
+		if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
+			gotoMainActivity();
+		} else {
+			launchNotification();
+		}
+
 	}
 
 	public void gotoMainActivity(){
@@ -103,8 +83,6 @@ public class MobilePeriodService extends JobIntentService {
 
 		//Set the next period end alarms and start service, if any automatical mode is selected
 		if(RReminder.getMode(this) != 1){
-			new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
-			RReminderMobile.startCounterService(this, type, 0, mCalendar, false);
 		}
 
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
@@ -117,19 +95,8 @@ public class MobilePeriodService extends JobIntentService {
 		getApplication().startActivity(actionIntent);
 	}
 
-	public void playSound(){
-		Intent playIntent = new Intent(this, PlaySoundService.class);
-		playIntent.putExtra(RReminder.PERIOD_TYPE,type);
-		this.startService(playIntent);
-	}
 
-	public int getNextPeriodType( int previousType){
-		switch(previousType){
-			case RReminder.WORK:case RReminder.WORK_EXTENDED:  return  RReminder.REST;
-			case RReminder.REST:case RReminder.REST_EXTENDED:  return  RReminder.WORK;
-			default: return RReminder.PERIOD_OFF;
-		}
-	}
+
 
 	public void launchNotification(){
 		//building android wear-only action for extending previously ended period

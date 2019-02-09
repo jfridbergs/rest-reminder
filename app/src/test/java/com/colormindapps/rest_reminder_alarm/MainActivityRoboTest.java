@@ -81,7 +81,7 @@ public class MainActivityRoboTest {
 
        int periodType = 1;
         mCalendar = RReminder.getNextPeriodEndTime(context, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-        new MobilePeriodManager(context).setPeriod(periodType, mCalendar,0, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(periodType, mCalendar,0);
 
         ShadowAlarmManager.ScheduledAlarm nextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         long nextAlarmEndTime = nextPeriodEnd.triggerAtTime;
@@ -89,9 +89,9 @@ public class MainActivityRoboTest {
         Assert.assertNotNull(nextPeriodEnd);
         assertEquals("next alarm should match the value initially set", mCalendar, nextAlarmEndTime);
 
-        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0);
 
-        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime,false,0L);
+        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime);
 
         nextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         Assert.assertNull(nextPeriodEnd);
@@ -105,7 +105,7 @@ public class MainActivityRoboTest {
 
         int periodType = 1;
         mCalendar = RReminder.getNextPeriodEndTime(context, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0);
 
         ShadowAlarmManager.ScheduledAlarm nextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         long nextAlarmEndTime = nextPeriodEnd.triggerAtTime;
@@ -114,8 +114,8 @@ public class MainActivityRoboTest {
         assertEquals("next alarm should match the value initially set", mCalendar, nextAlarmEndTime);
 
         long expectedUpdatedEndTime = RReminder.getNextPeriodEndTime(context,2, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime,false,0L);
-        new MobilePeriodManager(context).setPeriod(periodType, expectedUpdatedEndTime, 0, RReminder.isApproxEnabled(context));
+        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime);
+        new MobilePeriodManager(context).setPeriod(periodType, expectedUpdatedEndTime, 0);
 
         ShadowAlarmManager.ScheduledAlarm updatedNextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         long updatedNextAlarmEndTime = updatedNextPeriodEnd.triggerAtTime;
@@ -131,7 +131,7 @@ public class MainActivityRoboTest {
 
         int periodType = 1;
         mCalendar = RReminder.getNextPeriodEndTime(context, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0);
 
         ShadowAlarmManager.ScheduledAlarm nextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         long nextAlarmEndTime = nextPeriodEnd.triggerAtTime;
@@ -139,15 +139,15 @@ public class MainActivityRoboTest {
         Assert.assertNotNull(nextPeriodEnd);
         assertEquals("next alarm should match the value initially set", mCalendar, nextAlarmEndTime);
 
-        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(periodType, mCalendar, 0);
         System.out.println(Calendar.getInstance().toString());
 
         Thread.sleep(5000L);
         System.out.println(Calendar.getInstance().toString());
         long timeRemaining = mCalendar - Calendar.getInstance().getTimeInMillis();
-        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime,false,0L);
+        RReminderMobile.cancelCounterAlarm(context, periodType, 0,nextAlarmEndTime);
         long functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(),1,timeRemaining);
-        new MobilePeriodManager(context).setPeriod(3, functionCalendar, 1, RReminder.isApproxEnabled(context));
+        new MobilePeriodManager(context).setPeriod(3, functionCalendar, 1);
 
         ShadowAlarmManager.ScheduledAlarm updatedNextPeriodEnd = shadowAlarmManager.getNextScheduledAlarm();
         long updatedNextAlarmEndTime = updatedNextPeriodEnd.triggerAtTime;

@@ -577,7 +577,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	private void setReminderOn() {
 		periodType = 1;
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
 
 		if(bgAnimation!=null){
@@ -616,7 +616,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			unbindService(mConnection);
 			mBound = false;
 		}
-		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime);
 		cancelNotification(periodEndTimeValue,true);
 		if (mBound) {
 			unbindService(mConnection);
@@ -1012,7 +1012,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 
 
-		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 
 		String toastText;
 		if(flag==RReminder.EXTEND_PERIOD_SINGLE_OPTION){
@@ -1029,7 +1029,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
 		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		Intent intent = new Intent(this, CounterService.class);
@@ -1251,7 +1251,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
-		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
@@ -1277,7 +1277,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
 
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
 
 		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
 		cancelNotification(functionCalendar,false);
@@ -1373,7 +1373,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 
-					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
+					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {

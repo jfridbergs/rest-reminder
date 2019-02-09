@@ -32,7 +32,6 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	public boolean redirectScreenOff;
 	int restoredType;
 	int screenOrientation;
-	public boolean playSound;
 	CharSequence titleSequence;
 	Resources resources;
 	Typeface titleFont, descriptionFont, buttonFont;
@@ -78,7 +77,6 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 		if(getIntent().getExtras()!=null){
 			type = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
-			playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
 			mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
 			redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
 		}
@@ -242,7 +240,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 			
-			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount, false);
+			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 
 		}

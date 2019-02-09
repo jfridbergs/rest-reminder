@@ -70,7 +70,6 @@ public class RReminder {
 	public static final String ACTION_WEAR_COMMANDS_START_NEXT= "com.colormindapps.rest_reminder_alarm.ACTION_WEAR_COMMANDS_START_NEXT";
 	public static final String ACTION_VIEW_MAIN_ACTIVITY = "com.colormindapps.rest_reminder_alarm.ACTION_VIEW_MAIN_ACTIVITY";
 	public static final String ACTION_ALARM_PERIOD_END = "com.colormindapps.rest_reminder_alarm.ACTION_ALARM_PERIOD_END";
-	public static final String ACTION_APPROXIMATE_PERIOD_END = "com.colormindapps.rest_reminder_alarm.ACTION_APPROXIMATE_PERIOD_END";
     public static final String PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY = "com.colormindapps.rest_reminder_alarm.ACTION_PERIOD_EXTENDED_FROM_NOTIFICATION_ACT";
 
 	public static final String WEAR_ACTION_START_NEXT_PERIOD = "com.colormindapps.rest_reminder_alarm.ACTION_WEAR_START_NEXT_PERIOD";
@@ -144,9 +143,8 @@ public class RReminder {
 	public static final int WORK_EXTENDED = 3;
 	public static final int REST_EXTENDED = 4;
 	public static final int PERIOD_OFF = 0;
-	public static final int APPROXIMATE = 99;
 
-	@IntDef({WORK, REST, WORK_EXTENDED, REST_EXTENDED, PERIOD_OFF, APPROXIMATE})
+	@IntDef({WORK, REST, WORK_EXTENDED, REST_EXTENDED, PERIOD_OFF})
 	@Retention(RetentionPolicy.SOURCE)
 	public @interface PeriodType {}
     
@@ -216,12 +214,15 @@ public class RReminder {
 		}
 		return result;
 	}
-	
-	public static boolean isApproxEnabled(Context context){
-		String key = context.getString(R.string.pref_enable_approx_notification_key);
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-		return prefs.getBoolean(key, false);
+
+	public static int getNextPeriodType( int previousType){
+		switch(previousType){
+			case RReminder.WORK:case RReminder.WORK_EXTENDED:  return  RReminder.REST;
+			case RReminder.REST:case RReminder.REST_EXTENDED:  return  RReminder.WORK;
+			default: return RReminder.PERIOD_OFF;
+		}
 	}
+
 	
 	public static boolean isEndPeriodEnabled(Context context){
 		String key = context.getString(R.string.pref_end_period_key);
@@ -293,13 +294,10 @@ public class RReminder {
 		
 		switch(type){
 		case WORK: case WORK_EXTENDED:
-			ringtoneString = preference.getString(context.getString(R.string.pref_work_period_start_sound_key),"DEFAULT_SOUND");
-			break;
-		case REST: case REST_EXTENDED:
 			ringtoneString = preference.getString(context.getString(R.string.pref_rest_period_start_sound_key),"DEFAULT_SOUND");
 			break;
-		case APPROXIMATE:
-			ringtoneString = preference.getString(context.getString(R.string.pref_approx_time_sound_key),"DEFAULT_SOUND");
+		case REST: case REST_EXTENDED:
+			ringtoneString = preference.getString(context.getString(R.string.pref_work_period_start_sound_key),"DEFAULT_SOUND");
 			break;
 		default: 
 			ringtoneString = preference.getString(context.getString(R.string.pref_work_period_start_sound_key),"DEFAULT_SOUND");

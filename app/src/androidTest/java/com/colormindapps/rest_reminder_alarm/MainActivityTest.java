@@ -115,7 +115,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         solo.sleep(2000);
         Log.d(debug, "TEARDOWN");
         solo.finishOpenedActivities();
-        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue);
         RReminderMobile.stopCounterService(appContext, mActivity.periodType);
 
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
@@ -194,7 +194,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         assertTrue(solo.searchText(expectedOfflineTitle));
 
         RReminderMobile.stopCounterService(getActivity().getApplicationContext(),1);
-        RReminderMobile.cancelCounterAlarm(getActivity().getApplicationContext(), 1,0,mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.cancelCounterAlarm(getActivity().getApplicationContext(), 1,0,mActivity.periodEndTimeValue);
 
 
 

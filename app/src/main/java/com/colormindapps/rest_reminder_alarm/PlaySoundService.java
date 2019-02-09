@@ -33,8 +33,11 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
+import java.util.Calendar;
 
 
 /**
@@ -51,7 +54,9 @@ public class PlaySoundService extends Service {
     private MediaPlayer mMediaPlayer;
     private int mInitialCallState;
     private int type;
+    private long periodEndTime;
     private AudioManager audioManager;
+    private String debug = "RREMINDER_PLAYSOUNDSERVICE";
 
     // Internal messages
     private static final int KILLER = 1000;
@@ -89,6 +94,7 @@ public class PlaySoundService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.d(debug, "onDestroy");
         stop();
         // Stop listening for incoming calls.
         PlaySoundWakeLock.releaseCpuLock();
@@ -110,9 +116,17 @@ public class PlaySoundService extends Service {
 
 
 
-        type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 
-        play();
+        type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
+        periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+        Log.d(debug, "onStartCommand type: "+type);
+        Log.d(debug, "periodendtime: "+periodEndTime);
+        if((Calendar.getInstance().getTimeInMillis() - periodEndTime) < 3000){
+            play();
+        } else {
+            stopSelf();
+        }
+
         // Record the initial call state here so that the new alarm has the
         // newest state.
         PlaySoundWakeLock.acquireCpuWakeLock(this);
@@ -125,71 +139,73 @@ public class PlaySoundService extends Service {
     private static final float IN_CALL_VOLUME = 0.125f;
 
     private void play() {
+        Log.d(debug, "PLAY type: "+type);
         // stop() checks to see if we are already playing.
         stop();
+        long difference = Calendar.getInstance().getTimeInMillis() - periodEndTime;
+
+        Log.d(debug, "difference: " + difference);
+
+            Log.d(debug, "the alarm sound is played in correct time");
+            if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+
+                // Fall back on the default alarm if the database does not have an
+                // alarm stored.
 
 
-        if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+                // TODO: Reuse mMediaPlayer instead of creating a new one and/or use
+                // RingtoneManager.
+                mMediaPlayer = new MediaPlayer();
+                mMediaPlayer.setOnErrorListener(new OnErrorListener() {
+                    public boolean onError(MediaPlayer mp, int what, int extra) {
+                        mp.stop();
+                        mp.reset();
+                        mp.release();
+                        mMediaPlayer = null;
+                        stopSelf();
+                        return true;
 
-            // Fall back on the default alarm if the database does not have an
-            // alarm stored.
+                    }
+                });
 
+                mMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 
-            // TODO: Reuse mMediaPlayer instead of creating a new one and/or use
-            // RingtoneManager.
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setOnErrorListener(new OnErrorListener() {
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    mp.stop();
-                    mp.reset();
-                    mp.release();
-                    mMediaPlayer = null;
-                    stopSelf();
-                    return true;
-                    
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        // TODO Auto-generated method stub
+                        mp.stop();
+                        mp.reset();
+                        mp.release();
+                        //mp = null;
+                        mPlaying = false;
+                        PlaySoundWakeLock.releaseCpuLock();
+                        stopSelf();
+                    }
+
+                });
+
+                try {
+                    // Check if we are in a call. If we are, use the in-call alarm
+                    // resource at a low volume to not disrupt the call.
+                    mMediaPlayer.setDataSource(this, RReminder.getRingtone(this, type));
+                    startAlarm(mMediaPlayer);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-            });
-            
-            mMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    // TODO Auto-generated method stub
-                	mp.stop();
-                    mp.reset();
-                    mp.release();
-                    //mp = null;
-                    mPlaying = false;
-                    PlaySoundWakeLock.releaseCpuLock();
-                    stopSelf();
-                }
-
-            }); 
-
-            try {
-                // Check if we are in a call. If we are, use the in-call alarm
-                // resource at a low volume to not disrupt the call.
-                	mMediaPlayer.setDataSource(this, RReminder.getRingtone(this, type));
-                startAlarm(mMediaPlayer);
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
-        }
 
-        /* Start the vibrator after everything is ok with the media player */
-		if(audioManager.getRingerMode()!=AudioManager.RINGER_MODE_SILENT && type!=RReminder.APPROXIMATE){
-				if(RReminder.isVibrateEnabled(this, mVibrator)){
-					// Vibrate for 300 milliseconds
-					if(type ==RReminder.APPROXIMATE){
-						mVibrator.vibrate(100);
-					} else {
-						mVibrator.vibrate(300);
-					}
-				}
+            /* Start the vibrator after everything is ok with the media player */
+            if(audioManager.getRingerMode()!=AudioManager.RINGER_MODE_SILENT){
+                if(RReminder.isVibrateEnabled(this, mVibrator)){
+                    // Vibrate for 300 milliseconds
+                    mVibrator.vibrate(300);
 
-		}
+                }
 
-        mPlaying = true;
+            }
+
+            mPlaying = true;
+
     }
 
     // Do the common stuff when starting the alarm.

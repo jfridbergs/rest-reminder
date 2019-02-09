@@ -7,14 +7,12 @@
 	    <attr name="customTimeDialogTopText" format="string"/>
 	   	<attr name="firstMinValue" format="integer"/>
 	    <attr name="firstMaxValue" format="integer"/>
-	    <attr name="usedForApproximate" format="boolean" />
 	</declare-styleable>
 	<declare-styleable name="TimeSupportPickerPreference">
 	    <attr name="customTimeSupportDialogTopText" format="string"/>
 	   	<attr name="firstSupportMinValue" format="integer"/>
 	    <attr name="firstSupportMaxValue" format="integer"/>
 	    <attr name="defaultValueSupportTime" format="string"/>
-	    <attr name="usedForApproximateSupport" format="boolean" />
 	</declare-styleable>
 	<declare-styleable name="NumberPreference">
 	    <attr name="numberDialogTopText" format="string"/>

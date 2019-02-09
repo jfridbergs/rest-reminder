@@ -24,13 +24,13 @@ import java.util.Calendar;
 
 
 public class MyPreferenceFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener{
-	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, approxEnabledKey, enableColorizedNotificationsKey;
-	public String testModeSummary,testWorkLenghtSummary, testRestLenghtSummary, testWorkAudioSummary, testRestAudioSummary, testProximityLengthSummary, testProximityAudioSummary, testExtendCountSummary, testExtendLengthSummary;
-	Uri originalWorkUri, originalRestUri, originalApproxUri, newWorkUri, newRestUri, newApproxUri;
+	public String changeSummaryKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, enableColorizedNotificationsKey;
+	public String testModeSummary,testWorkLenghtSummary, testRestLenghtSummary, testWorkAudioSummary, testRestAudioSummary, testExtendCountSummary, testExtendLengthSummary;
+	Uri originalWorkUri, originalRestUri, newWorkUri, newRestUri;
 	SharedPreferences sharedPreferences;
-	String workPeriodLength, restPeriodLength, approxLength;
+	String workPeriodLength, restPeriodLength;
 	SharedPreferences.Editor editor;
-	Preference workSoundPreference, restSoundPreference, approxSoundPreference;
+	Preference workSoundPreference, restSoundPreference;
 	Context context;
 	private PreferenceActivityLinkedService parentActivity;
 
@@ -58,13 +58,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		changeSummaryKey = getString(R.string.pref_mode_key);
 		workPeriodLengthKey = getString(R.string.pref_work_period_length_key);
 		restPeriodLengthKey = getString(R.string.pref_rest_period_length_key);
-		approxPeriodLengthKey = getString(R.string.pref_approx_notification_length_key);
+
 		extendCountKey = getString(R.string.pref_period_extend_options_key);
 		extendBaseLengthKey = getString(R.string.pref_period_extend_length_key);
 		workPeriodSoundKey = getString(R.string.pref_work_period_start_sound_key);
 		restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
-		approxSoundKey = getString(R.string.pref_approx_time_sound_key);
-		approxEnabledKey = getString(R.string.pref_enable_approx_notification_key);
 		enableColorizedNotificationsKey = getString(R.string.pref_colorize_notifications_key);
 		
         Preference preference = findPreference(changeSummaryKey);
@@ -99,13 +97,8 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	preference.setSummary(output1);
 
 		testRestLenghtSummary = preference.getSummary().toString();
-    	
-    	preference = findPreference(approxPeriodLengthKey);
-    	approxLength = sharedPreferences.getString(approxPeriodLengthKey, getString(R.string.default_approx_length_string));
-    	output = RReminder.getFormatedValue(context, 1, approxLength);
-    	preference.setSummary(output);
 
-		testProximityLengthSummary = preference.getSummary().toString();
+
     	
     	workSoundPreference = findPreference(workPeriodSoundKey);   	
     	String valueString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
@@ -133,19 +126,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	restSoundPreference.setSummary(output);
 
 		testRestAudioSummary = restSoundPreference.getSummary().toString();
-    	
-    	approxSoundPreference = findPreference(approxSoundKey);   	
-    	valueString = sharedPreferences.getString(approxSoundKey, "DEFAULT_RINGTONE_URI");  	
-    	if (valueString.equals("DEFAULT_RINGTONE_URI")){
-    		originalApproxUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    	} else {
-    		originalApproxUri = Uri.parse(valueString);
-    	}
-    	ringtone = RingtoneManager.getRingtone(context, originalApproxUri);
-    	output = ringtone.getTitle(context);
-    	approxSoundPreference.setSummary(output);
 
-		testProximityAudioSummary = approxSoundPreference.getSummary().toString();
     	
     	
     	preference = findPreference(extendCountKey);
@@ -212,7 +193,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
     	int value;
     	String name, outputName;
     	Uri ringtoneUri;
-		String updatedWorkPeriodLength, updatedRestPeriodLength, updatedApproxLength;
+		String updatedWorkPeriodLength, updatedRestPeriodLength;
 
 		//after every preference change made while Rest reminder is running we are fetching the current period data from CounterService
 		if(RReminderMobile.isCounterServiceRunning(context)){
@@ -255,27 +236,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 			} else {
 				testRestLenghtSummary = preference.getSummary().toString();
 			}
-        	int shortestValue = RReminder.getShortestPeriodLength(context);
-        	String approxValue = sharedPreferences.getString(approxPeriodLengthKey, RReminder.DEFAULT_WORK_PERIOD_STRING);
-        	int approxHourValue = CustomTimePreference.getHour(approxValue);
-        	if(shortestValue % 60 <= approxHourValue ){
-        		approxHourValue= (shortestValue % 60)-1;
-        		int approxMinValue = 45;
-        		String time = String.valueOf(approxHourValue) + ":" + String.valueOf(approxMinValue);
-				editor.putString(approxPeriodLengthKey, time);
-				editor.commit();
-        		Preference approxPreference = findPreference(approxPeriodLengthKey);
-				output = RReminder.getFormatedValue(context, RReminder.PREFERENCE_SUMMARY_MMSS, time);
-				approxPreference.setSummary(output);
-        	}
 
-
-
-        } else if (key.equals(approxPeriodLengthKey)){
-        	String valueString = sharedPreferences.getString(key, RReminder.DEFAULT_APPROX_TIME_STRING);
-        	String output = RReminder.getFormatedValue(context, RReminder.PREFERENCE_SUMMARY_MMSS, valueString);
-        	preference.setSummary(output);
-			testProximityLengthSummary = preference.getSummary().toString();
         } else if (key.equals(extendCountKey)){
         	value = sharedPreferences.getInt(key, RReminder.DEFAULT_EXTEND_COUNT);
         	String output;
@@ -317,11 +278,11 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				if(periodType ==1 || periodType ==3){
 					//cancelling the current service and alarms
 					RReminderMobile.stopCounterService(context,periodType);
-					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
+					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue);
 
 					//getting new values for service and alarm
 					updatedWorkPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
-					long difference = getUpdatedDiffrerence(workPeriodLength, updatedWorkPeriodLength,false);
+					long difference = getUpdatedDiffrerence(workPeriodLength, updatedWorkPeriodLength);
 					long newPeriodEndValue = periodEndTimeValue + difference;
 					SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 					Calendar time = Calendar.getInstance();
@@ -330,7 +291,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 					//starting counterservice and setting new alarms
 					Log.d(debug, "new WORK period end value: "+newPeriodEndValue);
-					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
+					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
 					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
 					workPeriodLength = updatedWorkPeriodLength;
@@ -341,35 +302,20 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 				if(periodType ==2 || periodType ==4){
 					//cancelling the current service and alarms
 					RReminderMobile.stopCounterService(context,periodType);
-					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue, false,0L);
+					RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue);
 
 					//getting new values for service and alarm
 					updatedRestPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_REST_PERIOD_STRING);
-					long difference = getUpdatedDiffrerence(restPeriodLength, updatedRestPeriodLength,false);
+					long difference = getUpdatedDiffrerence(restPeriodLength, updatedRestPeriodLength);
 					long newPeriodEndValue = periodEndTimeValue + difference;
 
 					//starting counterservice and setting new alarms
 					Log.d(debug, "new REST period end value: "+newPeriodEndValue);
-					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount, false);
+					new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
 					RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
 					restPeriodLength = updatedRestPeriodLength;
 				}
-			}
-		} else if(key.equals(approxPeriodLengthKey)){
-			if(RReminderMobile.isCounterServiceRunning(context) && RReminder.isApproxEnabled(context)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
-				//cancelling the current approx alarm
-				long oldApproxTimeValue = periodEndTimeValue - (CustomTimePreference.getHour(approxLength)*60*1000L+CustomTimePreference.getMinute(approxLength)*1000L);
-				RReminderMobile.cancelCounterAlarm(context,periodType,extendCount,periodEndTimeValue,true,oldApproxTimeValue);
-
-				Log.d(debug, "new APPROX period end value: "+periodEndTimeValue);
-				new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
-				approxLength = sharedPreferences.getString(key,"00:30");
-
-			}
-		} else if(key.equals(approxEnabledKey)){
-			if(RReminderMobile.isCounterServiceRunning(context) && sharedPreferences.getBoolean(key, false)&& Calendar.getInstance().getTimeInMillis()<RReminder.getApproxTime(context,periodEndTimeValue)){
-				new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, periodEndTimeValue, extendCount, true);
 			}
 		}
     }
@@ -384,8 +330,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		testIntent.putExtra(RReminder.PREFERENCE_REST_LENGTH_SUMMARY, testRestLenghtSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_WORK_AUDIO_SUMMARY, testWorkAudioSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_REST_AUDIO_SUMMARY, testRestAudioSummary);
-		testIntent.putExtra(RReminder.PREFERENCE_PROXIMITY_LENGTH_SUMMARY, testProximityLengthSummary);
-		testIntent.putExtra(RReminder.PREFERENCE_PROXIMITY_AUDIO_SUMMARY, testProximityAudioSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_EXTEND_COUNT_SUMMARY, testExtendCountSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY, testExtendLengthSummary);
 		getActivity().sendBroadcast(testIntent);
@@ -427,20 +371,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	originalRestUri = newRestUri;
     	}
     	
-        //get latest rest sound uri
-    	String approxString = sharedPreferences.getString(approxSoundKey, "DEFAULT_RINGTONE_URI");  	
-    	if (approxString.equals("DEFAULT_RINGTONE_URI")){
-    		newApproxUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    	} else {
-    		newApproxUri = Uri.parse(approxString);
-    	}
-    	if(!newApproxUri.equals(originalApproxUri)){
-        	Ringtone ringtone = RingtoneManager.getRingtone(context, newApproxUri);
-        	String output = ringtone.getTitle(context);
-        	approxSoundPreference.setSummary(output);
-			testProximityAudioSummary = approxSoundPreference.getSummary().toString();
-        	originalApproxUri = newApproxUri;
-    	}
+
     }
 
     @Override
@@ -460,17 +391,14 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		}
 	}
 
-	public long getUpdatedDiffrerence(String oldString, String newString, boolean approx){
+	public long getUpdatedDiffrerence(String oldString, String newString){
 		int difference;
 		int oldHour = CustomTimePreference.getHour(oldString);
 		int oldMinute = CustomTimePreference.getMinute(oldString);
 		int newHour = CustomTimePreference.getHour(newString);
 		int newMinute = CustomTimePreference.getMinute(newString);
-		if (approx){
-			difference = (newHour*60*1000 + newMinute*1000) - (oldHour*60*1000 + oldMinute*1000);
-		} else {
-			difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
-		}
+		difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
+
 		return (long)difference;
 	}
 	

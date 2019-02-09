@@ -13,6 +13,7 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 import android.view.WindowManager;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
@@ -36,6 +37,8 @@ public class CounterService extends Service {
 	public boolean started = false;
 	public int onStartCommandCount = 0;
 	public int onCreateCount = 0;
+
+	private String debug = "RREMINDER_COUNTER_SERVICE";
 
 
 	private final IBinder mBinder = new CounterBinder();
@@ -63,6 +66,7 @@ public class CounterService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
+		Log.d(debug, "onStartCommand");
 		boolean excludeOngoing = false;
 		started = true;
 		onStartCommandCount++;
@@ -117,17 +121,6 @@ public class CounterService extends Service {
 			startForeground(id,builder.build());
 		}
 
-		new CountDownTimer(5*60*1000, 1000) {
-
-			public void onTick(long millisUntilFinished) {
-			}
-
-			public void onFinish() {
-				Intent playIntent = new Intent(context, PlaySoundService.class);
-				playIntent.putExtra(RReminder.PERIOD_TYPE,type);
-				context.startService(playIntent);
-			}
-		}.start();
 
 		return START_REDELIVER_INTENT;
 	}
@@ -161,6 +154,7 @@ public class CounterService extends Service {
 	
 	@Override
 	public void onDestroy(){
+		Log.d(debug, "onDestroy");
 		editor.putBoolean(RReminder.COUNTERSERVICE_STATUS, false);
 		editor.commit();
 		Context context = getBaseContext();

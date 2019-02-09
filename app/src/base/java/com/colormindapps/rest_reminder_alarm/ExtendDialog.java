@@ -159,11 +159,11 @@ public class ExtendDialog extends DialogFragment{
 			case 0:
 				timeRemaining = periodEndTimeValue - Calendar.getInstance().getTimeInMillis();
 				parentActivity.unbindFromFragment();
-				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 				toastText = getString(R.string.toast_period_end_extended);
 				break;
 			case 1:
-				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue);
 				toastText = getString(R.string.notification_toast_period_extended);
 				break;
 			default:
@@ -183,7 +183,7 @@ public class ExtendDialog extends DialogFragment{
 		
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
-		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
 		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){

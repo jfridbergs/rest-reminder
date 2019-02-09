@@ -22,8 +22,7 @@
 	           android:defaultValue="@string/default_work_length_string"
 	           jf:customTimeDialogTopText="@string/pref_work_period_length_dialog_text"
 	           jf:firstMinValue="0"
-		       jf:firstMaxValue="47"
-		       jf:usedForApproximate="false" />
+		       jf:firstMaxValue="47" />
 		      
 	        <RingtonePreference
 	           android:key="@string/pref_work_period_start_sound_key"
@@ -37,8 +36,7 @@
 	           android:defaultValue="@string/default_rest_length_string"
 	           jf:firstMinValue="0"
 		       jf:firstMaxValue="47"
-	           jf:customTimeDialogTopText="@string/pref_rest_period_length_dialog_text"
-	           jf:usedForApproximate="false" />
+	           jf:customTimeDialogTopText="@string/pref_rest_period_length_dialog_text" />
 	      
 	       <RingtonePreference
 	           android:key="@string/pref_rest_period_start_sound_key"
@@ -75,38 +73,6 @@
 	           android:summary="@string/pref_end_period_summary"
 	           android:title="@string/pref_end_period_title"
 	           android:defaultValue="true" />
-	       <SwitchPreference
-	           android:key="@string/pref_enable_approx_notification_key"
-	           android:summary="@string/pref_enable_approx_notification_summary"
-	           android:title="@string/pref_enable_approx_notification_title"
-	           android:defaultValue="false" />
-	       <PreferenceScreen
-	           android:key="@string/pref_screen_approx_settings_key"
-	           android:title="@string/pref_screen_approx_settings_title"
-	           android:persistent="false"
-	           android:dependency="@string/pref_enable_approx_notification_key" >
-	       
-		       <com.colormindapps.rest_reminder_alarm.CustomTimePreference
-		           android:key="@string/pref_approx_notification_length_key"
-		           android:title="@string/pref_approx_notification_length_title"
-		           android:summary="@string/pref_approx_notification_length_summary"
-		           android:dependency="@string/pref_enable_approx_notification_key"
-		           android:defaultValue="@string/default_approx_length_string"
-		           jf:customTimeDialogTopText="@string/pref_approx_notification_length_dialog_text"
-	          	   jf:firstMinValue="0"
-		           jf:firstMaxValue="47"
-		           jf:usedForApproximate="true" />
-		           
-		       <RingtonePreference
-		           android:key="@string/pref_approx_time_sound_key"
-		           android:title="@string/pref_approx_time_sound_title"
-		           android:ringtoneType="notification"
-		           android:dependency="@string/pref_enable_approx_notification_key"
-		           android:defaultValue="content://settings/system/notification_sound" />
-	       </PreferenceScreen>
-	
-	
-	
 	       <SwitchPreference
 	           android:key="@string/pref_enable_extend_key"
 	           android:summary="@string/pref_enable_extend_summary"

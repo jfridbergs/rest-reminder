@@ -24,7 +24,6 @@ public class CustomTimePreference extends DialogPreference {
 	private int restoreHour;
 	private int restoreMinute;
 	private String headerText;
-	private boolean usedForApprox;
 	
 
 	
@@ -51,7 +50,6 @@ public class CustomTimePreference extends DialogPreference {
 	private void init(AttributeSet attrs){
 		TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.CustomTimePreference);
 		firstMaxValue = a.getInteger(R.styleable.CustomTimePreference_firstMaxValue,10);
-		usedForApprox = a.getBoolean(R.styleable.CustomTimePreference_usedForApproximate, false);
 		headerText = a.getString(R.styleable.CustomTimePreference_customTimeDialogTopText);
 		a.recycle();
 	}
@@ -62,23 +60,27 @@ public class CustomTimePreference extends DialogPreference {
 	@Override
 	protected View onCreateDialogView(){
 		int firstMinValue = 0;
-		int secondMinValue = 0;
+		int secondMinValue = 10;
 		int secondMaxValue = 59;
 		View root = super.onCreateDialogView();
-		TextView tv = (TextView)root.findViewById(R.id.custom_time_preference_title);
+		TextView tv = root.findViewById(R.id.custom_time_preference_title);
 		tv.setText(headerText);
-		firstPicker = (NumberPicker)root.findViewById(R.id.time_preference_first_picker);
-		/*	
+		firstPicker = root.findViewById(R.id.time_preference_first_picker);
+		//add a listener for hourpicker to insure, that when hourpicker is set to 0, min value for minutepicker is set to 10 in order to work with doze alarm restrictions
 		firstPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
 		
 			@Override
 			public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
 				// TODO Auto-generated method stub
-				tempHour = newVal;
-				tempMinute = secondPicker.getValue();
+				if(newVal==0){
+					secondPicker.setMinValue(10);
+					secondPicker.setValue(10);
+				} else {
+					secondPicker.setMinValue(0);
+				}
 			}
 		});
-		*/
+
 		secondPicker = (NumberPicker)root.findViewById(R.id.time_preference_second_picker);
 		/*
 		secondPicker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
@@ -91,17 +93,10 @@ public class CustomTimePreference extends DialogPreference {
 			}
 		});
 		*/
-		if(usedForApprox){
-			int smallestValue = RReminder.getShortestPeriodLength(getContext().getApplicationContext());
-			int second = smallestValue % 60;
-			second-=1;
-			firstPicker.setMaxValue(second);
-			secondPicker.setMaxValue(59);
 
-		} else {
-			firstPicker.setMaxValue(firstMaxValue);
-			secondPicker.setMaxValue(secondMaxValue);
-		}
+		firstPicker.setMaxValue(firstMaxValue);
+		secondPicker.setMaxValue(secondMaxValue);
+
 		firstPicker.setMinValue(firstMinValue);
 		secondPicker.setMinValue(secondMinValue);
 		return root;
@@ -110,13 +105,15 @@ public class CustomTimePreference extends DialogPreference {
 	@Override
 	protected void onBindDialogView(View v){
 		super.onBindDialogView(v);
-		if(usedForApprox && lastHour > firstPicker.getMaxValue()){
-			firstPicker.setValue(firstPicker.getMaxValue());
-			secondPicker.setValue(lastMinute);
+
+		firstPicker.setValue(lastHour);
+		if(lastHour==0){
+			secondPicker.setMinValue(10);
 		} else {
-			firstPicker.setValue(lastHour);
-			secondPicker.setValue(lastMinute);
+			secondPicker.setMinValue(0);
 		}
+		secondPicker.setValue(lastMinute);
+
 		
 	}
 	

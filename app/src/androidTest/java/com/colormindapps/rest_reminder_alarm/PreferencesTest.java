@@ -128,7 +128,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
     @Override
     public void tearDown() throws Exception{
-        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue, false,0L);
+        RReminderMobile.cancelCounterAlarm(appContext, mActivity.periodType, mActivity.extendCount, mActivity.periodEndTimeValue);
         RReminderMobile.stopCounterService(appContext, mActivity.periodType);
         mActivity.unregisterReceiver(receiver);
 
