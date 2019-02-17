@@ -22,6 +22,7 @@ public class MobilePeriodService extends JobIntentService {
 	int type;
 	int extendCount;
 	int typeForNotification;
+	long periodEndedTime;
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 
@@ -44,7 +45,8 @@ public class MobilePeriodService extends JobIntentService {
 		if(intent.getExtras()!=null){
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
-			Log.d(debug, "period end value: "+ intent.getExtras().getLong(RReminder.PERIOD_END_TIME));
+			periodEndedTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+			Log.d(debug, "period end value: "+ periodEndedTime);
 		}
 		//manage period end
 		RReminder.addDismissDialogFlag(this);
@@ -52,7 +54,7 @@ public class MobilePeriodService extends JobIntentService {
 
 		type = RReminder.getNextPeriodType(type);
 		//playSound();
-		mCalendar = RReminder.getNextPeriodEndTime(this, type, Calendar.getInstance().getTimeInMillis(), 1, 0L);
+		mCalendar = RReminder.getNextPeriodEndTime(this, type, periodEndedTime, 1, 0L);
 
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 		mgr.cancel(24);
@@ -81,10 +83,10 @@ public class MobilePeriodService extends JobIntentService {
 				context.startService(playIntent);
 				*/
 
-		//Set the next period end alarms and start service, if any automatical mode is selected
+		//Set the next period end alarms and start service, if any automatic mode is selected
 		if(RReminder.getMode(this) != 1){
 		}
-
+		Log.d(debug, "goToActivity, mCalendar value: "+mCalendar);
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
 		actionIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);

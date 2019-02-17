@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -37,9 +38,11 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	Typeface titleFont, descriptionFont, buttonFont;
 	NotificationManagerCompat mgr;
 	String work,rest;
+	String debug = "RREMINDER_NOTIFICATION_ACTIVITY";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.d(debug, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_notification);
 		resources = getResources();
@@ -219,6 +222,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 		super.onResume();
 		setVisibleState(true);
 		if(RReminder.getMode(this)!=1 && Calendar.getInstance().getTimeInMillis()>mCalendar){
+			Log.d(debug, "current time > mCalendar");
 			finish();
 		}
 	}

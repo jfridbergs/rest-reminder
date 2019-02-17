@@ -36,8 +36,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
     TextView swipeArea;
     Context appContext;
     String expectedOfflineTitle, expectedOnlineWorkTitle, expectedOnlineRestTitle, actualModeSummary;
-    String expectedModeSummary, expectedWorkLengthSummary, expectedRestLengthSummary, expectedProximityLengthSummary, expectedWorkAudioSummary, expectedRestAudioSummary, expectedProximityAudioSummary, expectedExtendCountSummary, expectedExtendBaseLengthSummary;
-    String actualWorkLengthSummary, actualRestLengthSummary, actualProximityLenghtSummary, actualWorkAudioSummary, actualRestAudioSummary, actualProximityAudioSummary, actualExtendCountSummary, actualExtendLenghtSummary;
+    String expectedModeSummary, expectedWorkLengthSummary, expectedRestLengthSummary,  expectedWorkAudioSummary, expectedRestAudioSummary, expectedExtendCountSummary, expectedExtendBaseLengthSummary;
+    String actualWorkLengthSummary, actualRestLengthSummary, actualWorkAudioSummary, actualRestAudioSummary, actualExtendCountSummary, actualExtendLenghtSummary;
     String actualOfflineTitle, actualOnlineTitle;
     String workPeriodLengthKey, restPeriodLengthKey, approxPeriodLengthKey, workPeriodSoundKey, restPeriodSoundKey, approxSoundKey, extendCountKey, extendBaseLengthKey;
     Button hintButton, extendButton;
@@ -106,10 +106,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
         workPeriodLengthKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key);
         restPeriodLengthKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key);
-        approxPeriodLengthKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_notification_length_key);
         workPeriodSoundKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_start_sound_key);
         restPeriodSoundKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_start_sound_key);
-        approxSoundKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_time_sound_key);
         extendCountKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key);
         extendBaseLengthKey = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_key);
 
@@ -118,8 +116,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_approx_notification_key), true);
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_end_period_key), true);
-        editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:05");
-        editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:05");
+        editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:20");
+        editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:15");
         editor.putInt(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 1);
         editor.commit();
         receiver = new MyReceiver();
@@ -136,8 +134,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_mode_key), "0");
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_end_period_key), true);
         editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
-        editor.putBoolean(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_approx_notification_key), false);
-        editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), RReminder.DEFAULT_REST_PERIOD_STRING);
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:45");
         editor.putString(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:15");
         editor.putInt(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 3);
@@ -173,7 +169,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         expectedModeSummary = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_mode_summary_automatic);
         expectedWorkLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 0, preferences.getString(workPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_work_length_string)));
         expectedRestLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 0, preferences.getString(restPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_rest_length_string)));
-        expectedProximityLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 1, preferences.getString(approxPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_approx_length_string)));
 
         String temp = preferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
 
@@ -197,17 +192,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         ringtone = RingtoneManager.getRingtone(mActivity.getApplicationContext(), originalRestUri);
         expectedRestAudioSummary = ringtone.getTitle(mActivity.getApplicationContext());
 
-        temp = preferences.getString(approxSoundKey, "DEFAULT_RINGTONE_URI");
-
-        if (temp.equals("DEFAULT_RINGTONE_URI")){
-            originalApproxUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        } else {
-            originalApproxUri = Uri.parse(temp);
-        }
-
-        ringtone = RingtoneManager.getRingtone(mActivity.getApplicationContext(), originalApproxUri);
-        expectedProximityAudioSummary = ringtone.getTitle(mActivity.getApplicationContext());
-
         Integer value = preferences.getInt(extendCountKey, RReminder.DEFAULT_EXTEND_COUNT);
         if(value==1){
             expectedExtendCountSummary=mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_options_single);
@@ -226,10 +210,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         assertEquals("the summary of mode preference should say automatic", expectedModeSummary, actualModeSummary);
         assertEquals("the summary of work lenght preference should match", expectedWorkLengthSummary, actualWorkLengthSummary);
         assertEquals("the summary of rest lenght preference should match", expectedRestLengthSummary, actualRestLengthSummary);
-        assertEquals("the summary of proximity lenght preference should match", expectedProximityLengthSummary, actualProximityLenghtSummary);
         assertEquals("the summary of work period audio preference should match", expectedWorkAudioSummary, actualWorkAudioSummary);
         assertEquals("the summary of rest period audio preference should match", expectedRestAudioSummary, actualRestAudioSummary);
-        assertEquals("the summary of proximity audio preference should match", expectedProximityAudioSummary, actualProximityAudioSummary);
         assertEquals("the summary of extend count prfererence should match", expectedExtendCountSummary, actualExtendCountSummary);
         assertEquals("the summary of extend base length prfererence should match", expectedExtendBaseLengthSummary, actualExtendLenghtSummary);
 
@@ -265,7 +247,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnView(timerLayout);
         solo.sleep(3000);
         long periodEndTimeValue = mActivity.periodEndTimeValue;
-        long expectedPeriodEndTime1 = periodEndTimeValue + 35*60*1000;
+        long expectedPeriodEndTime1 = periodEndTimeValue + 20*60*1000;
         Intent intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);
 
@@ -342,8 +324,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.sleep(3000);
 
         long periodEndTimeValue = mActivity.periodEndTimeValue;
-        //Since we are changing work period length to 8 mins, we need to add 3 mins to the expected time, because the original work period length is set to 5 mins
-        long expectedPeriodEndTime1 = periodEndTimeValue + 3*60*1000;
+        //Since we are changing work period length to 25 mins, we need to add 5 mins to the expected time, because the original work period length is set to 20 mins
+        long expectedPeriodEndTime1 = periodEndTimeValue + 5*60*1000;
 
         Intent intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);
@@ -358,7 +340,7 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
 
         solo.sleep(4000);
 
-        changePeriodLengthPreference(RReminder.WORK,0,8);
+        changePeriodLengthPreference(RReminder.WORK,0,25);
 
         solo.sleep(200);
         solo.goBack();
@@ -377,8 +359,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.sleep(2000);
 
         periodEndTimeValue = mActivity.periodEndTimeValue;
-        //Since we are changing final period length to 3 mins, we need to subtrack 2 mins from the expected time, because the original rest period length is set to 5 mins
-        expectedPeriodEndTime1 = periodEndTimeValue - 2*60*1000;
+        //Since we are changing final period length to 12 mins, we need to subtrack 3 mins from the expected time, because the original rest period length is set to 15 mins
+        expectedPeriodEndTime1 = periodEndTimeValue - 3*60*1000;
 
         intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);
@@ -389,15 +371,15 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title));
         solo.sleep(1000);
 
-        changePeriodLengthPreference(RReminder.REST, 0,10);
+        changePeriodLengthPreference(RReminder.REST, 0,30);
 
         solo.sleep(4000);
 
-        changePeriodLengthPreference(RReminder.REST, 0,15);
+        changePeriodLengthPreference(RReminder.REST, 0,18);
 
         solo.sleep(4000);
 
-        changePeriodLengthPreference(RReminder.REST, 0,3);
+        changePeriodLengthPreference(RReminder.REST, 0,12);
 
         solo.sleep(200);
         solo.goBack();
@@ -501,8 +483,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         swipePeriodEnd();
         solo.sleep(2000);
         long periodEndTimeValue = mActivity.periodEndTimeValue;
-        //Since we are changing rest period lenght to 40 mins, we need to add 35 mins to the expected time, because the original rest period length is set to 5 mins
-        long expectedPeriodEndTime1 = periodEndTimeValue + 35*60*1000;
+        //Since we are changing rest period lenght to 40 mins, we need to add 25 mins to the expected time, because the original rest period length is set to 15 mins
+        long expectedPeriodEndTime1 = periodEndTimeValue + 25*60*1000;
         Intent intent = new Intent(appContext,PreferenceActivity.class);
         mActivity.startActivity(intent);
 
@@ -572,36 +554,10 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         changePeriodLengthPreference(RReminder.REST, 2,45);
 
         solo.sleep(200);
-        /*
-        solo.clickOnText("Work period end sound");
-        solo.sleep(1000);
-
-        solo.clickOnText("Antares");
-
-
-        solo.clickOnButton("OK");
-
-        solo.sleep(200);
-
-        solo.clickOnText("Rest period end duration");
-        solo.sleep(1000);
-
-        solo.clickOnText("Arcturus");
-
-        solo.clickOnButton("OK");
-*/
-        solo.goBack();
-        solo.sleep(1000);
-
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_approx_settings_title));
-        solo.sleep(200);
-
-        changePeriodLengthPreference(99,0,15);
-
-        solo.sleep(200);
 
         solo.goBack();
         solo.sleep(1000);
+
 
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title));
         solo.sleep(200);
@@ -628,7 +584,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         expectedModeSummary = mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_mode_summary_manual);
         expectedWorkLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 0, preferences.getString(workPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_work_length_string)));
         expectedRestLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 0, preferences.getString(restPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_rest_length_string)));
-        expectedProximityLengthSummary = RReminder.getFormatedValue(mActivity.getApplicationContext(), 1, preferences.getString(approxPeriodLengthKey, mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.default_approx_length_string)));
 
         String temp = preferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
 
@@ -652,16 +607,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         ringtone = RingtoneManager.getRingtone(mActivity.getApplicationContext(), originalRestUri);
         expectedRestAudioSummary = ringtone.getTitle(mActivity.getApplicationContext());
 
-        temp = preferences.getString(approxSoundKey, "DEFAULT_RINGTONE_URI");
-
-        if (temp.equals("DEFAULT_RINGTONE_URI")){
-            originalApproxUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        } else {
-            originalApproxUri = Uri.parse(temp);
-        }
-
-        ringtone = RingtoneManager.getRingtone(mActivity.getApplicationContext(), originalApproxUri);
-        expectedProximityAudioSummary = ringtone.getTitle(mActivity.getApplicationContext());
 
         Integer value = preferences.getInt(extendCountKey, RReminder.DEFAULT_EXTEND_COUNT);
         if(value==1){
@@ -681,7 +626,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         assertEquals("after updating reminder mode preference the summary should be updated", expectedModeSummary, actualModeSummary);
         assertEquals("after updating work period lenght preference the summary should be updated", expectedWorkLengthSummary, actualWorkLengthSummary);
         assertEquals("after updating rest period lenght preference the summary should be updated", expectedRestLengthSummary, actualRestLengthSummary);
-        assertEquals("after updating proximity alarm lenght preference the summary should be updated", expectedProximityLengthSummary, actualProximityLenghtSummary);
         //assertEquals("after updating work period ringtone preference the summary should be updated", expectedWorkAudioSummary, actualWorkAudioSummary);
        //assertEquals("after updating rest period ringtone preference the summary should be updated", expectedRestAudioSummary, actualRestAudioSummary);
         assertEquals("after updating extend options count preference the summary should be updated", expectedExtendCountSummary, actualExtendCountSummary);
@@ -819,69 +763,6 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
         solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
 
         solo.goBack();
-
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_approx_settings_title));
-        solo.sleep(1000);
-        solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_approx_notification_length_title));
-        solo.sleep(1000);
-
-        setValuesForTwoNumberPickers(0,19);
-
-        expectedHour = 0;
-        expectedMinute = 19;
-        solo.sleep(1000);
-        if(RReminder.isPortrait(appContext)){
-            pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-
-
-        monitor = instr.addMonitor(PreferenceActivity.class.getName(), null, false);
-
-        pActivity = (PreferenceActivity) instr.waitForMonitor(monitor);
-
-        solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
-        solo.sleep(3000);
-        currentRotateViews = solo.getCurrentViews();
-        nb1Picked = false;
-        for (View v : currentRotateViews) {
-            if (v instanceof NumberPicker) {
-                Log.d(debug, "NumberPicker object detected");
-                if(nb1Picked == false){
-                    numberPicker21 = (NumberPicker)v;
-                    nb1Picked = true;
-                    Log.d(debug, "first numberpicker assigned");
-                } else {
-                    numberPicker22 = (NumberPicker)v;
-                    Log.d(debug, "second numberpicker assigned");
-                }
-            }
-        }
-
-        actualHour = numberPicker21.getValue();
-        actualMinute = numberPicker22.getValue();
-        solo.sleep(1000);
-
-        assertEquals("after rotating the device the proximity preference should keep the previous set hour value", expectedHour, actualHour);
-        assertEquals("after rotating the device the proximity preference should keep the previous set minute value", expectedMinute, actualMinute);
-
-        solo.clickOnButton("Cancel");
-
-        if(RReminder.isPortrait(appContext)){
-            pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else {
-            pActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        }
-
-        monitor = instr.addMonitor(PreferenceActivity.class.getName(), null, false);
-
-        pActivity = (PreferenceActivity) instr.waitForMonitor(monitor);
-
-        solo.assertCurrentActivity("preference activity should be open", PreferenceActivity.class);
-
-        solo.goBack();
-        solo.sleep(1000);
 
         solo.clickOnText(mActivity.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title));
         solo.sleep(1000);
@@ -1127,10 +1008,8 @@ public class PreferencesTest extends ActivityInstrumentationTestCase2<MainActivi
             actualModeSummary = intent.getExtras().getString(RReminder.PREFERENCE_MODE_SUMMARY);
             actualWorkLengthSummary = intent.getExtras().getString(RReminder.PREFERENCE_WORK_LENGTH_SUMMARY);
             actualRestLengthSummary = intent.getExtras().getString(RReminder.PREFERENCE_REST_LENGTH_SUMMARY);
-            actualProximityLenghtSummary = intent.getExtras().getString(RReminder.PREFERENCE_PROXIMITY_LENGTH_SUMMARY);
             actualWorkAudioSummary = intent.getExtras().getString(RReminder.PREFERENCE_WORK_AUDIO_SUMMARY);
             actualRestAudioSummary = intent.getExtras().getString(RReminder.PREFERENCE_REST_AUDIO_SUMMARY);
-            actualProximityAudioSummary = intent.getExtras().getString(RReminder.PREFERENCE_PROXIMITY_AUDIO_SUMMARY);
             actualExtendCountSummary = intent.getExtras().getString(RReminder.PREFERENCE_EXTEND_COUNT_SUMMARY);
             actualExtendLenghtSummary = intent.getExtras().getString(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY);
             Log.d(debug, "mode preference summary: "+ actualModeSummary);

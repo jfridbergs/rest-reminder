@@ -675,7 +675,7 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
         int diff = actualFunctionCount - restoreFunctionCount;
         assertEquals("the restore animation function counter should have been increased", 1, diff);
         instr.waitForIdleSync();
-        solo.clickLongOnView(timerLayout, 1500);
+        solo.clickLongOnView(timerLayout, 2000);
         instr.waitForIdleSync();
         solo.sleep(3000);
         assertFalse("the service is not running", RReminderMobile.isCounterServiceRunning(appContext));
@@ -1207,9 +1207,10 @@ public class MainActivityTest extends ActivityInstrumentationTestCase2<MainActiv
     public void testClicksOnActiveMode(){
         int recentColor = Color.TRANSPARENT;
         int initialColor = Color.TRANSPARENT;
-        solo.sleep(2000);
+
         solo.clickOnView(timerLayout);
         instr.waitForIdleSync();
+        solo.sleep(2000);
         String titleText = title.getText().toString();
         solo.sleep(2000);
         boolean countdownIsRunning = mActivity.countdown.isRunning;

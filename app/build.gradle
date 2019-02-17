@@ -9,7 +9,7 @@ android {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 10
+        versionCode 11
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //android.test.InstrumentationTestRunner for robotium tests
     }
@@ -27,7 +27,7 @@ android {
     productFlavors {
         base {
             applicationId "com.colormindapps.rest_reminder_alarm"
-            versionName "1.0.2-base"
+            versionName "1.1-base"
             minSdkVersion 16
             targetSdkVersion 26
             dimension "default"
@@ -35,7 +35,7 @@ android {
         }
         pro {
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "1.0.2-pro"
+            versionName "1.1-pro"
             minSdkVersion 16
             targetSdkVersion 27
             dimension "default"

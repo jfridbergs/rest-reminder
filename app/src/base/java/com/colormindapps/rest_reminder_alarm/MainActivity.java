@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationManagerCompat;
@@ -59,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity implements OnDialogCloseListener {
 
@@ -266,7 +268,14 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		setUpNotificationChannels();
 
 
-
+		//Setting the period lenght lower than min value for development
+		/*
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+		SharedPreferences.Editor editor   = preferences.edit();
+		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:05");
+		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:07");
+		editor.commit();
+		*/
 
 		if (savedInstanceState != null) {
 			dialogOnScreen = savedInstanceState.getBoolean("dialogOnScreen");
@@ -287,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.d(debug, "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
@@ -398,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		int currentVersionNumber = 0;
 		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
 		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
+		Log.d(debug, "current version number: "+savedVersionNumber);
 		animateInfo = sharedPref.getBoolean(RReminder.ANIMATE_INFO, true);
 		try {
 			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -412,6 +423,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
 				editor.putBoolean(RReminder.EULA_ACCEPTED, false);
 				editor.apply();
+				correctPreferencePeriodLength();
 			}
 
 		}
@@ -420,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onResume() {
+		Log.d(debug, "onResume");
 		super.onResume();
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
@@ -451,6 +464,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.d(debug, "onPause");
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
@@ -509,6 +523,26 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		am = null;
 
 
+	}
+
+	//Function to update stored user preferences to work with new RReminder restriction of periods not shorter than 10 minutes
+	private void correctPreferencePeriodLength(){
+		Log.d(debug, "correctPreferencePeriodLength");
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+		SharedPreferences.Editor editor   = preferences.edit();
+
+		String workPeriod = preferences.getString(RReminder.PREF_WORK_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
+		String restPeriod = preferences.getString(RReminder.PREF_REST_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
+		int workPeriodValue = RReminder.getHourFromString(workPeriod) * 60 + RReminder.getMinuteFromString(workPeriod);
+		int restPeriodValue = RReminder.getHourFromString(restPeriod) * 60 + RReminder.getMinuteFromString(restPeriod);
+		if(workPeriodValue<10){
+			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:10");
+		}
+		if(restPeriodValue<10){
+			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:10");
+		}
+		editor.commit();
+		manageTimer(false);
 	}
 
 	private void setUpNotificationChannels(){
@@ -843,6 +877,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	*/
 
 	public void manageTimer(Boolean isOn) {
+		Log.d(debug, "manageTimer");
 		timerButtonLayout = (RelativeLayout) findViewById(R.id.timer_layout);
 		timerHour1 = (TextView) findViewById(R.id.timer_hour1);
 		timerMinute1 = (TextView) findViewById(R.id.timer_minute1);
@@ -1231,6 +1266,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	public void resumeCounter(boolean positiveDismissal) {
+		Log.d(debug, "resumeCounter");
 		dialogOnScreen = false;
 		if (mBound && !positiveDismissal) {
 			counterTimeValue = mService.getCounterTimeValue();
