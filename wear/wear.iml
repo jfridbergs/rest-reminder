@@ -190,5 +190,7 @@
     <orderEntry type="library" scope="TEST" name="Gradle: net.sf.kxml:kxml2:2.3.0@jar" level="project" />
     <orderEntry type="library" name="Gradle: com.google.android.gms:play-services-tasks:16.0.1@aar" level="project" />
     <orderEntry type="module" module-name="shared" />
+    <orderEntry type="module" module-name="shared" />
+    <orderEntry type="module" module-name="shared" />
   </component>
 </module>

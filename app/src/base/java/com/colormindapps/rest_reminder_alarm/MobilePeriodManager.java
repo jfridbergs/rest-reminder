@@ -18,7 +18,6 @@ public class MobilePeriodManager {
 	private Context mContext;
 	private AlarmManager mAlarmManager;
 
-	String debug = "RREMINDER_MOBILE_PERIOD_MANAGER";
 	public MobilePeriodManager(Context context){
 		mContext = context;
 		mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -26,7 +25,6 @@ public class MobilePeriodManager {
 	@TargetApi(Build.VERSION_CODES.M)
 	public void setPeriod(int type, long when, int extendCount){
 		int buildNumber = Build.VERSION.SDK_INT;
-		Log.d(debug, "Mobile period manager was called");
 
 		PendingIntent pi;
 
@@ -39,17 +37,13 @@ public class MobilePeriodManager {
 		Calendar endTime = Calendar.getInstance();
 		endTime.setTimeInMillis(when);
 
-		Log.d(debug, "period end time: "+format.format(endTime.getTime()));
 		pi = PendingIntent.getBroadcast(mContext, (int)when, i, PendingIntent.FLAG_ONE_SHOT);
 		if(buildNumber>=Build.VERSION_CODES.M){
-			Log.d(debug, "setExactAndAllowWhileIdle");
 			mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
 		} else if(buildNumber >= Build.VERSION_CODES.LOLLIPOP){
-			Log.d(debug, "AlarmClock");
 			AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(when, pi);
 			mAlarmManager.setAlarmClock(alarmClockInfo,pi);
 		} else if(buildNumber >= Build.VERSION_CODES.KITKAT){
-			Log.d(debug, "setExactAndAllowWhileIdle");
 			mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, when, pi);
 		} else {
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, when, pi);

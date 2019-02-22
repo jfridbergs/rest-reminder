@@ -16,7 +16,7 @@
 	       android:title="@string/pref_screen_periods_title"
 	       android:persistent="false" >
 		
-			       <com.colormindapps.rest_reminder_alarm.CustomTimePreference
+			<com.colormindapps.rest_reminder_alarm.CustomTimePreference
 	           android:key="@string/pref_work_period_length_key"
 	           android:title="@string/pref_work_period_length_title"
 	           android:defaultValue="@string/default_work_length_string"

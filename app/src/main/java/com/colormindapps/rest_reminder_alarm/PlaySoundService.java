@@ -56,7 +56,6 @@ public class PlaySoundService extends Service {
     private int type;
     private long periodEndTime;
     private AudioManager audioManager;
-    private String debug = "RREMINDER_PLAYSOUNDSERVICE";
 
     // Internal messages
     private static final int KILLER = 1000;
@@ -94,7 +93,6 @@ public class PlaySoundService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d(debug, "onDestroy");
         stop();
         // Stop listening for incoming calls.
         PlaySoundWakeLock.releaseCpuLock();
@@ -119,8 +117,6 @@ public class PlaySoundService extends Service {
 
         type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
         periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
-        Log.d(debug, "onStartCommand type: "+type);
-        Log.d(debug, "periodendtime: "+periodEndTime);
         if((Calendar.getInstance().getTimeInMillis() - periodEndTime) < 3000){
             play();
         } else {
@@ -139,14 +135,13 @@ public class PlaySoundService extends Service {
     private static final float IN_CALL_VOLUME = 0.125f;
 
     private void play() {
-        Log.d(debug, "PLAY type: "+type);
         // stop() checks to see if we are already playing.
         stop();
         long difference = Calendar.getInstance().getTimeInMillis() - periodEndTime;
 
-        Log.d(debug, "difference: " + difference);
 
-            Log.d(debug, "the alarm sound is played in correct time");
+
+
             if (audioManager.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
 
                 // Fall back on the default alarm if the database does not have an

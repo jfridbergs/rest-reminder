@@ -38,11 +38,9 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	Typeface titleFont, descriptionFont, buttonFont;
 	NotificationManagerCompat mgr;
 	String work,rest;
-	String debug = "RREMINDER_NOTIFICATION_ACTIVITY";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.d(debug, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_notification);
 		resources = getResources();
@@ -222,7 +220,6 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 		super.onResume();
 		setVisibleState(true);
 		if(RReminder.getMode(this)!=1 && Calendar.getInstance().getTimeInMillis()>mCalendar){
-			Log.d(debug, "current time > mCalendar");
 			finish();
 		}
 	}

@@ -64,7 +64,6 @@ import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity implements OnDialogCloseListener {
 
-	String debug = "RREMINDER_MAIN_ACTIVITY";
 
 	public int periodType = 0;
 	public int extendCount;
@@ -296,7 +295,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.d(debug, "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
@@ -408,7 +406,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		int currentVersionNumber = 0;
 		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
 		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
-		Log.d(debug, "current version number: "+savedVersionNumber);
 		animateInfo = sharedPref.getBoolean(RReminder.ANIMATE_INFO, true);
 		try {
 			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -432,7 +429,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onResume() {
-		Log.d(debug, "onResume");
 		super.onResume();
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
@@ -464,7 +460,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.d(debug, "onPause");
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
@@ -527,7 +522,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	//Function to update stored user preferences to work with new RReminder restriction of periods not shorter than 10 minutes
 	private void correctPreferencePeriodLength(){
-		Log.d(debug, "correctPreferencePeriodLength");
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		SharedPreferences.Editor editor   = preferences.edit();
 
@@ -877,7 +871,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	*/
 
 	public void manageTimer(Boolean isOn) {
-		Log.d(debug, "manageTimer");
 		timerButtonLayout = (RelativeLayout) findViewById(R.id.timer_layout);
 		timerHour1 = (TextView) findViewById(R.id.timer_hour1);
 		timerMinute1 = (TextView) findViewById(R.id.timer_minute1);
@@ -1266,7 +1259,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	public void resumeCounter(boolean positiveDismissal) {
-		Log.d(debug, "resumeCounter");
 		dialogOnScreen = false;
 		if (mBound && !positiveDismissal) {
 			counterTimeValue = mService.getCounterTimeValue();

@@ -12,13 +12,11 @@ import java.util.Calendar;
 
 
 public class MobileOnAlarmReceiver extends BroadcastReceiver {
-    String debug = "RREMINDER_ON_ALARM_RECEIVER";
     int type, nextType;
     long mCalendar, currentTime;
 
 	@Override
 	public void onReceive(Context context, Intent intent){
-	    Log.d(debug, "was called");
 	    currentTime = Calendar.getInstance().getTimeInMillis();
 		type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 		Intent playIntent = new Intent(context, PlaySoundService.class);
@@ -30,7 +28,6 @@ public class MobileOnAlarmReceiver extends BroadcastReceiver {
 
 
 		if(RReminder.getMode(context) == 0){
-			Log.d(debug, "Calling for new periods in manager and counterservice");
 			new MobilePeriodManager(context.getApplicationContext()).setPeriod(nextType, mCalendar, 0);
 			RReminderMobile.startCounterService(context.getApplicationContext(), nextType, 0, mCalendar, true);
 		}

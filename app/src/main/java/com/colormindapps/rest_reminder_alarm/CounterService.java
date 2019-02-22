@@ -38,7 +38,6 @@ public class CounterService extends Service {
 	public int onStartCommandCount = 0;
 	public int onCreateCount = 0;
 
-	private String debug = "RREMINDER_COUNTER_SERVICE";
 
 
 	private final IBinder mBinder = new CounterBinder();
@@ -66,7 +65,6 @@ public class CounterService extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
-		Log.d(debug, "onStartCommand");
 		boolean excludeOngoing = false;
 		started = true;
 		onStartCommandCount++;
@@ -154,7 +152,6 @@ public class CounterService extends Service {
 	
 	@Override
 	public void onDestroy(){
-		Log.d(debug, "onDestroy");
 		editor.putBoolean(RReminder.COUNTERSERVICE_STATUS, false);
 		editor.commit();
 		Context context = getBaseContext();

@@ -19,7 +19,6 @@ public class PreferenceActivity extends FragmentActivity implements PreferenceAc
 	CounterService.CounterBinder binder;
 	long periodEndTimeValue;
 	int periodType, extendCount;
-	String debug = "RREMINDER_PREFERENCE_ACTIVITY";
 
 	private ServiceConnection mConnection = new ServiceConnection() {
 		@Override
@@ -58,7 +57,6 @@ public class PreferenceActivity extends FragmentActivity implements PreferenceAc
 
 	@Override
 	protected void onStop(){
-		Log.d(debug, "onStop");
 		unbindFromService();
 		super.onStop();
 	}
@@ -71,7 +69,6 @@ public class PreferenceActivity extends FragmentActivity implements PreferenceAc
 	}
 	@Override
 	public Bundle getDataFromService() {
-		Log.d(debug, "getDataFromService");
 		if (mBound) {
 			return mService.getData();
 		}

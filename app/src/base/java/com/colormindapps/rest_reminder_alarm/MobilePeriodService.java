@@ -26,7 +26,6 @@ public class MobilePeriodService extends JobIntentService {
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 
-	String debug = "RREMINDER_MOBILE_PERIOD_SERVICE";
 
 	static final int JOB_ID = 1000;
 
@@ -41,12 +40,10 @@ public class MobilePeriodService extends JobIntentService {
 	
 	@Override
 	protected void onHandleWork(Intent intent){
-		Log.d(debug, "onHandleWork");
 		if(intent.getExtras()!=null){
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
 			periodEndedTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
-			Log.d(debug, "period end value: "+ periodEndedTime);
 		}
 		//manage period end
 		RReminder.addDismissDialogFlag(this);
@@ -86,7 +83,6 @@ public class MobilePeriodService extends JobIntentService {
 		//Set the next period end alarms and start service, if any automatic mode is selected
 		if(RReminder.getMode(this) != 1){
 		}
-		Log.d(debug, "goToActivity, mCalendar value: "+mCalendar);
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
 		actionIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);

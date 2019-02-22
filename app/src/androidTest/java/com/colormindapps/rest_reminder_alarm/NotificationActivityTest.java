@@ -42,7 +42,6 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
     Calendar customTime;
     Intent intent;
     int extendBaseLength, extendOptionCount;
-    String debug = "NOTIFICATION_ACTIVITY_TEST";
     String expectedOnlineWorkTitle, expectedOnlineRestTitle;
 
     private int versionCode;
@@ -845,14 +844,10 @@ public class NotificationActivityTest extends ActivityInstrumentationTestCase2<N
         }
         //10.3f value represents the approximate char width for 20sp text size
         float descriptionTextWidth = lengthSum * 9.8f * getActivity().getResources().getDisplayMetrics().scaledDensity;
-        Log.d(debug, "screen width: "+ width);
-        Log.d(debug, "description total width: "+descriptionTextWidth);
         int expectedRowCount = (int)descriptionTextWidth / width;
         expectedRowCount+=1;
-        Log.d(debug, "expected amount of rows: "+expectedRowCount);
+
         int expectedDescriptionHeight = (int)(textSize* getActivity().getResources().getDisplayMetrics().scaledDensity * expectedRowCount + 6f);
-        Log.d(debug, "actual height: "+ height);
-        Log.d(debug, "expected height: "+expectedDescriptionHeight);
         solo.sleep(5000);
         return height>= expectedDescriptionHeight;
     }
