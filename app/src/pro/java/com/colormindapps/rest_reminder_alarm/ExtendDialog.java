@@ -92,8 +92,8 @@ public class ExtendDialog extends DialogFragment{
 		int extendBaseLength = RReminder.getExtendBaseLength(context);
 
 
-        TextView dialogTitle = (TextView) view.findViewById(R.id.extend_dialog_title);
-		Button extendOptionButton = (Button) view.findViewById(R.id.extend_dialog_button_extend);
+        TextView dialogTitle = view.findViewById(R.id.extend_dialog_title);
+		Button extendOptionButton = view.findViewById(R.id.extend_dialog_button_extend);
         if(activityType==0){
             dialogTitle.setText(getString(R.string.extend_dialog_title));
             extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
@@ -109,7 +109,7 @@ public class ExtendDialog extends DialogFragment{
 		});
 		
 		if(RReminder.getExtendOptionsCount(context)>1){
-			Button extendOptionButton1 = (Button) view.findViewById(R.id.extend_dialog_button_extend1);
+			Button extendOptionButton1 = view.findViewById(R.id.extend_dialog_button_extend1);
             if(activityType==0){
                 extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*2));
             } else {
@@ -127,7 +127,7 @@ public class ExtendDialog extends DialogFragment{
 		}
 		
 		if(RReminder.getExtendOptionsCount(context)>2){
-			Button extendOptionButton2 = (Button) view.findViewById(R.id.extend_dialog_button_extend2);
+			Button extendOptionButton2 = view.findViewById(R.id.extend_dialog_button_extend2);
             if(activityType==0){
                 extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
             } else {
@@ -160,11 +160,11 @@ public class ExtendDialog extends DialogFragment{
 			case 0:
 				timeRemaining = periodEndTimeValue - Calendar.getInstance().getTimeInMillis();
 				parentActivity.unbindFromFragment();
-				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 				toastText = getString(R.string.toast_period_end_extended);
 				break;
 			case 1:
-				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue);
 				toastText = getString(R.string.notification_toast_period_extended);
 				break;
 			default:
@@ -184,7 +184,7 @@ public class ExtendDialog extends DialogFragment{
 		
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
-		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
 		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount, true);
@@ -215,13 +215,13 @@ public class ExtendDialog extends DialogFragment{
 
 	
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnDialogCloseListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
         }
     }
 

@@ -3,12 +3,14 @@ package com.colormindapps.rest_reminder_alarm.wear;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
@@ -39,7 +41,7 @@ import java.util.Calendar;
  * Created by ingressus on 13/01/2017.
  */
 
-public class WearPeriodService extends Service implements
+public class WearPeriodService extends JobIntentService implements
         GoogleApiClient.ConnectionCallbacks,
         DataApi.DataListener,
         CapabilityApi.CapabilityListener,
@@ -53,6 +55,12 @@ public class WearPeriodService extends Service implements
     private NotificationCompat.Action extendAction, endPeriodAction;
 
     ReminderStatus statusData;
+
+    static final int JOB_ID = 1001;
+
+    static void enqueueWork(Context context, Intent work) {
+        enqueueWork(context, WearPeriodService.class, JOB_ID, work);
+    }
 
     @Override
     public IBinder onBind(Intent intent){
@@ -68,11 +76,10 @@ public class WearPeriodService extends Service implements
 
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    protected void onHandleWork(Intent intent) {
 
         periodIntent = intent;
 
-        return START_REDELIVER_INTENT;
     }
 
     public void doServiceWork(){
@@ -112,9 +119,6 @@ public class WearPeriodService extends Service implements
         }
 
 
-
-        WearOnAlarmReceiver.completeWakefulIntent(periodIntent);
-        stopSelf();
     }
 
     public void launchNotification(int type, int extendCount, long nextPeriodEndTime, int typeOFF){

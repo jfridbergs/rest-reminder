@@ -129,7 +129,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		testRestAudioSummary = restSoundPreference.getSummary().toString();
 
 
-
     	preference = findPreference(extendCountKey);
     	value = sharedPreferences.getInt(extendCountKey, RReminder.DEFAULT_EXTEND_COUNT);
     	if(value==1){
@@ -253,7 +252,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
         	preference.setSummary(output);
 			testExtendCountSummary = preference.getSummary().toString();
         } else if (key.equals(extendBaseLengthKey)) {
-        	value = sharedPreferences.getInt(key, RReminder.DEFAULT_EXTEND_COUNT);
+        	value = sharedPreferences.getInt(key, RReminder.DEFAULT_EXTEND_BASE_LENGTH);
         	String output;
         	if(value==1){
         		output=getString(R.string.pref_minute_single);

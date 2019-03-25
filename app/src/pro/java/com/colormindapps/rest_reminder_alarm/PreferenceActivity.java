@@ -34,6 +34,7 @@ import com.google.android.gms.wearable.Wearable;
 
 
 public class PreferenceActivity extends FragmentActivity implements
+		PreferenceActivityLinkedService,
 		DataApi.DataListener,
 		OnPreferencesOpenListener,
 		MessageApi.MessageListener,
@@ -73,8 +74,7 @@ public class PreferenceActivity extends FragmentActivity implements
 			extendCount = data.getInt(RReminder.EXTEND_COUNT);
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
 			long timeRemaining = mService.getCounterTimeValue();
-			getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance(periodType, extendCount,periodEndTimeValue)).commit();
-			unbindFromService();
+			getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance()).commit();
 		}
 
 		@Override
@@ -93,7 +93,7 @@ public class PreferenceActivity extends FragmentActivity implements
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {
-					getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance(1,0,5000L)).commit();
+					getFragmentManager().beginTransaction().replace(android.R.id.content, MyPreferenceFragment.newInstance()).commit();
 				}
 	            // Display the fragment as the main content.
 
@@ -126,7 +126,7 @@ public class PreferenceActivity extends FragmentActivity implements
 
 			mGoogleApiClient.disconnect();
 		}
-
+        unbindFromService();
 		super.onStop();
 	}
 
@@ -137,6 +137,7 @@ public class PreferenceActivity extends FragmentActivity implements
 		}
 	}
 
+    @Override
 	public Bundle getDataFromService() {
 		if (mBound) {
 			return mService.getData();

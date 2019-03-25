@@ -92,7 +92,7 @@ public class ExtendDialog extends DialogFragment{
 
 
         TextView dialogTitle = view.findViewById(R.id.extend_dialog_title);
-		Button extendOptionButton =  view.findViewById(R.id.extend_dialog_button_extend);
+		Button extendOptionButton = view.findViewById(R.id.extend_dialog_button_extend);
         if(activityType==0){
             dialogTitle.setText(getString(R.string.extend_dialog_title));
             extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));

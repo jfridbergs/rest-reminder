@@ -1,26 +1,37 @@
 package com.colormindapps.rest_reminder_alarm.shared;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.content.WakefulBroadcastReceiver;
+
+import java.util.Calendar;
 
 
-public abstract class OnAlarmReceiver extends WakefulBroadcastReceiver {
+public abstract class OnAlarmReceiver extends BroadcastReceiver {
 	private String debug = "ON_ALARM_RECEIVER";
+	private long currentTime, mCalendar;
+	private int nextType;
 
-	public abstract Intent getAlarmServiceIntent(Context context);
+	public abstract void enqueueWork(Context context, Intent intent);
+	public abstract void playSound(Context context, int type, long currentTime);
+	public abstract void startNextPeriod(Context context, int type, long calendar);
 
 	@Override
 	public void onReceive(Context context, Intent intent){
+		currentTime = Calendar.getInstance().getTimeInMillis();
 		int type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
-		int extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
-		long periodEndTimeValue = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
-		Intent i = getAlarmServiceIntent(context);
-		i.putExtra(RReminder.PERIOD_TYPE, type);
-		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
-		i.putExtra(RReminder. PERIOD_END_TIME, periodEndTimeValue);
-		startWakefulService(context,i);
+		playSound(context, type, currentTime);
+
+		nextType = RReminder.getNextPeriodType(type);
+		mCalendar = RReminder.getNextPeriodEndTime(context.getApplicationContext(), nextType, currentTime, 1, 0L);
+
+		if(RReminder.getMode(context.getApplicationContext()) == 0){
+			startNextPeriod(context.getApplicationContext(), nextType, mCalendar);
+		}
+
+		enqueueWork(context,intent);
 
 	}
+
 
 }

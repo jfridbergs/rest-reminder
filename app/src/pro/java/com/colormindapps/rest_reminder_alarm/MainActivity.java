@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements
 		GoogleApiClient.ConnectionCallbacks {
 
 
-	public int periodType = RReminder.PERIOD_OFF;
+	public int periodType = 0;
 	public int extendCount;
 	private int requiredSwipeDistance;
 	private boolean turnOffIntent = false;
@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements
 			//checking for special case where the reminder was turned off from notification bar after the the app was removed from active task list
 			Log.d(debug, "onServiceConnected");
 			if(getIntent().hasExtra(RReminder.TURN_OFF)){
-				if(getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
+				if(getIntent().getAction()!=null && getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && getIntent().getExtras()!=null &&periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
 					turnOffFirstIntent = true;
 				}
 
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements
 					turnOffIntent = false;
 				//If the activity was opened while the countdown was already finished(manual mode), jump to NotificationActivity
 				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
-					startNotificationActivity(periodType, extendCount, periodEndTimeValue, false);
+					startNotificationActivity(periodType, extendCount, periodEndTimeValue);
 				} else {
 					if(getVisibleState()){
 						manageUI(true);
@@ -272,13 +272,13 @@ public class MainActivity extends AppCompatActivity implements
 	private GoogleApiClient client;
 
 
-	public void startNotificationActivity(@RReminder.PeriodType int type, int extendCount, long periodEndTimeValue, boolean redirectScreenOff) {
+	public void startNotificationActivity(@RReminder.PeriodType int type, int extendCount, long periodEndTimeValue) {
 		Intent intent = new Intent(MainActivity.this, NotificationActivity.class);
 		intent.putExtra(RReminder.PERIOD_TYPE, type);
 		intent.putExtra(RReminder.PERIOD_END_TIME, periodEndTimeValue);
 		intent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		intent.putExtra(RReminder.PLAY_SOUND, false);
-		intent.putExtra(RReminder.REDIRECT_SCREEN_OFF, redirectScreenOff);
+		intent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		intent.setAction(RReminder.ACTION_VIEW_NOTIFICATION_ACTIVITY);
 		startActivity(intent);
@@ -307,6 +307,17 @@ public class MainActivity extends AppCompatActivity implements
 		swipeWorkLand = getString(R.string.swipe_area_text_land_work);
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
+
+		setUpNotificationChannels();
+
+		//Setting the period lenght lower than min value for development
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+		SharedPreferences.Editor editor   = preferences.edit();
+		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:03");
+		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:02");
+		editor.commit();
+
 
 		if (savedInstanceState != null) {
 			dialogOnScreen = savedInstanceState.getBoolean("dialogOnScreen");
@@ -444,6 +455,31 @@ public class MainActivity extends AppCompatActivity implements
 
 		manageUiOnStart();
 
+		//showing an EULA dialog after each update
+
+		SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
+		int currentVersionNumber = 0;
+		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
+		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
+		animateInfo = sharedPref.getBoolean(RReminder.ANIMATE_INFO, true);
+		try {
+			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+			currentVersionNumber = pi.versionCode;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if (!eulaAccepted || currentVersionNumber > savedVersionNumber) {
+			if(!dialogOnScreen){
+				showIntroductionDialog();
+				Editor editor = sharedPref.edit();
+				editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
+				editor.putBoolean(RReminder.EULA_ACCEPTED, false);
+				editor.apply();
+				correctPreferencePeriodLength();
+			}
+
+		}
+
 	}
 
 	@Override
@@ -460,25 +496,7 @@ public class MainActivity extends AppCompatActivity implements
 			RReminder.removeDismissDialogFlag(MainActivity.this);
 		}
 
-		SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
-		int currentVersionNumber = 0;
-		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
-		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
-		animateInfo = sharedPref.getBoolean(RReminder.ANIMATE_INFO, true);
-		try {
-			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-			currentVersionNumber = pi.versionCode;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
-		if (!eulaAccepted || currentVersionNumber > savedVersionNumber) {
-			showIntroductionDialog();
-			Editor editor = sharedPref.edit();
-			editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
-			editor.putBoolean(RReminder.EULA_ACCEPTED, false);
-			editor.apply();
-		}
 
 		Calendar current = Calendar.getInstance();
 		current.add(Calendar.SECOND, 30);
@@ -562,6 +580,25 @@ public class MainActivity extends AppCompatActivity implements
 		resources = null;
 		am = null;
 
+	}
+
+	//Function to update stored user preferences to work with new RReminder restriction of periods not shorter than 10 minutes
+	private void correctPreferencePeriodLength(){
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
+		SharedPreferences.Editor editor   = preferences.edit();
+
+		String workPeriod = preferences.getString(RReminder.PREF_WORK_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
+		String restPeriod = preferences.getString(RReminder.PREF_REST_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
+		int workPeriodValue = RReminder.getHourFromString(workPeriod) * 60 + RReminder.getMinuteFromString(workPeriod);
+		int restPeriodValue = RReminder.getHourFromString(restPeriod) * 60 + RReminder.getMinuteFromString(restPeriod);
+		if(workPeriodValue<10){
+			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:10");
+		}
+		if(restPeriodValue<10){
+			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:10");
+		}
+		editor.commit();
+		manageTimer(false);
 	}
 
 	private void setUpNotificationChannels(){
@@ -687,7 +724,7 @@ public class MainActivity extends AppCompatActivity implements
 		Log.d(debug, "setReminderOn");
 		periodType = 1;
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,mCalendar,0, true, wearOn);
@@ -731,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements
 			mBound = false;
 		}
 		Log.d(debug, "SET_REMINDER_OFF period values: type: "+ periodType + ", endtime: "+ periodEndTime);
-		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime);
 		cancelNotification(periodEndTimeValue,true);
 		if (mBound) {
 			unbindService(mConnection);
@@ -842,11 +879,11 @@ public class MainActivity extends AppCompatActivity implements
 
 			//call to cancel already running period countdown on mobile in order to set up new period with values from wear device
 			if(periodType!=0){
-				RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+				RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 			}
 
 
-			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount, false);
+			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount);
 			RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
 
 			Intent intent = new Intent(this, CounterService.class);
@@ -1294,7 +1331,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 
 
-		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 
 		String toastText;
 		if(flag==RReminder.EXTEND_PERIOD_SINGLE_OPTION){
@@ -1311,7 +1348,7 @@ public class MainActivity extends AppCompatActivity implements
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
 		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
@@ -1535,7 +1572,7 @@ public class MainActivity extends AppCompatActivity implements
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
-		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue, false,0L);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTimeValue);
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
@@ -1561,7 +1598,7 @@ public class MainActivity extends AppCompatActivity implements
 			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
 
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount, false);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType, functionCalendar,extendCount, true, wearOn);
 
 		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
@@ -1586,7 +1623,7 @@ public class MainActivity extends AppCompatActivity implements
 		if(eulaAccepted){
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
-			editor.putBoolean(RReminder.EULA_ACCEPTED, eulaAccepted);
+			editor.putBoolean(RReminder.EULA_ACCEPTED, true);
 			editor.apply();
 		}
 
@@ -1625,7 +1662,7 @@ public class MainActivity extends AppCompatActivity implements
 	    }
 
 		*/
-		if (data != null) {
+		if (data != null && intentAction!=null) {
 			Log.d(debug,"intent has data");
 			switch(intentAction) {
 				//intent after turning off countdown from notification activity
@@ -1662,7 +1699,7 @@ public class MainActivity extends AppCompatActivity implements
 					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 
-					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount,false);
+					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {
@@ -2159,8 +2196,8 @@ public class MainActivity extends AppCompatActivity implements
 			float timeFraction = dX / fullSwipeLength;
 			float multiplierFloat = timeFraction * 100;
 			int multiplier = (int) multiplierFloat;
-			if (multiplier < 0)
-				multiplier = 0;
+			if (multiplier < 1)
+				multiplier = 1;
 			if (multiplier > 99) {
 				multiplier = 99;
 			}

@@ -727,7 +727,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 							description.setText(getString(R.string.description_extended_one_time));
 					} else {
 							description.setText(String.format(getString(R.string.description_extended),extendCount));
-
 					}
 					break;
 				case 4:

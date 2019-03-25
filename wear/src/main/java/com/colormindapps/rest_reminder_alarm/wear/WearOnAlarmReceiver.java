@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.OnAlarmReceiver;
+import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
 public class WearOnAlarmReceiver extends OnAlarmReceiver {
@@ -15,9 +16,17 @@ public class WearOnAlarmReceiver extends OnAlarmReceiver {
 	}
 
 	@Override
-	public Intent getAlarmServiceIntent(Context context){
-		Log.d(debug, "setting intent destination");
-		return new Intent(context,WearPeriodService.class);
+	public void enqueueWork(Context context, Intent intent){
+		WearPeriodService.enqueueWork(context, intent);
+	}
+
+	@Override
+	public void playSound(Context context, int type, long currentTime){
+	}
+
+	@Override
+	public void startNextPeriod(Context context, int nextType, long calendar){
+		new WearPeriodManager(context.getApplicationContext()).setPeriod(nextType, calendar, 0);
 	}
 
 }

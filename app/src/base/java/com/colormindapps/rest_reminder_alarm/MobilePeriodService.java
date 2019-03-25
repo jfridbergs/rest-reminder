@@ -109,7 +109,7 @@ public class MobilePeriodService extends JobIntentService {
 				startNextPeriod.setAction(RReminder.ACTION_MANUAL_START_NEXT_PERIOD);
 				startNextPeriod.putExtra(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE, type);
 				PendingIntent pIntentStartNextPeriod = PendingIntent.getActivity(this, 0, startNextPeriod, PendingIntent.FLAG_ONE_SHOT);
-				builder.addAction(android.R.drawable.stat_notify_sync , getString(R.string.notify_turn_off), pIntentStartNextPeriod);
+				builder.addAction(android.R.drawable.stat_notify_sync , getString(R.string.start_next_period), pIntentStartNextPeriod);
 			}
 			Intent turnOffIntent = new Intent (this, MainActivity.class);
 			turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
@@ -190,7 +190,6 @@ public class MobilePeriodService extends JobIntentService {
 		} else {
 			builder.setColorized(false);
 		}
-
 
 		builder.setContentIntent(pi);
 		builder.setAutoCancel(true);

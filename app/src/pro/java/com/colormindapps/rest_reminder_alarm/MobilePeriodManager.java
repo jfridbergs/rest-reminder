@@ -10,6 +10,9 @@ import android.os.Build;
 import com.colormindapps.rest_reminder_alarm.shared.PeriodManager;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 
 public class MobilePeriodManager extends PeriodManager {
 	int buildNumber;
@@ -20,39 +23,31 @@ public class MobilePeriodManager extends PeriodManager {
 		mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 	}
 
-	@TargetApi(Build.VERSION_CODES.LOLLIPOP)
-	public void setPeriod(int type, long when, int extendCount, boolean approxOnly){
+	@TargetApi(Build.VERSION_CODES.M)
+	public void setPeriod(int type, long when, int extendCount){
 		buildNumber = Build.VERSION.SDK_INT;
 
-		PendingIntent pi,pa;
+		PendingIntent pi;
 
-		if (RReminder.isApproxEnabled(mContext)){
-			long approxCalendarInMillis = RReminder.getApproxTime(mContext, when);
-			Intent iApprox = new Intent(mContext, MobileOnAlarmReceiver.class);
-			pa = super.createPendingIntent(mContext,iApprox,RReminder.APPROXIMATE,when,0);
+		Intent i = new Intent(mContext, MobileOnAlarmReceiver.class);
+		i.putExtra(RReminder.PERIOD_TYPE, type);
+		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
+		i.putExtra(RReminder.PERIOD_END_TIME, when);
+		i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
+		SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
+		Calendar endTime = Calendar.getInstance();
+		endTime.setTimeInMillis(when);
 
-			if(buildNumber >= Build.VERSION_CODES.LOLLIPOP){
-				AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(approxCalendarInMillis, pa);
-				mAlarmManager.setAlarmClock(alarmClockInfo,pa);
-			} else if(buildNumber >= Build.VERSION_CODES.KITKAT){
-				mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, approxCalendarInMillis, pa);
-			} else {
-				mAlarmManager.set(AlarmManager.RTC_WAKEUP, approxCalendarInMillis, pa);
-			}
-		}
-
-		if(!approxOnly){
-			Intent i = new Intent(mContext, MobileOnAlarmReceiver.class);
-			pi = super.createPendingIntent(mContext,i,type,when,extendCount);
-
-			if(buildNumber >= Build.VERSION_CODES.LOLLIPOP){
-				AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(when, pi);
-				mAlarmManager.setAlarmClock(alarmClockInfo,pi);
-			} else if(buildNumber >= Build.VERSION_CODES.KITKAT){
-				mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, when, pi);
-			} else {
-				mAlarmManager.set(AlarmManager.RTC_WAKEUP, when, pi);
-			}
+		pi = PendingIntent.getBroadcast(mContext, (int)when, i, PendingIntent.FLAG_ONE_SHOT);
+		if(buildNumber>=Build.VERSION_CODES.M){
+			mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
+		} else if(buildNumber >= Build.VERSION_CODES.LOLLIPOP){
+			AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(when, pi);
+			mAlarmManager.setAlarmClock(alarmClockInfo,pi);
+		} else if(buildNumber >= Build.VERSION_CODES.KITKAT){
+			mAlarmManager.setExact(AlarmManager.RTC_WAKEUP, when, pi);
+		} else {
+			mAlarmManager.set(AlarmManager.RTC_WAKEUP, when, pi);
 		}
 
 

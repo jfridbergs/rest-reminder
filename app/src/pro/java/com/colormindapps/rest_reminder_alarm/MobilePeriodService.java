@@ -2,6 +2,7 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -11,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Vibrator;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -35,7 +37,7 @@ import com.google.android.gms.wearable.Wearable;
 import java.util.Calendar;
 
 
-public class MobilePeriodService extends Service implements
+public class MobilePeriodService extends JobIntentService implements
 		GoogleApiClient.ConnectionCallbacks,
 		DataApi.DataListener,
 		CapabilityApi.CapabilityListener,
@@ -45,11 +47,21 @@ public class MobilePeriodService extends Service implements
 	int type;
 	int extendCount;
 	int typeForNotification;
+	long periodEndedTime;
 	boolean noReminderStatus = false;
 	Intent periodIntent;
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 	ReminderStatus statusData;
+
+	static final int JOB_ID = 1000;
+
+	/**
+	 * Convenience method for enqueuing work in to this service.
+	 */
+	static void enqueueWork(Context context, Intent work) {
+		enqueueWork(context, MobilePeriodService.class, JOB_ID, work);
+	}
 
 	String debug  = "MOBILE_PERIOD_SERVICE";
 
@@ -57,32 +69,17 @@ public class MobilePeriodService extends Service implements
 	private Node connectedNode;
 
 
-	@Override
-	public IBinder onBind(Intent intent){
-		return mBinder;
-	}
-
-	private final IBinder mBinder = new CounterBinder();
-	public class CounterBinder extends Binder {
-		MobilePeriodService getService(){
-			return MobilePeriodService.this;
-		}
-	}
-
 
 	@Override
 	public void onCreate() {
+		Log.d(debug, "onCreate");
 		super.onCreate();
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
-				.addApi(Wearable.API)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.build();
-		mGoogleApiClient.connect();
+
 	}
 
 	@Override
 	public void onDestroy() {
+		Log.d(debug, "onDestroy");
 		if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
 			Wearable.DataApi.removeListener(mGoogleApiClient, this);
 			Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
@@ -93,11 +90,15 @@ public class MobilePeriodService extends Service implements
 	}
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-
+	protected void onHandleWork(Intent intent) {
+		Log.d(debug, "onHandleWork");
+		mGoogleApiClient = new GoogleApiClient.Builder(this)
+				.addApi(Wearable.API)
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this)
+				.build();
+		mGoogleApiClient.connect();
 		periodIntent = intent;
-
-		return START_REDELIVER_INTENT;
 	}
 
 	@Override
@@ -202,23 +203,23 @@ public class MobilePeriodService extends Service implements
 
 	}
 
+
 	public void doServiceWork(){
-		type = periodIntent.getExtras().getInt(RReminder.PERIOD_TYPE);
-		extendCount = periodIntent.getExtras().getInt(RReminder.EXTEND_COUNT);
+		if(periodIntent.getExtras()!=null){
+			type = periodIntent.getExtras().getInt(RReminder.PERIOD_TYPE);
+			extendCount = periodIntent.getExtras().getInt(RReminder.EXTEND_COUNT);
+			periodEndedTime = periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+		}
+
 		Log.d(debug, "periodEndTimeValue: "+ periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME));
 
-		if (type==RReminder.APPROXIMATE){
-			//play approximate alarm sound
-			playSound();
-		} else {
 			//manage period end
 			RReminder.addDismissDialogFlag(this);
 
 
 			typeForNotification = type;
 
-			type = getNextPeriodType(type);
-			playSound();
+			type = RReminder.getNextPeriodType(type);
 			mCalendar = RReminder.getNextPeriodEndTime(this, type, Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 			mgr = NotificationManagerCompat.from(getApplicationContext());
@@ -238,12 +239,6 @@ public class MobilePeriodService extends Service implements
 				gotoMainActivity();
 
 			} else {
-
-
-				new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
-				RReminderMobile.startCounterService(this, type, 0, mCalendar, true);
-
-
 				launchNotification();
 			}
 
@@ -255,10 +250,6 @@ public class MobilePeriodService extends Service implements
 
 			}
 
-
-		}
-		MobileOnAlarmReceiver.completeWakefulIntent(periodIntent);
-		stopSelf();
 	}
 
 
@@ -271,9 +262,6 @@ public class MobilePeriodService extends Service implements
 
 		//Set the next period end alarms and start service, if any automatical mode is selected
 		if(RReminder.getMode(this) != 1){
-			Log.d(debug, "PERIOD_SERVICE new period values: type: "+ type+ ", endtime: "+mCalendar);
-			new MobilePeriodManager(getApplicationContext()).setPeriod(type, mCalendar, 0, false);
-			RReminderMobile.startCounterService(this, type, 0, mCalendar, false);
 		}
 
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
@@ -286,19 +274,6 @@ public class MobilePeriodService extends Service implements
 		getApplication().startActivity(actionIntent);
 	}
 
-	public void playSound(){
-		Intent playIntent = new Intent(this, PlaySoundService.class);
-		playIntent.putExtra(RReminder.PERIOD_TYPE,type);
-		this.startService(playIntent);
-	}
-
-	public int getNextPeriodType( int previousType){
-		switch(previousType){
-			case RReminder.WORK:case RReminder.WORK_EXTENDED:  return  RReminder.REST;
-			case RReminder.REST:case RReminder.REST_EXTENDED:  return  RReminder.WORK;
-			default: return RReminder.PERIOD_OFF;
-		}
-	}
 
 	public void launchNotification(){
 		//building android wear-only action for extending previously ended period
@@ -403,6 +378,8 @@ public class MobilePeriodService extends Service implements
 		if(RReminder.isNotificationColorizeEnabled(this)){
 			builder.setColorized(true);
 			builder.setColor(RReminder.getNotificationBackgroundColorId(this.getApplicationContext(), typeForNotification,extendCount));
+		} else{
+			builder.setColorized(false);
 		}
 
 		builder.setContentIntent(pi);

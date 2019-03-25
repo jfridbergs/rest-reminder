@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NotificationManagerCompat;
@@ -101,7 +102,7 @@ public class NotificationActivity extends FragmentActivity implements
 						| WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
 			//Initiate a countdown to turn off screen after certain ammount of time in order to avoid burning out battery
-			new CountDownTimer(30000, 1000) {
+			new CountDownTimer(15000, 1000) {
 
 				public void onTick(long millisUntilFinished) {
 				}
@@ -119,12 +120,13 @@ public class NotificationActivity extends FragmentActivity implements
             hasntRestored = savedInstanceState.getBoolean("hasntRestored");
             restoredType = savedInstanceState.getInt("restoredType");
         }
-
-        type = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
-        extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
-        playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
-        mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
-        redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
+		if(getIntent().getExtras()!=null) {
+			type = getIntent().getExtras().getInt(RReminder.PERIOD_TYPE);
+			extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
+			playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
+			mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
+			redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
+		}
 		work = getString(R.string.work);
 		rest = getString(R.string.rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
@@ -160,25 +162,25 @@ public class NotificationActivity extends FragmentActivity implements
 		}
 
 		RelativeLayout rootLayout;
-        TextView notificationTitle = (TextView) findViewById(R.id.notification_title);
-		TextView extendDescription = (TextView) findViewById(R.id.notification_extend_description);
+        TextView notificationTitle = findViewById(R.id.notification_title);
+		TextView extendDescription = findViewById(R.id.notification_extend_description);
         notificationTitle.setTypeface(titleFont);
-        ImageView image = (ImageView) findViewById(R.id.notification_image);
-        TextView notificationDescription = (TextView) findViewById(R.id.notification_description);
+        ImageView image =findViewById(R.id.notification_image);
+        TextView notificationDescription =findViewById(R.id.notification_description);
         notificationDescription.setTypeface(descriptionFont);
-        Button notificationButton = (Button) findViewById(R.id.notification_button);
-		Button extendPeriodEnd = (Button) findViewById(R.id.button_notification_period_end_extend);
+        Button notificationButton = findViewById(R.id.notification_button);
+		Button extendPeriodEnd =  findViewById(R.id.button_notification_period_end_extend);
         notificationButton.setTypeface(buttonFont);
-        rootLayout = (RelativeLayout) findViewById(R.id.root_layout);
+        rootLayout =  findViewById(R.id.root_layout);
 
 
         switch(type){
-            case 1:
+            case RReminder.WORK:
                 notificationTitle.setText(getString(R.string.notification_work_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.rest));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_coffee_mug));
                 break;
-            case 2:
+            case RReminder.REST:
                 notificationTitle.setText(getString(R.string.notification_rest_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.work));
                 if(screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
@@ -187,7 +189,7 @@ public class NotificationActivity extends FragmentActivity implements
                     image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_gears));
                 }
                 break;
-            case 3:
+            case RReminder.WORK_EXTENDED:
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.rest));
                 image.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.img_coffee_mug));
 				notificationTitle.setText(getString(R.string.notification_work_end_title));
@@ -199,7 +201,7 @@ public class NotificationActivity extends FragmentActivity implements
                 }
 				extendDescription.setVisibility(View.VISIBLE);
                 break;
-            case 4:
+            case RReminder.REST_EXTENDED:
 				notificationTitle.setText(getString(R.string.notification_rest_end_title));
                 rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.work));
                 if(screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
@@ -244,11 +246,11 @@ public class NotificationActivity extends FragmentActivity implements
             notificationButton.setText(getString(R.string.close_notification));
 
             switch(type){
-                case 1: case 3:
+                case RReminder.WORK: case RReminder.WORK_EXTENDED:
                     notificationDescription.setText(String.format(getString(R.string.next_period_end_description), rest,RReminder.getTimeString(this, mCalendar)));
 
                     break;
-                case 2: case 4:
+                case RReminder.REST: case RReminder.REST_EXTENDED:
 
                     notificationDescription.setText(String.format(getString(R.string.next_period_end_description), work, RReminder.getTimeString(this, mCalendar)));
                     break;
@@ -261,10 +263,10 @@ public class NotificationActivity extends FragmentActivity implements
 			extendPeriodEnd.setVisibility(View.INVISIBLE);
 
             switch(type){
-                case 1:
+                case RReminder.WORK:
                     notificationDescription.setText(String.format(getString(R.string.notification_end_manual_title), rest));
                     break;
-                case 2:
+                case RReminder.REST:
 					notificationDescription.setText(String.format(getString(R.string.notification_end_manual_title), work));
 
                     break;
@@ -305,7 +307,7 @@ public class NotificationActivity extends FragmentActivity implements
 			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 			
-			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount, false);
+			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 
 		}
@@ -355,14 +357,14 @@ public class NotificationActivity extends FragmentActivity implements
 						} else if(wearOn && dataMap.getLong(RReminder.PERIOD_END_TIME)> mCalendar && Math.abs(dataMap.getLong(RReminder.PERIOD_END_TIME)-mCalendar)>2000){
 							Log.d(debug, "close NotificationActivity and return to MainActivity");
 							//if reminder status was updated while notificationA was on screen, first cancel currently running mobile period and then set up new mobile period with values from reminder data
-							RReminderMobile.cancelCounterAlarm(NotificationActivity.this.getApplicationContext(), type, extendCount,mCalendar, false,0L);
+							RReminderMobile.cancelCounterAlarm(NotificationActivity.this.getApplicationContext(), type, extendCount,mCalendar);
 
 							int newPeriodType = dataMap.getInt(RReminder.PERIOD_TYPE);
 							long newPeriodEndTime = dataMap.getLong(RReminder.PERIOD_END_TIME);
 							int newExtendCount = dataMap.getInt(RReminder.EXTEND_COUNT);
 							boolean wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
 
-							new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount, false);
+							new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount);
 							RReminderMobile.startCounterService(NotificationActivity.this.getApplicationContext(), newPeriodType, newExtendCount, newPeriodEndTime, false);
 							finish();
 						}

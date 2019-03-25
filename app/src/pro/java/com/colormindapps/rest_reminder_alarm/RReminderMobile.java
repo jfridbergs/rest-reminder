@@ -16,35 +16,21 @@ public class RReminderMobile {
 
 	static String debug = "RREMINDER_MOBILE";
 
-	public static void cancelCounterAlarm(Context context, int type, int extendCount, long endTime, boolean approxOnly, long oldApproxValue){
-		Log.d(debug, "cancelCounterAlarm");
+	public static void cancelCounterAlarm(Context context, int type, int extendCount, long endTime){
 		AlarmManager mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-		PendingIntent pi, pa;
-		if (RReminder.isApproxEnabled(context)){
-			Intent ia = new Intent(context, MobileOnAlarmReceiver.class);
-			ia.putExtra(RReminder.PERIOD_TYPE, type);
-			ia.putExtra(RReminder.EXTEND_COUNT, 0);
-			ia.setAction(RReminder.ACTION_APPROXIMATE_PERIOD_END);
-			if(approxOnly){
-				pa = PendingIntent.getBroadcast(context, (int)oldApproxValue, ia, PendingIntent.FLAG_ONE_SHOT);
-			} else {
-				pa = PendingIntent.getBroadcast(context, (int)RReminder.getApproxTime(context, endTime), ia, PendingIntent.FLAG_ONE_SHOT);
-			}
+		PendingIntent pi;
 
-			mAlarmManager.cancel(pa);
-			pa.cancel();
-		}
 
-		if(!approxOnly){
-			Intent i = new Intent(context, MobileOnAlarmReceiver.class);
-			i.putExtra(RReminder.PERIOD_TYPE, type);
-			i.putExtra(RReminder.EXTEND_COUNT, extendCount);
-			i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
-			pi = PendingIntent.getBroadcast(context, (int)endTime, i, PendingIntent.FLAG_ONE_SHOT);
+
+		Intent i = new Intent(context, MobileOnAlarmReceiver.class);
+		i.putExtra(RReminder.PERIOD_TYPE, type);
+		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
+		i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
+		pi = PendingIntent.getBroadcast(context, (int)endTime, i, PendingIntent.FLAG_ONE_SHOT);
+		if(mAlarmManager!=null)
 			mAlarmManager.cancel(pi);
-			pi.cancel();
-		}
-}
+		pi.cancel();
+	}
 
 	public static void stopCounterService(Context context, int type){
 		Intent i = new Intent(context, CounterService.class);
