@@ -2,7 +2,8 @@
 <resources>
     <string name="app_name">Rest reminder Pro</string>
     <string name="appIndexUrl">android-app://com.colormindapps.rest_reminder_alarm.pro/http/host/path</string>
-
+    <string name="title_activity_sessions">Sessions</string>
+    <string name="title_activity_session_details">SessionDetailsActivity</string>
 
 
 </resources>

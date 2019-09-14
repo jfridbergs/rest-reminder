@@ -137,12 +137,16 @@ public class RReminder {
 	public static final String EULA_ACCEPTED="eula_accepted";
     public static final String TIME_FORMAT_24H = "kk:mm";
     public static final String TIME_FORMAT_12H = "hh:mm aa";
+    public static final String DATE_FORMAT = "dd/MM/yyyy kk:mm.ss";
+    public static final String SESSION_DATE_FORMAT = "EEE, dd/MM/yyyy";
 
 	public static final int WORK = 1;
 	public static final int REST = 2;
 	public static final int WORK_EXTENDED = 3;
 	public static final int REST_EXTENDED = 4;
 	public static final int PERIOD_OFF = 0;
+
+	public static final String SESSION_START_TIME = "session_start_time";
 
 	@IntDef({WORK, REST, WORK_EXTENDED, REST_EXTENDED, PERIOD_OFF})
 	@Retention(RetentionPolicy.SOURCE)
@@ -185,6 +189,24 @@ public class RReminder {
 		calendar.setTimeInMillis(time);
 		periodEndTime = DateFormat.format(timeFormatString,calendar.getTime());
 		return periodEndTime;
+	}
+
+	public static String getDateString(long time){
+		CharSequence periodEndTime, timeFormatString;
+		timeFormatString = DATE_FORMAT;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		periodEndTime = DateFormat.format(timeFormatString,calendar.getTime());
+		return periodEndTime.toString();
+	}
+
+	public static String getSessionDateString(long time){
+		CharSequence periodEndTime, timeFormatString;
+		timeFormatString = SESSION_DATE_FORMAT;
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(time);
+		periodEndTime = DateFormat.format(timeFormatString,calendar.getTime());
+		return periodEndTime.toString();
 	}
 	
 	public static int getMode(Context context){

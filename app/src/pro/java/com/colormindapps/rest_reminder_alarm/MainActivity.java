@@ -1305,6 +1305,11 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
+	public void openSessions(View v){
+		Intent intent  = new Intent(this, SessionsListActivity.class);
+		startActivity(intent);
+	}
+
 	public void showExtendDialog(View v) {
 		if(RReminder.getExtendOptionsCount(MainActivity.this)>1){
 			stopCountDownTimer();

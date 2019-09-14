@@ -5,25 +5,21 @@
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
 
-    
-    <style name="AppBaseTheme"
-           parent="@style/Theme.AppCompat.Light.NoActionBar">
+
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
 
     </style>
-    
 
 
-    
-   <style name="Theme.WorkRestTheme" parent="@style/AppBaseTheme">
+    <style name="Theme.WorkRestTheme" parent="@style/AppBaseTheme">
         <item name="android:windowAnimationStyle">@null</item>
-       <item name="windowActionBar">false</item>
-   </style>
-    
-   <style name="PreferencesNoOverlayActionbar" parent="Theme.WorkRestTheme">
-   </style>
-    
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="PreferencesNoOverlayActionbar" parent="Theme.WorkRestTheme"></style>
+
     <!-- ActionBar styles -->
     <style name="MyToolBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
 
@@ -32,55 +28,54 @@
     <style name="Toolbar" parent="Widget.AppCompat.Toolbar">
         <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
     </style>
-    
+
     <style name="NotificationActivity" parent="AppBaseTheme">
         <item name="android:windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
-    
+
     <style name="TimerFont" parent="@android:style/TextAppearance.Medium">
-        <item name="android:layout_height">match_parent</item> 
+        <item name="android:layout_height">match_parent</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/timer_layout_text_size</item>
         <item name="android:gravity">center_vertical|right</item>
     </style>
-    
+
     <style name="NormalFont" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/description_text_text_size</item>
-        
+
     </style>
 
     <style name="NotificationExtendDescriptionFont" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/extend_description_text_text_size</item>
     </style>
-    
+
     <style name="TitleFont" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/period_title_text_size</item>
-        
+
     </style>
-    
-        <style name="NotificationButtonFont" parent="@android:style/Widget.ImageButton">
+
+    <style name="NotificationButtonFont" parent="@android:style/Widget.ImageButton">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/notification_button_text_size</item>
-        
+
     </style>
-    
-    
+
+
     <style name="NotificationExtendButtonFont" parent="@android:style/Widget.ImageButton">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/button_notification_period_end_extend_text_size</item>
 
-        
-    </style>  
-    
+
+    </style>
+
     <style name="ExtendButton" parent="@android:style/Widget.ImageButton">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/extend_button_text_size</item>
     </style>
-
 
 
     <style name="InfoButton" parent="@android:style/Widget.ImageButton">
@@ -90,9 +85,9 @@
         <item name="android:background">@drawable/btn_info</item>
         <item name="android:textSize">@dimen/info_button_text_size</item>
     </style>
-    
+
     <style name="ExtendDialogButton" parent="@android:style/Widget.ImageButton">
-       <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">50dp</item>
         <item name="android:layout_marginLeft">15dp</item>
         <item name="android:layout_marginRight">15dp</item>
@@ -103,21 +98,21 @@
         <item name="android:textColor">@color/black</item>
         <item name="android:gravity">center</item>
     </style>
-    
+
     <style name="DialogTitle" parent="@android:style/TextAppearance.Medium">
         <item name="android:paddingLeft">5dp</item>
         <item name="android:paddingRight">5dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:layout_marginBottom">10dp</item>
-		<item name="android:textSize">19sp</item>
+        <item name="android:textSize">19sp</item>
         <item name="android:textColor">@color/black</item>
     </style>
-    
+
     <style name="DialogText" parent="@android:style/TextAppearance.Medium">
         <item name="android:paddingLeft">5dp</item>
         <item name="android:paddingRight">5dp</item>
         <item name="android:layout_marginBottom">5dp</item>
-		<item name="android:textSize">16sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/black</item>
     </style>
 
@@ -140,4 +135,13 @@
     <style name="CustomText2" parent="TextAppearance.ShowcaseView.Detail.Light">
         <item name="android:textColor">#8affffff</item>
     </style>
+
+    <style name="Theme.WorkRestTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.WorkRestTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.WorkRestTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

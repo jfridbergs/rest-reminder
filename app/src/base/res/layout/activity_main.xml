@@ -77,8 +77,7 @@
 		    android:layout_marginRight="@dimen/timer_layout_marginRight"
 		    android:background="@drawable/btn_timer_np"
 		    android:clickable="true"
-		    android:focusable="true"
-		    android:onClick="callStartScheduler" >
+		    android:focusable="true">
 	
 			    	<TextView
 		   				android:id="@+id/timer_hour1"

@@ -17,7 +17,6 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -188,6 +187,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		int periodType = 0;
 		int extendCount = 0;
 		long periodEndTimeValue = 0L;
+		boolean failCondition = true;
 		Bundle dataFromCounterSerivce;
     	Preference preference = findPreference(key);
     	int value;
@@ -197,15 +197,13 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 		//after every preference change made while Rest reminder is running we are fetching the current period data from CounterService
 		if(RReminderMobile.isCounterServiceRunning(context)){
-			if(parentActivity!=null){
-				Log.d("RREMINDER_PREFERENCE", "NOT null");
-			} else {
-				Log.d("RREMINDER_PREFERENCE", "IS null");
-			}
 			dataFromCounterSerivce = parentActivity.getDataFromService();
-			periodType = dataFromCounterSerivce.getInt(RReminder.PERIOD_TYPE);
-			extendCount = dataFromCounterSerivce.getInt(RReminder.EXTEND_COUNT);
-			periodEndTimeValue = dataFromCounterSerivce.getLong(RReminder.PERIOD_END_TIME);
+			if(dataFromCounterSerivce!=null){
+				periodType = dataFromCounterSerivce.getInt(RReminder.PERIOD_TYPE);
+				extendCount = dataFromCounterSerivce.getInt(RReminder.EXTEND_COUNT);
+				periodEndTimeValue = dataFromCounterSerivce.getLong(RReminder.PERIOD_END_TIME);
+			}
+
 		}
 
 

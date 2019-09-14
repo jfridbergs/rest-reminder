@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.SessionDetailsActivity"
+            android:label="@string/title_activity_session_details"
+            android:theme="@style/Theme.WorkRestTheme.NoActionBar"></activity>
+        <activity
+            android:name="com.colormindapps.rest_reminder_alarm.SessionsListActivity"
+            android:label="@string/title_activity_sessions" />
+    </application>
+
+</manifest>
