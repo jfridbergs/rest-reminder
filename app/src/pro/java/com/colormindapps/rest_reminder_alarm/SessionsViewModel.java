@@ -21,7 +21,7 @@ public class SessionsViewModel extends AndroidViewModel {
     LiveData<List<Period>> getAllSessions(){
         return mAllSessions;
     }
-    LiveData<Long> getSessionEndTime(long sessionStartTime){return mRepository.getSessionEndTime(sessionStartTime);}
+    long getSessionEndTime(long sessionStartTime){return mRepository.getSessionEndTime(sessionStartTime);}
 
 
     public void insert(Period period){

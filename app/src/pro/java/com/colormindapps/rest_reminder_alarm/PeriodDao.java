@@ -29,8 +29,8 @@ public interface PeriodDao {
     @Query("SELECT * FROM period_table WHERE session_start_time = :sessionStartTime ORDER BY start_time DESC")
     LiveData<List<Period>> getSessionPeriods(long sessionStartTime);
 
-    @Query("SELECT end_time FROM period_table WHERE session_start_time = :sessionStartTime ORDER BY end_time DESC LIMIT 1")
-    LiveData<Long> getSessionEndTIme(long sessionStartTime);
+    @Query("SELECT * FROM period_table WHERE session_start_time = :sessionStartTime ORDER BY end_time DESC LIMIT 1")
+    Period getSessionEndTIme(long sessionStartTime);
 
 
 }

@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -19,7 +21,8 @@ import java.util.List;
 
 public class SessionsListActivity extends AppCompatActivity implements OnSessionListener {
 
-    private SessionsViewModel mPeriodViewModel;
+    private SessionsViewModel mSessionsViewModel;
+    private String debug = "RREMINDER_SESSION_LIST_ACTIVITY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,17 +34,21 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mPeriodViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
+        mSessionsViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
 
-        mPeriodViewModel.getAllSessions().observe(this, new Observer<List<Period>>(){
+        mSessionsViewModel.getAllSessions().observe(this, new Observer<List<Period>>(){
             @Override
             public void onChanged(@Nullable final List<Period> periods){
                 long[] endTime = new long[periods.size()];
                 adapter.setSessions(periods);
+
                 for(int i = 0; i<periods.size(); i++){
-                    Long endTimeValue = mPeriodViewModel.getSessionEndTime(periods.get(i).getStartTime());
+                    long endTimeValue = mSessionsViewModel.getSessionEndTime(periods.get(i).getStartTime());
+                    Log.d(debug, "for item " + i + "endtimevalue is "+ endTimeValue);
                     endTime[i] = endTimeValue;
                 }
+
+
                 adapter.setEndTimeValues(endTime);
             }
         });
@@ -52,7 +59,7 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
             public void onClick(View view) {
                 long time = Calendar.getInstance().getTimeInMillis();
                 Period period = new Period(time,1,0L,1,time,0,0,0);
-                mPeriodViewModel.insert(period);
+                mSessionsViewModel.insert(period);
             }
         });
 
@@ -61,7 +68,7 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
             @Override
             public void onClick(View view) {
                 long time = Calendar.getInstance().getTimeInMillis();
-                mPeriodViewModel.deleteOlder(time);
+                mSessionsViewModel.deleteOlder(time);
             }
         });
     }

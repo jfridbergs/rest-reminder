@@ -1067,6 +1067,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	public void showHintDialog(View v) {
 
+
 		if (animateInfo) {
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
