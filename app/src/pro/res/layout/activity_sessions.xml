@@ -6,18 +6,18 @@
     android:layout_height="match_parent"
     tools:context="com.colormindapps.rest_reminder_alarm.SessionsListActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview_sessions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/darker_gray"
-        tools:listitem="@layout/recyclerview_item" />
+        tools:listitem="@layout/recyclerview_sessions" />
 
     <Button
-        android:id="@+id/add_session"
+        android:id="@+id/delete_all"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add session"
+        android:text="Delete all"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         />

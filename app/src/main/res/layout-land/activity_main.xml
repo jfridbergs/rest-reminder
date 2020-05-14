@@ -6,7 +6,7 @@
     tools:context="com.colormindapps.rest_reminder_alarm.MainActivity"
     android:id="@+id/mainActivityLayout" >
 
-	<android.support.v7.widget.Toolbar
+	<androidx.appcompat.widget.Toolbar
 		android:layout_width="match_parent"
 		android:id="@+id/toolbar"
 		android:background="@color/toolbar"

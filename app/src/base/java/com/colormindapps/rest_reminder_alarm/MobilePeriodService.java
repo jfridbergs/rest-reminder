@@ -1,20 +1,16 @@
 package com.colormindapps.rest_reminder_alarm;
 
-import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
-import android.support.v4.app.JobIntentService;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.util.Log;
+import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
-
-import java.util.Calendar;
 
 
 public class MobilePeriodService extends JobIntentService {

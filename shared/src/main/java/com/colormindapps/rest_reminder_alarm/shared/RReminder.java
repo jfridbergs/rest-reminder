@@ -11,8 +11,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.annotation.IntDef;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.IntDef;
+import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 
@@ -146,7 +146,7 @@ public class RReminder {
 	public static final int REST_EXTENDED = 4;
 	public static final int PERIOD_OFF = 0;
 
-	public static final String SESSION_START_TIME = "session_start_time";
+	public static final String SESSION_ID = "session_id";
 
 	@IntDef({WORK, REST, WORK_EXTENDED, REST_EXTENDED, PERIOD_OFF})
 	@Retention(RetentionPolicy.SOURCE)
@@ -450,8 +450,23 @@ public class RReminder {
 			break;
 		default: addMins = 0; break;
 		}
-		
-		calendar+=(long)addMins * 60000L + timeTillEndExtend;
+		//for testing purposes only
+		if(addMins==955){
+			switch(type){
+				case WORK:{
+					calendar+=15000 + timeTillEndExtend;
+					break;
+				}
+				case REST:{
+					calendar+=10000 + timeTillEndExtend;
+					break;
+				}
+				default: break;
+			}
+		} else {
+			calendar+=(long)addMins * 60000L + timeTillEndExtend;
+		}
+
 		return calendar;
 	}
 	

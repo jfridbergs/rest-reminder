@@ -2,7 +2,7 @@ package com.colormindapps.rest_reminder_alarm;
 
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +16,12 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
     private OnSessionListener onSessionListener;
     private Context mContext;
     class SessionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private final TextView sessionDateView, sessionTimeView;
+        private final TextView sessionDateView, sessionTimeView, sessionIdView;
         OnSessionListener onSessionListener;
 
         private SessionViewHolder(View itemView, OnSessionListener onSessionListener){
             super(itemView);
+            sessionIdView = itemView.findViewById(R.id.session_id);
             sessionDateView = itemView.findViewById(R.id.date);
             sessionTimeView = itemView.findViewById(R.id.time_from_to);
             this.onSessionListener = onSessionListener;
@@ -29,15 +30,15 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
 
         @Override
         public void onClick(View view) {
-            Period current = mSessions.get(getAdapterPosition());
-            long sessionStartTime = current.getStartTime();
-            onSessionListener.onSessionClick(sessionStartTime);
+            Session current = mSessions.get(getAdapterPosition());
+            int sessionId = current.getSessionId();
+            onSessionListener.onSessionClick(sessionId);
         }
     }
 
     private final LayoutInflater mInflater;
-    private List<Period> mSessions;
-    private long[] mEndTimeValues;
+    private List<Session> mSessions;
+    private int sessionId;
 
     SessionListAdapter(Context context, OnSessionListener onSessionListener){
         this.onSessionListener = onSessionListener;
@@ -47,34 +48,40 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
 
     @Override
     public SessionViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        View itemView = mInflater.inflate(R.layout.recyclerview_item, parent, false);
+        View itemView = mInflater.inflate(R.layout.recyclerview_sessions, parent, false);
         return new SessionViewHolder(itemView, onSessionListener);
     }
 
     @Override
     public void onBindViewHolder(SessionViewHolder holder, int position){
         if(mSessions != null){
-            Period current = mSessions.get(position);
-            String date = RReminder.getSessionDateString(current.getStartTime());
-            String sessionStartTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getStartTime()).toString();
-            String sessionEndTime = RReminder.getTimeString(mContext.getApplicationContext(), mEndTimeValues[position]).toString();
+            Session current = mSessions.get(position);
+            String date = RReminder.getSessionDateString(current.getSessionStart());
+            String sessionStartTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getSessionStart()).toString();
+            String sessionEndTime;
+            sessionEndTime = RReminder.getTimeString(mContext.getApplicationContext(),current.getSessionEnd()).toString();
             String time = sessionStartTime +" - "+ sessionEndTime;
+            String sessionId = "Session ID: " + current.getSessionId();
+            holder.sessionIdView.setText(sessionId);
             holder.sessionDateView.setText(date);
             holder.sessionTimeView.setText(time);
         } else {
+            holder.sessionIdView.setText("No ID");
             holder.sessionDateView.setText("No word");
             holder.sessionTimeView.setText("No time");
         }
     }
 
-    void setSessions(List<Period> periods){
-        mSessions = periods;
+    void setSessions(List<Session> sessions){
+        mSessions = sessions;
         notifyDataSetChanged();
+
     }
 
-    void setEndTimeValues(long[] endTimes){
-        mEndTimeValues = endTimes;
-    }
+
+
+
+
 
     @Override
     public int getItemCount(){

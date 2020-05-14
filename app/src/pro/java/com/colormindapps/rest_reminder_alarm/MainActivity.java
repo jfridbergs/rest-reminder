@@ -5,6 +5,9 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -28,13 +31,14 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -82,6 +86,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements
 		DataApi.DataListener,
@@ -98,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements
 	private boolean turnOffIntent = false;
 	public MyCountDownTimer countdown;
 	public long periodEndTimeValue;
+	public long sessionStartTime;
 	private long counterTimeValue;
 	private boolean dialogOnScreen;
 	public int restoreAnimateCounter = 0;
@@ -137,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements
 	private Button infoButton;
 	private Typeface font, titleFont, swipeFont, timerFont;
 	private RelativeLayout timerButtonLayout;
-	private Button extendPeriodEnd;
+	private Button extendPeriodEnd, sessions;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
 	private CounterBinder binder;
 	private int turnOffValue=0;
@@ -145,6 +152,11 @@ public class MainActivity extends AppCompatActivity implements
 	private NotificationManagerCompat mgr;
 	private String debug = "MAIN_ACTIVITY";
 	private boolean wearOn = false;
+	private SessionsViewModel mSessionsViewModel;
+	private Session currentSession;
+	private boolean initialObserverCall;
+	private LiveData<Session> currentLDSession;
+	private Observer<Session> sessionObserver;
 
 	private ValueAnimator bgAnimation;
 
@@ -308,7 +320,11 @@ public class MainActivity extends AppCompatActivity implements
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 
+		mSessionsViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
+
 		setUpNotificationChannels();
+
+
 
 		//Setting the period lenght lower than min value for development
 
@@ -387,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		description = (TextView) findViewById(R.id.description_text);
 		extendPeriodEnd = (Button) findViewById(R.id.button_period_end_extend);
-
+		sessions = findViewById(R.id.button_open_sessions);
 		swipeArea = (TextView) findViewById(R.id.swipe_area_text);
 		swipeAreaListenerUsed = false;
 		infoButton = (Button) findViewById(R.id.info_button);
@@ -723,9 +739,22 @@ public class MainActivity extends AppCompatActivity implements
 	private void setReminderOn() {
 		Log.d(debug, "setReminderOn");
 		periodType = 1;
-		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
+		sessionStartTime = Calendar.getInstance().getTimeInMillis();
+		Log.d(debug, "SET_REMINDER_ON sessionStartTime: "+sessionStartTime);
+		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, sessionStartTime, 1, 0L);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+		currentSession = new Session(0,sessionStartTime,0L);
+		mSessionsViewModel.insert(currentSession);
+
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				getCurrentSessionId(sessionStartTime);
+			}
+		}, 2000);
+
+		initialObserverCall = true;
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,mCalendar,0, true, wearOn);
 		updateWearPreferences();
@@ -753,11 +782,35 @@ public class MainActivity extends AppCompatActivity implements
 
 	}
 
+	public void getCurrentSessionId(long sessionStart){
+		currentLDSession = mSessionsViewModel.getSessionId(sessionStart);
+		sessionObserver = new Observer<Session>(){
+			@Override
+			public void onChanged(@Nullable final Session session){
+				Log.d(debug, "observer onChanged called");
+				Log.d(debug, "OBSERVER onChanged sessionStartValue: "+session.getSessionStart());
+				if(session!=null){
+					updateCurrentSession(session.getSessionId());
+				}
+			}
+		};
+		currentLDSession.observe(this, sessionObserver);
+	}
+
 	/*
 	public void setReminderOffFromOutside() {
 		setReminderOff();
 	}
 	*/
+
+	public void updateCurrentSession(int id){
+		if(currentSession!=null){
+			currentSession.setSessionId(id);
+		}
+		if(sessionObserver!=null){
+			currentLDSession.removeObserver(sessionObserver);
+		}
+	}
 
 	private void setReminderOff(long periodEndTime) {
 		Log.d(debug, "setReminderOff");
@@ -769,6 +822,12 @@ public class MainActivity extends AppCompatActivity implements
 		}
 		Log.d(debug, "SET_REMINDER_OFF period values: type: "+ periodType + ", endtime: "+ periodEndTime);
 		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime);
+		currentSession.setSessionEnd(Calendar.getInstance().getTimeInMillis());
+		Log.d(debug, "SET_REMINDER_OFF session start time: "+sessionStartTime);
+		mSessionsViewModel.update(currentSession);
+
+
+
 		cancelNotification(periodEndTimeValue,true);
 		if (mBound) {
 			unbindService(mConnection);
@@ -971,6 +1030,7 @@ public class MainActivity extends AppCompatActivity implements
 	      */
 
 		if (isOn) {
+			sessions.setVisibility(View.GONE);
 			activityTitle.setTextColor(colorBlack);
 			toolBar.setTitleTextColor(colorBlack);
 
@@ -1127,6 +1187,7 @@ public class MainActivity extends AppCompatActivity implements
 			extendPeriodEnd.setVisibility(View.INVISIBLE);
 			rootLayout.setBackgroundColor(colorBlack);
 			swipeArea.setVisibility(View.GONE);
+			sessions.setVisibility(View.VISIBLE);
 			manageTimer(false);
 
 		}

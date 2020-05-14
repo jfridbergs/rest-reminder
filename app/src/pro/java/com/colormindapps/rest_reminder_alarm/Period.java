@@ -1,9 +1,9 @@
 package com.colormindapps.rest_reminder_alarm;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-import android.support.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
 
 @Entity(tableName = "period_table")
 public class Period {
@@ -13,23 +13,18 @@ public class Period {
     @ColumnInfo(name = "start_time")
     private long startTime;
 
+    @ColumnInfo(name = "end_time")
+    private long endTime;
+
     @NonNull
     @ColumnInfo(name = "period_type")
     private int type;
 
-    @ColumnInfo(name = "end_time")
-    private long endTime;
-
-    @ColumnInfo(name = "is_session_first_period")
-    private int sessionFirstPeriod;
-
-    @ColumnInfo(name = "session_start_time")
-    private long sessionStartTime;
-
+    @ColumnInfo(name = "session_id")
+    private int sessionId;
 
     @ColumnInfo(name = "is_extended")
     private int extended;
-
 
     @ColumnInfo(name = "extend_count")
     private int extendCount;
@@ -38,13 +33,12 @@ public class Period {
     @ColumnInfo(name = "is_ended")
     private int ended;
 
-    public Period(@NonNull long startTime, @NonNull int type, long endTime,  int sessionFirstPeriod, long sessionStartTime, int extended,  int extendCount, int ended){
+    public Period(@NonNull long startTime, @NonNull int type, long endTime, int sessionId, int extended,  int extendCount, int ended){
 
         this.startTime = startTime;
         this.type = type;
         this.endTime = endTime;
-        this.sessionFirstPeriod = sessionFirstPeriod;
-        this.sessionStartTime = sessionStartTime;
+        this.sessionId = sessionId;
         this.extended = extended;
         this.extendCount = extendCount;
         this.ended = ended;
@@ -57,9 +51,7 @@ public class Period {
 
     public long getEndTime(){return this.endTime; }
 
-    public int getSessionFirstPeriod(){return this.sessionFirstPeriod; }
-
-    public long getSessionStartTime(){return this.sessionStartTime; }
+    public int getSessionId(){return this.sessionId; }
 
     public int getExtended(){return this.extended;}
 

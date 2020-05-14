@@ -25,13 +25,14 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MotionEventCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MarginLayoutParamsCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -60,7 +61,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.prefs.Preferences;
 
 public class MainActivity extends AppCompatActivity implements OnDialogCloseListener {
 
@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		@Override
 		public void onServiceConnected(ComponentName className,
 									   IBinder service) {
+			Log.d("MAIN_ACTIVITY", "onServiceConnected");
 			binder = (CounterBinder) service;
 			mService = binder.getService();
 			mBound = true;
@@ -207,7 +208,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
 					startNotificationActivity(periodType, extendCount, periodEndTimeValue);
 				} else {
+					Log.d("MAIN", "visibleState value: "+getVisibleState());
 					if(getVisibleState()){
+						Log.d("MAIN", "visiblestate is true");
 						manageUI(true);
 						if (dialogOnScreen || stopTimerInServiceConnectedAfterPause) {
 							manageTimer(false);
@@ -295,13 +298,14 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.d("MAIN", "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
 
 		powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 		resources = getResources();
-		rootLayout = (RelativeLayout) findViewById(R.id.mainActivityLayout);
+		rootLayout = findViewById(R.id.mainActivityLayout);
 
 		colorWork = ContextCompat.getColor(MainActivity.this,R.color.work);
 		colorRest = ContextCompat.getColor(MainActivity.this,R.color.rest);
@@ -324,18 +328,18 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		swipeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-UltLt.otf");
 		timerFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
 
-		activityTitle = (TextView) findViewById(R.id.period_title);
+		activityTitle = findViewById(R.id.period_title);
 
 		if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE && buildNumber <= Build.VERSION_CODES.HONEYCOMB) {
 			smallTitle = true;
 		}
 
-		description = (TextView) findViewById(R.id.description_text);
-		extendPeriodEnd = (Button) findViewById(R.id.button_period_end_extend);
+		description = findViewById(R.id.description_text);
+		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
 
-		swipeArea = (TextView) findViewById(R.id.swipe_area_text);
+		swipeArea = findViewById(R.id.swipe_area_text);
 		swipeAreaListenerUsed = false;
-		infoButton = (Button) findViewById(R.id.info_button);
+		infoButton =  findViewById(R.id.info_button);
 		
 		/*
 		if(buildNumber >= Build.VERSION_CODES.HONEYCOMB){
@@ -387,7 +391,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			}
 		 	*/
 
-
+		Log.d("MAIN", "setVisible to true");
 		setVisibleState(true);
 		//dismissExtendDialog();
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
@@ -475,6 +479,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		super.onStop();
+		Log.d("MAIN", "onStop");
 		setVisibleState(false);
 		//stopCountDownTimer();
 		if (mBound) {
@@ -870,15 +875,119 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	*/
 
 	public void manageTimer(Boolean isOn) {
-		timerButtonLayout = (RelativeLayout) findViewById(R.id.timer_layout);
-		timerHour1 = (TextView) findViewById(R.id.timer_hour1);
-		timerMinute1 = (TextView) findViewById(R.id.timer_minute1);
-		timerSecond1 = (TextView) findViewById(R.id.timer_second1);
-		timerHour2 = (TextView) findViewById(R.id.timer_hour2);
-		timerMinute2 = (TextView) findViewById(R.id.timer_minute2);
-		timerSecond2 = (TextView) findViewById(R.id.timer_second2);
-		colon = (TextView) findViewById(R.id.timer_colon);
-		point = (TextView) findViewById(R.id.timer_point);
+		timerButtonLayout = findViewById(R.id.timer_layout);
+		timerHour1 = findViewById(R.id.timer_hour1);
+		timerMinute1 = findViewById(R.id.timer_minute1);
+		timerSecond1 = findViewById(R.id.timer_second1);
+		timerHour2 = findViewById(R.id.timer_hour2);
+		timerMinute2 =  findViewById(R.id.timer_minute2);
+		timerSecond2 =  findViewById(R.id.timer_second2);
+		colon = findViewById(R.id.timer_colon);
+		point =  findViewById(R.id.timer_point);
+
+
+		//adjustments for accessibility font sizes
+		int digitWidth = (int)resources.getDimension(R.dimen.timer_digit_width);
+		float scale = getResources().getConfiguration().fontScale;
+		float scaledWidth = digitWidth * scale;
+
+
+
+
+		if(scale > 1.0f){
+			ViewGroup.LayoutParams param = timerHour1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerHour1.setLayoutParams(param);
+
+			param = timerMinute1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerMinute1.setLayoutParams(param);
+
+			param = timerSecond1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerSecond1.setLayoutParams(param);
+
+			param = timerHour2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerHour2.setLayoutParams(param);
+
+			param = timerMinute2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerMinute2.setLayoutParams(param);
+
+			param = timerSecond2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerSecond2.setLayoutParams(param);
+
+			float density = getApplicationContext().getResources().getDisplayMetrics().density;
+
+			int colonMargin = (int)resources.getDimension(R.dimen.timer_sepparator_colon_marginTop);
+			int pointMargin = (int)resources.getDimension(R.dimen.timer_sepparator_point_marginTop);
+			float colonScaledMargin, pointScaledMargin;
+			if(scale>=1.3f){
+				colonScaledMargin = colonMargin - 9*density;
+				pointScaledMargin = pointMargin - 9*density;
+			} else {
+				colonScaledMargin = colonMargin - 7*density;
+				pointScaledMargin = pointMargin - 7*density;
+			}
+
+
+			float marginTop = -5 *density;
+			ViewGroup.MarginLayoutParams marginParam = (ViewGroup.MarginLayoutParams) timerHour1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerHour1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerMinute1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerMinute1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerSecond1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerSecond1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerHour2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerHour2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerMinute2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerMinute2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerSecond2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerSecond2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) colon.getLayoutParams();
+			marginParam.setMargins(0,(int)colonScaledMargin,0,0);
+			colon.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) point.getLayoutParams();
+			marginParam.setMargins(0,(int)pointScaledMargin,0,0);
+			point.setLayoutParams(marginParam);
+
+			if(scale>=1.3f){
+				int timerButtonWidth = (int)resources.getDimension(R.dimen.timer_layout_width);
+				int timerButtonHeight = (int)resources.getDimension(R.dimen.timer_layout_height);
+				int sepparatorWidth = (int)resources.getDimension(R.dimen.timer_sepparator_width);
+				param = timerButtonLayout.getLayoutParams();
+				float scaledTimerWidth = timerButtonWidth * 1.1f;
+				float scaledTimerHeight = timerButtonHeight * 1.1f;
+				param.width = (int)scaledTimerWidth;
+				param.height = (int)scaledTimerHeight;
+				timerButtonLayout.setLayoutParams(param);
+
+				float pointScaledWidth = 3 * density + sepparatorWidth;
+				param = point.getLayoutParams();
+				param.width = (int)pointScaledWidth;
+				point.setLayoutParams(param);
+
+				param = colon.getLayoutParams();
+				param.width = (int)pointScaledWidth;
+				colon.setLayoutParams(param);
+			}
+		}
+
 
 
 		timerHour1.setTypeface(timerFont);

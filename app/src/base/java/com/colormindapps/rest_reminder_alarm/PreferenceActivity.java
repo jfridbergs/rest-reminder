@@ -6,10 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-
-import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+import androidx.fragment.app.FragmentActivity;
 
 
 public class PreferenceActivity extends FragmentActivity implements PreferenceActivityLinkedService{

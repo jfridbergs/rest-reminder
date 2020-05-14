@@ -1,14 +1,15 @@
 package com.colormindapps.rest_reminder_alarm;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModelProviders;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -24,42 +25,38 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
     private SessionsViewModel mSessionsViewModel;
     private String debug = "RREMINDER_SESSION_LIST_ACTIVITY";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sessions);
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);
+        RecyclerView recyclerView = findViewById(R.id.recyclerview_sessions);
         final SessionListAdapter adapter = new SessionListAdapter(this, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mSessionsViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
 
-        mSessionsViewModel.getAllSessions().observe(this, new Observer<List<Period>>(){
+        mSessionsViewModel.getAllSessions().observe(this, new Observer<List<Session>>(){
             @Override
-            public void onChanged(@Nullable final List<Period> periods){
-                long[] endTime = new long[periods.size()];
-                adapter.setSessions(periods);
+            public void onChanged(@Nullable final List<Session> sessions){
+                adapter.setSessions(sessions);
+                Log.d(debug, "adding items to adapter");
 
-                for(int i = 0; i<periods.size(); i++){
-                    long endTimeValue = mSessionsViewModel.getSessionEndTime(periods.get(i).getStartTime());
-                    Log.d(debug, "for item " + i + "endtimevalue is "+ endTimeValue);
-                    endTime[i] = endTimeValue;
-                }
-
-
-                adapter.setEndTimeValues(endTime);
             }
         });
+        Log.d(debug, "item count: "+ adapter.getItemCount());
 
-        Button fab = findViewById(R.id.add_session);
+
+        Button fab = findViewById(R.id.delete_all);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 long time = Calendar.getInstance().getTimeInMillis();
-                Period period = new Period(time,1,0L,1,time,0,0,0);
-                mSessionsViewModel.insert(period);
+                long endTime = time +60*60*1000;
+                Session session = new Session(0,time, endTime);
+                mSessionsViewModel.deleteOlder(0L);
             }
         });
 
@@ -73,10 +70,12 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
         });
     }
 
+
+
     @Override
-    public void onSessionClick(long sessionStartTime) {
+    public void onSessionClick(int sessionId) {
         Intent intent = new Intent(this, SessionDetailsActivity.class);
-        intent.putExtra(RReminder.SESSION_START_TIME, sessionStartTime);
+        intent.putExtra(RReminder.SESSION_ID, sessionId);
         startActivity(intent);
     }
 

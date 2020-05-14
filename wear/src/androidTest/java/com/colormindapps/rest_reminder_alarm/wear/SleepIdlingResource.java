@@ -1,7 +1,7 @@
 package com.colormindapps.rest_reminder_alarm.wear;
 
 
-import android.support.test.espresso.IdlingResource;
+import androidx.test.espresso.IdlingResource;
 
 /**
  * Created by ingressus on 22/02/2017.

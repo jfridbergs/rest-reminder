@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm.wear;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,11 +9,11 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.JobIntentService;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.R;
@@ -208,7 +207,7 @@ public class WearPeriodService extends JobIntentService implements
 
         //setting up main notification
 
-        NotificationCompat.BigTextStyle bigTextStyle = new android.support.v7.app.NotificationCompat.BigTextStyle();
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
         String eventDescription;
         // Build intent for notification content
         Intent mainIntent = new Intent(this, WearMainActivity.class);
@@ -222,7 +221,7 @@ public class WearPeriodService extends JobIntentService implements
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
             // Enables launching app in Wear 2.0 while keeping the old Notification Style behavior.
-            android.support.v7.app.NotificationCompat.Action mainAction = new android.support.v7.app.NotificationCompat.Action.Builder(
+            NotificationCompat.Action mainAction = new NotificationCompat.Action.Builder(
                     R.mipmap.ic_launcher,
                     "Open",
                     mainPendingIntent)
@@ -239,7 +238,7 @@ public class WearPeriodService extends JobIntentService implements
 
         //adding actions to main notification
         //notificationBuilder.extend(wearableExtender);
-        notificationBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        notificationBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
         notificationBuilder.addAction(turnOffAction);
         if(RReminder.isExtendEnabled(this.getApplicationContext())){

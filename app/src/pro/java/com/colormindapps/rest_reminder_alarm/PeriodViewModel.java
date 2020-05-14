@@ -1,36 +1,33 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.app.Application;
-import android.arch.lifecycle.AndroidViewModel;
-import android.arch.lifecycle.LiveData;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
 public class PeriodViewModel extends AndroidViewModel {
 
-    private PeriodRepository mRepository;
+    private RReminderRepository mRepository;
     private LiveData<List<Period>> mSessionPeriods;
 
-    public PeriodViewModel(Application application, long sessionStartTime){
+    public PeriodViewModel(Application application){
         super(application);
-        mRepository = new PeriodRepository(application);
-        mSessionPeriods = mRepository.getSessionPeriods(sessionStartTime);
+        mRepository = new RReminderRepository(application);
     }
 
-    LiveData<List<Period>> getSessionPeriods(){
+    LiveData<List<Period>> getSessionPeriods(int sessionId){
+        mSessionPeriods = mRepository.getSessionPeriods(sessionId);
         return mSessionPeriods;
     }
 
 
     public void insert(Period period){
-        mRepository.insert(period);
+        mRepository.insertPeriod(period);
     }
 
-    public void deleteOlder(long currentTime){
-        mRepository.deleteOlder(currentTime);
-    }
 
     public void update(Period period){
-        mRepository.update(period);
+        mRepository.updatePeriod(period);
     }
 }
