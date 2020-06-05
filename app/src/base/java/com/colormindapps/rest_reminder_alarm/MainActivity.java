@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	private RelativeLayout rootLayout;
 	private Resources resources;
 	private TextView activityTitle;
-	private TextView description;
+	public TextView description;
 	private PowerManager powerManager;
 	private CharSequence titleForRestore, titleSequence;
 	private int fullSwipeLength;
@@ -2150,7 +2150,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			multiplier = 0;
 		colorIds = new int[multiplier];
 		int j = 0;
-		for (int i = multiplier - 1; i >= 0; i--) {
+		for (int i = multiplier - 2; i >= 0; i--) {
 			if (i > 50) {
 				switch (periodType) {
 					case 1:
@@ -2191,6 +2191,32 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				}
 			}
 			j++;
+		}
+		switch(periodType){
+			case 1: {
+				colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.work);
+				break;
+			}
+			case 2: {colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.rest);
+			break;
+			}
+			case 3: {
+				if(extendCount>3) {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.red);
+				} else {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.work);
+				}
+				break;
+			}
+			case 4: {
+				if(extendCount>3) {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.red);
+				} else {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.rest);
+				}
+				break;
+			}
+			default: break;
 		}
 
 

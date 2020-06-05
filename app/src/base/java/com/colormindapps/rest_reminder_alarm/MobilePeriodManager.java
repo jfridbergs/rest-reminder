@@ -33,6 +33,7 @@ public class MobilePeriodManager {
 		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		i.putExtra(RReminder.PERIOD_END_TIME, when);
 		i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
+		Log.d("PERIOD_MANAGER", "New Alarm: type: "+type+", extendCount: "+extendCount+", endTime: "+when);
 		SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
 		Calendar endTime = Calendar.getInstance();
 		endTime.setTimeInMillis(when);

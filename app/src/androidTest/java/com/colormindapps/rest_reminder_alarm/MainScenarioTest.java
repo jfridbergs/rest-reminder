@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.preference.PreferenceManager;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.LargeTest;
 import android.util.Log;
 
 import androidx.fragment.app.DialogFragment;
@@ -13,6 +11,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -265,5 +264,39 @@ public class MainScenarioTest {
         expectedSize = 15;
         actualSize = RReminder.adjustTitleSize(appContext, count, true);
         assertWithMessage("small screen with 40 symbol string should have font size 15"). that(expectedSize).isEqualTo(actualSize);
+    }
+
+    @Test
+    public void testTimerStopOnPause() {
+        try (ActivityScenario<MainActivity> scenario =
+                     ActivityScenario.launch(MainActivity.class)) {
+            scenario.recreate();
+            assertThat(scenario.getState()).isEqualTo(Lifecycle.State.RESUMED);
+            scenario.onActivity(
+                    activity -> {
+                        assertWithMessage("at the start the timer shouldnt be active").that(activity.countdown == null).isTrue();
+                        activity.startReminder();
+                    });
+
+            onView(isRoot()).perform(CustomActions.waitFor(2000));
+
+            scenario.onActivity(
+                    activity -> {
+                        assertWithMessage("after launching reminder the countdown timer should be active").that(activity.countdown != null && activity.countdown.isRunning).isTrue();
+                    });
+
+            scenario.moveToState(Lifecycle.State.STARTED);
+            scenario.onActivity(
+                    activity -> {
+                        assertWithMessage("after onPause was called, the countdown timer should be inactive").that(activity.countdown.isRunning).isFalse();
+                    });
+            scenario.moveToState(Lifecycle.State.STARTED);
+            scenario.moveToState(Lifecycle.State.RESUMED);
+            onView(isRoot()).perform(CustomActions.waitFor(1000));
+            scenario.onActivity(
+                    activity -> {
+                        assertWithMessage("after onResume was called the countdown timer should be active").that(activity.countdown.isRunning).isTrue();
+                    });
+        }
     }
 }

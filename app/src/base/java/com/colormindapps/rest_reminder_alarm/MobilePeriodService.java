@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -14,11 +16,10 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
 public class MobilePeriodService extends JobIntentService {
-	long mCalendar;
 	int type;
 	int extendCount;
 	int typeForNotification;
-	long periodEndedTime;
+	long periodEndedTime, nextPeriodEndTime;
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 
@@ -40,6 +41,7 @@ public class MobilePeriodService extends JobIntentService {
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
 			periodEndedTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+			nextPeriodEndTime = intent.getExtras().getLong(RReminder.NEXT_PERIOD_END_TIME);
 		}
 		//manage period end
 		RReminder.addDismissDialogFlag(this);
@@ -47,8 +49,7 @@ public class MobilePeriodService extends JobIntentService {
 
 		type = RReminder.getNextPeriodType(type);
 		//playSound();
-		mCalendar = RReminder.getNextPeriodEndTime(this, type, periodEndedTime, 1, 0L);
-
+		Log.d("PERIOD_SERVICE", "nextPeriodEndValue: "+intent.getExtras().getLong(RReminder.NEXT_PERIOD_END_TIME));
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 		mgr.cancel(24);
 
@@ -59,7 +60,7 @@ public class MobilePeriodService extends JobIntentService {
 		//getSystemService(Context.POWER_SERVICE);
 		//boolean isScreenOn = pm.isScreenOn();
 		if(RReminder.isActiveModeNotificationEnabled(this)){
-			mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, mCalendar, true));
+			mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, nextPeriodEndTime, true));
 		}
 		if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
 			gotoMainActivity();
@@ -81,7 +82,7 @@ public class MobilePeriodService extends JobIntentService {
 		}
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
-		actionIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);
+		actionIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 		actionIntent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		actionIntent.putExtra(RReminder.PLAY_SOUND, true);
 		actionIntent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);
@@ -115,7 +116,7 @@ public class MobilePeriodService extends JobIntentService {
 		}
 		Intent notificationIntent = new Intent(this, NotificationActivity.class);
 		notificationIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
-		notificationIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);
+		notificationIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 		notificationIntent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		notificationIntent.putExtra(RReminder.PLAY_SOUND, false);
 		notificationIntent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);

@@ -33,6 +33,7 @@ public class RReminder {
 	public static final String TURN_OFF = "turn_off";
 	public static final String MANUAL_MODE_NEXT_PERIOD_TYPE = "manual_mode_next_period_type";
 	public static final String PERIOD_END_TIME = "period_end";
+	public static final String NEXT_PERIOD_END_TIME = "next_period_end";
 	public static final String EXTENDED_PERIOD_TYPE = "extended_period_type";
 	public static final String START_COUNTER = "start_counter";
 	public static final String EXTEND_COUNT = "extend_count";
@@ -454,7 +455,7 @@ public class RReminder {
 		if(addMins==955){
 			switch(type){
 				case WORK:{
-					calendar+=15000 + timeTillEndExtend;
+					calendar+=20000 + timeTillEndExtend;
 					break;
 				}
 				case REST:{
