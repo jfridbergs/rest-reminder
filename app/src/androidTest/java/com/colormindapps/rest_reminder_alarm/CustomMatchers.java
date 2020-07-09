@@ -5,6 +5,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -58,6 +60,22 @@ public class CustomMatchers {
         };
     }
 
+    public static Matcher<View> withNumberPickerValue(final int expectedValue) {
+        return new BoundedMatcher<View, NumberPicker>(NumberPicker.class) {
+
+            @Override
+            protected boolean matchesSafely(NumberPicker numberPicker) {
+                return numberPicker.getValue() == expectedValue;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with numberpicker value: ");
+                description.appendValue(expectedValue);
+            }
+        };
+    }
+
     public static Matcher<View> withTextSize(final int expectedSize) {
         return new BoundedMatcher<View, TextView>(TextView.class) {
 
@@ -77,6 +95,42 @@ public class CustomMatchers {
             }
         };
     }
+
+    public static Matcher<View> withVerticalPosition(final int expectedVerticalPosition) {
+        return new BoundedMatcher<View, WebView>(WebView.class) {
+
+            @Override
+            protected boolean matchesSafely(WebView webView) {
+                Log.d("CUSTOM_MATCHERS", "vertical position: "+ webView.getScrollY());
+                return webView.getScrollY() == expectedVerticalPosition;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with vertical scroll position size: ");
+                description.appendValue(expectedVerticalPosition);
+            }
+        };
+    }
+
+    public static Matcher<View> withVerticalPositionSaved(final int expectedVerticalPosition) {
+        return new BoundedMatcher<View, WebView>(WebView.class) {
+
+            @Override
+            protected boolean matchesSafely(WebView webView) {
+                Log.d("CUSTOM_MATCHERS", "vertical position: "+ webView.getScrollY());
+                return webView.getScrollY() > 1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("with vertical scroll position size: ");
+                description.appendValue(expectedVerticalPosition);
+            }
+        };
+    }
+
+
 
     public static Matcher<View> withEnoughSpace() {
         return new BoundedMatcher<View, TextView>(TextView.class) {
@@ -137,4 +191,6 @@ public class CustomMatchers {
             }
         };
     }
+
+
 }

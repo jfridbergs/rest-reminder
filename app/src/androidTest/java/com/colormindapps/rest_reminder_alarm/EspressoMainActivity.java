@@ -1123,6 +1123,16 @@ public class EspressoMainActivity {
         onView(withId(R.id.period_title)).check(matches(withText(expectedOnlineWorkTitle)));
     }
 
+    @Test
+    public void testNotificationCloseButton(){
+        onView(withId(R.id.timer_layout)).perform(click());
+        onView(isRoot()).perform(CustomActions.waitFor(20000));
+        onView(withId(R.id.notification_button)).perform(click());
+        onView(withId(R.id.notification_title)).check(doesNotExist());
+        onView(withId(R.id.notification_button)).check(doesNotExist());
+    }
+
+
 
 
     private String getResourceString(int id) {

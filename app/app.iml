@@ -30,9 +30,9 @@
     <output-test url="file://$MODULE_DIR$/build/intermediates/javac/baseDebugUnitTest/classes" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/ap_generated_sources/baseDebug/out" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/aidl_source_output_dir/baseDebug/out" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/base/debug" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/ap_generated_sources/baseDebug/out" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/renderscript_source_output_dir/baseDebug/out" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/base/debug" type="java-resource" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/baseDebug/res" type="java-resource" />
@@ -42,9 +42,9 @@
       <sourceFolder url="file://$MODULE_DIR$/src/baseDebug/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/baseDebug/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/baseDebug/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/build/generated/ap_generated_sources/baseDebugAndroidTest/out" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/aidl_source_output_dir/baseDebugAndroidTest/out" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/source/buildConfig/androidTest/base/debug" isTestSource="true" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/build/generated/ap_generated_sources/baseDebugAndroidTest/out" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/renderscript_source_output_dir/baseDebugAndroidTest/out" isTestSource="true" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/build/generated/res/rs/androidTest/base/debug" type="java-test-resource" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTestBaseDebug/res" type="java-test-resource" />
