@@ -108,6 +108,7 @@ public class RReminder {
 	public static final String PREF_EXTEND_BASE_LENGTH_KEY = "end_extend_length_key";
 	public static final String PREF_EXTEND_OPTIONS_KEY = "end_extend_options_key";
 	public static final String PREF_APPROX_LENGTH_KEY = "approx_notification_length_key";
+	public static final String PREFERENCE_SCREEN_KEY = "preference_screen_key";
 
 	public static final int EXTEND_PERIOD_SINGLE_OPTION = 1;
 	public static final int EXTEND_PERIOD_WEAR = 2;
@@ -136,6 +137,9 @@ public class RReminder {
     public static final String PRIVATE_PREF = "myapp";
     public static final String VERSION_KEY = "version_number";
 	public static final String EULA_ACCEPTED="eula_accepted";
+	public static final String DISPLAY_TURN_OFF_HINT = "display_turn_off_hint";
+	public static final String TURN_OFF_COUNT = "turn_off_count";
+	public static final String EULA_ACCEPT_TIME="eula_accept_time";
     public static final String TIME_FORMAT_24H = "kk:mm";
     public static final String TIME_FORMAT_12H = "hh:mm aa";
     public static final String DATE_FORMAT = "dd/MM/yyyy kk:mm.ss";
@@ -245,6 +249,7 @@ public class RReminder {
 			default: return RReminder.PERIOD_OFF;
 		}
 	}
+
 
 	
 	public static boolean isEndPeriodEnabled(Context context){
@@ -551,8 +556,8 @@ public class RReminder {
 				size = size * 2;
 			}
 			return size;
-		} else if (length <=25 && length > 15){
-			size = 35;
+		} else if (length <=25 && length > 10){
+			size = 38;
 			if(smallTitle){
 				return 26;
 			}
@@ -561,7 +566,12 @@ public class RReminder {
 			}
 			return size;
 		} else {
-			size = 50;
+			if(isPortrait(context)){
+				size=70;
+			} else {
+				size = 50;
+			}
+
 			if(smallTitle){
 				return 34;
 			}

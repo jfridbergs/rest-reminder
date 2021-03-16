@@ -9,6 +9,12 @@
         android:title="@string/menu_settings"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/menu_settings_X"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:orderInCategory="100"
+        android:title="Settings X"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/menu_feedback"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="101"

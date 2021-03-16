@@ -17,8 +17,8 @@
     <string name="counter_on">Atpūtu atgādinātājs ir ieslēgts</string>
     <string name="notification_sample_text">Sample text for period end notification</string>
     <string name="close_notification">Aizvērt</string>
-    <string name="on_work_period">Darba periods</string>
-    <string name="on_rest_period">Atpūtas periods</string>
+    <string name="on_work_period">Darbs</string>
+    <string name="on_rest_period">Atpūta</string>
     <string name="description_extended">pagarināts %1$d reizes</string>
     <string name="extend_current_period">pagarināt periodu</string>
     <string name="toast_period_end_forced">Tekošais periods tika pārtraukts</string>
@@ -31,6 +31,7 @@
     <string name="release_text">Atlaist, lai beigtu tekošo periodu</string>
     <string name="timer_layout_colon_string">:</string>
     <string name="timer_layout_point_string">.</string>
+    <string name="description_turn_off">Lai izslēgtu, spied un turi taimeri</string>
     <string name="turning_off_text">Izslēdzas&#8230;</string>
     <string name="swipe_area_work">strādāt</string>
     <string name="swipe_area_rest">atpūsties</string>
@@ -73,6 +74,7 @@
     <string name="pref_category_basic_settings_title">Vispārējie iestatījumi</string>
     <string name="pref_screen_periods_key">screen_period_length</string>
     <string name="pref_screen_periods_title">Darba un atpūtas periodu iestatījumi</string>
+    <string name="pref_screen_extension_title">Periodu pagarināšanas iestatījumi</string>
     <string name="pref_work_period_length_key">work_period_length</string>
     <string name="pref_work_period_length_title">Darba perioda ilgums</string>
     <string name="pref_work_period_length_dialog_text">Ievadīt perioda ilgumu (stundas un minūtes)</string>
@@ -84,6 +86,8 @@
     <string name="pref_rest_period_start_sound_key">rest_period_start_sound</string>
     <string name="pref_category_features_key">features_category</string>
     <string name="pref_category_features_title">Programmas iespēju iestatījumi</string>
+    <string name="pref_category_period_settings_key">period_settings_category</string>
+    <string name="pref_category_extension_settings_key">extension_settings_category</string>
     <string name="pref_approx_time_sound_key">approx_time_sound</string>
     <string name="pref_approx_time_sound_title">Perioda beigu tuvuma atgādinājuma tonis</string>
     <string name="title_activity_notification">NotificationActivity</string>

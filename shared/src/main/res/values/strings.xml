@@ -19,9 +19,10 @@
     <string name="counter_on">Rest reminder is on</string>
     <string name="notification_sample_text">Sample text for period end notification</string>
     <string name="close_notification">Close</string>
-    <string name="on_work_period">Work Period</string>
-    <string name="on_rest_period">Rest Period</string>
+    <string name="on_work_period">Work</string>
+    <string name="on_rest_period">Rest</string>
     <string name="description_extended">extended %1$d times</string>
+    <string name="description_turn_off">To turn off, press and hold timer</string>
     <string name="description_extended_one_time">extended</string>
     <string name="extend_current_period">extend period</string>
     <string name="extend_period_one_option">extend for %1$d min</string>
@@ -102,6 +103,7 @@
     <string name="pref_category_basic_settings_title">General settings</string>
     <string name="pref_screen_periods_key">screen_period_length</string>
     <string name="pref_screen_periods_title">Work and rest period settings</string>
+    <string name="pref_screen_extension_title">Period extension settings</string>
     <string name="pref_work_period_length_key">work_period_length</string>
     <string name="pref_work_period_length_title">Work period duration</string>
     <string name="pref_work_period_length_dialog_text">Set period duration in hours and minutes</string>
@@ -114,6 +116,8 @@
     <string name="pref_rest_period_start_sound_title">Rest period start sound</string>
     <string name="pref_category_features_key">features_category</string>
     <string name="pref_category_features_title">Feature settings</string>
+    <string name="pref_category_period_settings_key">period_settings_category</string>
+    <string name="pref_category_extension_settings_key">extension_settings_category</string>
     <string name="pref_approx_time_sound_key">approx_time_sound</string>
     <string name="pref_approx_time_sound_title">Proximity alarm sound</string>
     <string name="title_activity_notification">NotificationActivity</string>
@@ -139,7 +143,7 @@
     <string name="pref_period_extend_length_summary">Set the period end extend duration in minutes</string>
     <string name="pref_period_extend_length_dialog_text">Set the extend in minutes (1&#8211;120)</string>
     <string name="pref_period_extend_options_key">end_extend_options_key</string>
-    <string name="pref_period_extend_options_title">Amount of extending options</string>
+    <string name="pref_period_extend_options_title">Amount of extension options</string>
     <string name="pref_period_extend_options_dialog_text">Choose the amount of extend options</string>
     <string name="pref_screen_approx_settings_key">pref_screen_approx_settings</string>
     <string name="pref_screen_approx_settings_title">Proximity alarm settings</string>

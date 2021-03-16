@@ -1,15 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion '28.0.3'
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
-        targetSdkVersion 28
-        versionCode 13
+        targetSdkVersion 29
+        versionCode 14
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //android.test.InstrumentationTestRunner for robotium tests
 
@@ -33,9 +33,9 @@ android {
     productFlavors {
         base {
             applicationId "com.colormindapps.rest_reminder_alarm"
-            versionName "1.1.2-base"
+            versionName "1.1.3-base"
             minSdkVersion 16
-            targetSdkVersion 28
+            targetSdkVersion 29
             dimension "default"
             proguardFile 'flavor-rules-base.pro'
         }
@@ -43,7 +43,7 @@ android {
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
             versionName "1.1-pro"
             minSdkVersion 16
-            targetSdkVersion 28
+            targetSdkVersion 29
             dimension "default"
             proguardFile 'flavor-rules-pro.pro'
         }
@@ -91,21 +91,23 @@ dependencies {
     //Espresso
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test:runner:1.2.0-alpha03'
+    androidTestImplementation 'androidx.test:runner:1.3.0-alpha02'
     androidTestImplementation 'androidx.test:rules:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
     androidTestImplementation 'androidx.test.ext:truth:1.2.0'
     androidTestImplementation 'com.google.truth:truth:0.42'
     // fixes issue on linux/mac
-    testImplementation 'org.robolectric:robolectric:4.2.1'
-    testImplementation 'org.robolectric:shadows-play-services:3.0'
-    testImplementation 'org.robolectric:shadows-support-v4:3.0'
+    //testImplementation 'org.robolectric:robolectric:4.2.1'
+    //testImplementation 'org.robolectric:shadows-play-services:3.0'
+    //testImplementation 'org.robolectric:shadows-support-v4:3.0'
 
     implementation 'com.google.android.gms:play-services-wearable:17.0.0'
+    implementation 'com.google.android.play:core:1.9.1'
 
     androidTestImplementation 'androidx.annotation:annotation:1.1.0'
 
     implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'androidx.preference:preference:1.1.1'
 
     // Room components
     implementation 'androidx.room:room-runtime:2.2.5'

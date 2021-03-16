@@ -36,6 +36,7 @@
 	   	    android:layout_height="48dp"
 	   	    android:layout_marginLeft="15dp"
 	   	    android:layout_marginTop="15dp"
+			android:paddingTop="2dp"
 	   	    android:onClick="showHintDialog"
 			android:layout_below="@id/toolbar"
 	   	    android:text="@string/hint_dialog_text"

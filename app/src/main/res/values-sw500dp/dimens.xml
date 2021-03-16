@@ -4,7 +4,7 @@
     
     <!-- Main Activity -->
     
-    <dimen name="period_title_text_size">35sp</dimen>
+    <dimen name="period_title_text_size">45sp</dimen>
     <dimen name="description_text_text_size">28sp</dimen>
     <dimen name="description_text_marginTop">11dp</dimen>
     <dimen name ="timer_layout_width">450dp</dimen>

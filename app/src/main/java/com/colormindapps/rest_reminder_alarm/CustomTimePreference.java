@@ -7,11 +7,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-
-import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
 public class CustomTimePreference extends DialogPreference {
@@ -24,6 +23,7 @@ public class CustomTimePreference extends DialogPreference {
 	private int restoreHour;
 	private int restoreMinute;
 	private String headerText;
+
 	
 
 	
@@ -42,7 +42,7 @@ public class CustomTimePreference extends DialogPreference {
 	public CustomTimePreference(Context context, AttributeSet attrs){
 		super(context, attrs);
 		init(attrs);
-		setDialogLayoutResource(R.layout.custom_time_preference);
+		setDialogLayoutResource(R.layout.period_length_pref_dialog);
 		setPositiveButtonText(context.getString(R.string.time_preference_set_text));
 		setNegativeButtonText(context.getString(R.string.time_preference_cancel_text));
 	}

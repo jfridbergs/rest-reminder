@@ -42,6 +42,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -55,6 +57,10 @@ import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.tasks.Task;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -107,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	int colorRest, colorWork, colorBlack, colorRed, colorWhite, colorInactive;
 	TextView swipeArea;
 	Button infoButton;
-	Typeface font, titleFont, swipeFont, timerFont;
+	Typeface font, titleFont, swipeFont, timerFont, infoFont;
 	private RelativeLayout timerButtonLayout;
 	private Button extendPeriodEnd;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
@@ -115,8 +121,15 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	int turnOffValue=0;
 	private boolean turnOffFirstIntent;
 	private NotificationManagerCompat mgr;
+	private SharedPreferences sharedPref;
+	private CountDownTimer descriptionAnimTimer;
 
 	private ValueAnimator bgAnimation;
+
+	float mLastTouchX, mLastTouchY, startX, startY;
+	private int mActivePointerId;
+
+	String debug = "MAIN_ACTIVITY";
 
 	//for testing purposes only. remove before release
 	//boolean isOngoingNotificationOn;
@@ -256,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.d(debug, "onCreate()");
 		setContentView(R.layout.activity_main);
 		toolBar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolBar);
@@ -298,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.d("MAIN", "onStart");
+		Log.d(debug, "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
@@ -327,6 +341,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		titleFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
 		swipeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-UltLt.otf");
 		timerFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
+		infoFont = Typeface.createFromAsset(getAssets(), "fonts/Blenda Script.otf");
 
 		activityTitle = findViewById(R.id.period_title);
 
@@ -352,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		swipeArea.setTypeface(swipeFont);
 		activityTitle.setTypeface(titleFont);
 		description.setTypeface(font);
+		infoButton.setTypeface(infoFont);
 
 
 		description.setText("");
@@ -406,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		//showing an EULA dialog after each update
 
-		SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
+		 sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 		int currentVersionNumber = 0;
 		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
 		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
@@ -434,6 +450,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d(debug, "onResume");
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
@@ -463,6 +480,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onPause() {
+		Log.d(debug, "onPause()");
 		super.onPause();
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
@@ -479,7 +497,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		super.onStop();
-		Log.d("MAIN", "onStop");
+		Log.d(debug, "onStop");
 		setVisibleState(false);
 		//stopCountDownTimer();
 		if (mBound) {
@@ -663,6 +681,48 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		periodType = 0;
 		storedPeriodEndTime = 0;
 		periodEndTimeValue = 0;
+		long eulaTime = sharedPref.getLong(RReminder.EULA_ACCEPT_TIME, 0L);
+		if(eulaTime > 0 && Calendar.getInstance().getTimeInMillis() - eulaTime > 60*60*1000){
+			openReview();
+		}
+		//increase turn off count for purposes of turn off hin
+		//if turn off hint was previously disabled, skip the turn off count increase
+		if(displayTurnOffHint()){
+			int turnOffCount = sharedPref.getInt(RReminder.TURN_OFF_COUNT, 0);
+			Log.d(debug, "app has been previously turned off times: "+ turnOffCount);
+			turnOffCount++;
+			Editor editor = sharedPref.edit();
+			editor.putInt(RReminder.TURN_OFF_COUNT, turnOffCount);
+			if(turnOffCount>=3){
+				Log.d(debug, "reminder has been turned off "+ turnOffCount+ " times, turn off hint will not be displayed any more");
+				editor.putBoolean(RReminder.DISPLAY_TURN_OFF_HINT, false);
+			}
+			editor.apply();
+		}
+
+
+	}
+
+	public void openReview(){
+		ReviewManager manager = ReviewManagerFactory.create(this);
+		Task<ReviewInfo> request = manager.requestReviewFlow();
+		request.addOnCompleteListener(requestTask -> {
+			if (requestTask.isSuccessful()) {
+				// We can get the ReviewInfo object
+				Log.d(debug, "review request approved");
+				ReviewInfo reviewInfo = requestTask.getResult();
+				Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+				flow.addOnCompleteListener(openTask -> {
+					// The flow has finished. The API does not indicate whether the user
+					// reviewed or not, or even whether the review dialog was shown. Thus, no
+					// matter the result, we continue our app flow.
+				});
+			} else {
+				Log.d(debug, "review request denied");
+				// There was some problem, continue regardless of the result.
+			}
+		});
+
 	}
 
 
@@ -688,9 +748,16 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	      
 	      */
 
+		if(descriptionAnimTimer!=null){
+			descriptionAnimTimer.cancel();
+		}
+
 		if (isOn) {
 			activityTitle.setTextColor(colorBlack);
 			toolBar.setTitleTextColor(colorBlack);
+			if(displayTurnOffHint()){
+				description.setText(R.string.description_turn_off);
+			}
 
 			switch (periodType) {
 				case 1:
@@ -733,6 +800,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					} else {
 							description.setText(String.format(getString(R.string.description_extended),extendCount));
 					}
+
 					break;
 				case 4:
 					if (extendCount > 3) {
@@ -759,6 +827,28 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					break;
 
 			}
+
+			if(displayTurnOffHint() && extendCount>0){
+				descriptionAnimTimer = new CountDownTimer((periodEndTimeValue-Calendar.getInstance().getTimeInMillis()), 10000) {
+					int ticks = 0;
+					public void onTick(long millisUntilFinished) {
+						if(ticks>0){
+							if(ticks % 2 == 0){
+								animateDescription(false);
+							}else {
+								animateDescription(true);
+							}
+						}
+						ticks++;
+					}
+
+					public void onFinish() {
+					}
+				}.start();
+			}
+
+			//show turnoff hint for new users
+
 
 			titleSequence = activityTitle.getText();
 			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
@@ -836,6 +926,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			activityTitle.setTextColor(colorWhite);
 			activityTitle.setText(getString(R.string.reminder_off_title));
 			description.setText("");
+			description.setVisibility(View.VISIBLE);
 			titleSequence = activityTitle.getText();
 			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 			infoButton.setTextColor(colorWhite);
@@ -1060,10 +1151,16 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			startActivity(ih);
 			return true;
 		} else if (item.getItemId() == R.id.menu_settings) {
-				Intent i = new Intent(this, PreferenceActivity.class);
-				startActivity(i);
+			Intent i = new Intent(this, PreferenceActivity.class);
+			startActivity(i);
 			return true;
-		} else if (item.getItemId() == R.id.menu_feedback){
+		}
+		else if (item.getItemId() == R.id.menu_settings_X) {
+			Intent i = new Intent(this, PreferenceXActivity.class);
+			startActivity(i);
+			return true;
+		}
+		else if (item.getItemId() == R.id.menu_feedback){
 				Intent Email = new Intent(Intent.ACTION_SEND);
 				Email.setType("text/email");
 				Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
@@ -1439,6 +1536,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
 			editor.putBoolean(RReminder.EULA_ACCEPTED, true);
+			editor.putLong(RReminder.EULA_ACCEPT_TIME, Calendar.getInstance().getTimeInMillis());
 			editor.apply();
 		}
 
@@ -1455,6 +1553,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public void stopReminder() {
 		setReminderOff(periodEndTimeValue);
 	}
+
+	public boolean displayTurnOffHint(){
+		Log.d(debug, "displayTurnOffHint: "+sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true));
+		return sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true);
+	}
+
 
 
 	@Override
@@ -1550,8 +1654,40 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	}
 
 
-	float mLastTouchX, mLastTouchY, startX, startY;
-	private int mActivePointerId;
+	public void animateDescription(boolean switchToHint){
+		AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+		anim.setDuration(1000);
+		anim.setRepeatCount(1);
+		anim.setRepeatMode(Animation.REVERSE);
+		anim.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				if(switchToHint){
+					description.setText(getString(R.string.description_turn_off));
+				} else {
+					if(extendCount==1){
+						description.setText(getString(R.string.description_extended_one_time));
+					} else {
+						description.setText(String.format(getString(R.string.description_extended),extendCount));
+					}
+				}
+
+			}
+		});
+		description.startAnimation(anim);
+	}
+
+
 
 	private class TimerButtonListener implements OnTouchListener {
 
@@ -1604,6 +1740,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 							if (ticks == 7) {
 
 								activityTitle.setText(getString(R.string.turning_off_text));
+								description.setVisibility(View.INVISIBLE);
 								titleSequence = activityTitle.getText();
 								activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 								activityTitle.setTextColor(colorWhite);
@@ -1627,6 +1764,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					if (!turnedOff) {
 						activityTitle.setText(tempTitle);
 						activityTitle.setTextColor(colorBlack);
+						description.setVisibility(View.VISIBLE);
 						titleSequence = activityTitle.getText();
 						activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 						animatePowerDownRestore(frames);
@@ -1640,6 +1778,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					titleSequence = activityTitle.getText();
 					activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 					activityTitle.setTextColor(colorBlack);
+					description.setVisibility(View.VISIBLE);
 					timerButtonLayout.setBackgroundResource(R.drawable.btn_timer_idle_np);
 					timer.cancel();
 					frames = 0;

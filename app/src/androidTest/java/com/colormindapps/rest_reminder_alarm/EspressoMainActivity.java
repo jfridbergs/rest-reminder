@@ -208,9 +208,7 @@ public class EspressoMainActivity {
         onView(withId(R.id.notification_title)).check(matches(CustomMatchers.withTextColor(expectedColor)));
 
         onView(withId(R.id.notification_turn_off)).perform(click());
-        onView(isRoot()).perform(CustomActions.waitFor(1000));
-        int updatedSetReminderOffCounter = mActivityRule.getActivity().setReminderOffCounter;
-        Assert.assertTrue("after pressing turn off button the setReminderOff should be called", (updatedSetReminderOffCounter == initialSetReminderOffCounter));
+        Assert.assertTrue("after pressing turn off button the setReminderOff should be called and activity finished", mActivityRule.getActivity().isFinishing());
         //onView(withId(R.id.notification_turn_off)).check(doesNotExist());
         //onView(withId(R.id.timer_layout)).check(matches(isDisplayed()));
     }
@@ -317,7 +315,7 @@ public class EspressoMainActivity {
 
         assertWithMessage("extenddialog is an instance of DialogFragment").that(extendDialog != null).isTrue();
         assertWithMessage("extenddialog is visible").that( extendDialog.dialogIsOpen).isTrue();
-        onView(isRoot()).perform(CustomActions.waitFor(15000));
+        onView(isRoot()).perform(CustomActions.waitFor(20000));
         intended(hasComponent(NotificationActivity.class.getName()));
         onView(withId(R.id.notification_button)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
@@ -366,17 +364,12 @@ public class EspressoMainActivity {
         intent.setAction(RReminder.ACTION_ALARM_PERIOD_END);
         boolean alarmUp = (PendingIntent.getBroadcast(appContext, (int)mActivityRule.getActivity().periodEndTimeValue, intent, PendingIntent.FLAG_ONE_SHOT) != null);
         assertWithMessage("the alarm manager is running").that(alarmUp).isTrue();
-        onView(withId(R.id.timer_layout)).perform(TouchActions.pressAndHold());
-        onView(isRoot()).perform(CustomActions.waitFor(700));
-        onView(withId(R.id.timer_layout)).perform(TouchActions.release());
-        TouchActions.tearDown();
+        timerLongPress(700);
         int actualFunctionCount = mActivityRule.getActivity().restoreAnimateCounter;
         int diff = actualFunctionCount - restoreFunctionCount;
         assertWithMessage("the restore animation function counter should have been increased").that(diff).isEqualTo(1);
 
-        onView(withId(R.id.timer_layout)).perform(TouchActions.pressAndHold());
-        onView(isRoot()).perform(CustomActions.waitFor(2000));
-        onView(withId(R.id.timer_layout)).perform(TouchActions.release());
+        timerLongPress(2000);
 
 
         assertWithMessage("the service is not running").that(RReminderMobile.isCounterServiceRunning(appContext)).isFalse();
@@ -1083,6 +1076,7 @@ public class EspressoMainActivity {
         onView(withId(R.id.mainActivityLayout)).check(matches(CustomMatchers.withBackgroundColor(expectedBgColor)));
     }
 
+    /*
     @Test
     public void testOnGoingNotificationIntent(){
         onView(withId(R.id.timer_layout)).perform(click());
@@ -1103,6 +1097,8 @@ public class EspressoMainActivity {
         onView(withId(R.id.period_title)).check(matches(isDisplayed()));
 
     }
+
+     */
 
     @Test
     public void testDialogCloseTimerResume(){
@@ -1130,6 +1126,13 @@ public class EspressoMainActivity {
         onView(withId(R.id.notification_button)).perform(click());
         onView(withId(R.id.notification_title)).check(doesNotExist());
         onView(withId(R.id.notification_button)).check(doesNotExist());
+    }
+
+    private void timerLongPress(int duration){
+        onView(withId(R.id.timer_layout)).perform(TouchActions.pressAndHold());
+        onView(isRoot()).perform(CustomActions.waitFor(duration));
+        onView(withId(R.id.timer_layout)).perform(TouchActions.release());
+        TouchActions.tearDown();
     }
 
 

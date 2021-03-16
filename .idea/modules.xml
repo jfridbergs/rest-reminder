@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WorkdayScheduler1.iml" filepath="$PROJECT_DIR$/WorkdayScheduler1.iml" group="WorkdayScheduler1" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="WorkdayScheduler1/app" />
-      <module fileurl="file://$PROJECT_DIR$/shared/shared.iml" filepath="$PROJECT_DIR$/shared/shared.iml" group="WorkdayScheduler1/shared" />
-      <module fileurl="file://$PROJECT_DIR$/wear/wear.iml" filepath="$PROJECT_DIR$/wear/wear.iml" group="WorkdayScheduler1/wear" />
+      <module fileurl="file://$PROJECT_DIR$/WorkdayScheduler1.iml" filepath="$PROJECT_DIR$/WorkdayScheduler1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/WorkdayScheduler1.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/WorkdayScheduler1.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/shared/WorkdayScheduler1.shared.iml" filepath="$PROJECT_DIR$/.idea/modules/shared/WorkdayScheduler1.shared.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/wear/WorkdayScheduler1.wear.iml" filepath="$PROJECT_DIR$/.idea/modules/wear/WorkdayScheduler1.wear.iml" />
     </modules>
   </component>
 </project>
