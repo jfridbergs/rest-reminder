@@ -237,10 +237,8 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 		//Remove a flag for redirecting from MainActivity to NotificationActivity
 		
 		if(RReminder.getMode(this)== 1){
-
-			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
-
-			
+			long currentTime = Calendar.getInstance().getTimeInMillis();
+			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), currentTime, 1, 0L);
 			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 

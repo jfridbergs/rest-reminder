@@ -10,14 +10,22 @@
         android:layout_centerHorizontal="true"
         android:textSize="16sp"
         android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp" />
+    <TextView
+        android:id="@+id/short_period_warning"
+        android:layout_below="@id/custom_time_preference_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp" />
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:text="@string/short_period_warning"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/custom_time_preference_title"
+        android:layout_below="@id/short_period_warning"
         android:gravity="center_horizontal"
         android:orientation="horizontal"
         android:layout_marginBottom="10dp" >

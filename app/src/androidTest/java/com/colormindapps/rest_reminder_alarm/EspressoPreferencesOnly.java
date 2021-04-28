@@ -34,6 +34,9 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 @LargeTest
 public class EspressoPreferencesOnly {
 
+    //Made this additional test file for preference tests, as it is launched from PreferenceActivity instead of MainActivity, because the function for rotating screen requires the correct base activity
+    // (cant call rotate screen in preference activity by using MainActivity test rule) or i dont know yey, how to set up multiple test rules.
+
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
     float scaledDensity;
@@ -47,8 +50,8 @@ public class EspressoPreferencesOnly {
 
     String debug = "ESPRESSO_PREFERENCES_ONLY";
     @Rule
-    public IntentsTestRule<PreferenceActivity> pActivityRule =
-            new IntentsTestRule<PreferenceActivity>(PreferenceActivity.class, false, true);
+    public IntentsTestRule<PreferenceXActivity> pActivityRule =
+            new IntentsTestRule<PreferenceXActivity>(PreferenceXActivity.class, false, true);
 
     @Before
     public void setUp(){
@@ -72,7 +75,10 @@ public class EspressoPreferencesOnly {
         extendCountKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key);
         extendBaseLengthKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_key);
 
-        filter = new IntentFilter(RReminder.CUSTOM_INTENT_TEST_PREFERENCES);
+        filter = new IntentFilter();
+        filter.addAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_MODE);
+        filter.addAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_PERIOD);
+        filter.addAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_EXTEND);
 
         editor.putBoolean(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_extend_key), true);
         editor.putBoolean(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_enable_approx_notification_key), true);

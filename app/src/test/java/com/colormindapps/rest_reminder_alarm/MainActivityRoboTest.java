@@ -15,14 +15,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
-import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowAlarmManager;
 import org.robolectric.shadows.ShadowApplication;
 import org.robolectric.shadows.gms.ShadowGooglePlayServicesUtil;
-import org.robolectric.util.ActivityController;
 
 import java.util.Calendar;
 

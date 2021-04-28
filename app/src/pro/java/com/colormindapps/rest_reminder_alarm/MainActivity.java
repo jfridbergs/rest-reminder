@@ -742,7 +742,9 @@ public class MainActivity extends AppCompatActivity implements
 		sessionStartTime = Calendar.getInstance().getTimeInMillis();
 		Log.d(debug, "SET_REMINDER_ON sessionStartTime: "+sessionStartTime);
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, sessionStartTime, 1, 0L);
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
+		if ((mCalendar - sessionStartTime)>= RReminder.SHORT_PERIOD_LIMIT){
+			new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
+		}
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
 		currentSession = new Session(0,sessionStartTime,0L);
 		mSessionsViewModel.insert(currentSession);
@@ -941,8 +943,9 @@ public class MainActivity extends AppCompatActivity implements
 				RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 			}
 
-
-			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount);
+			if((updatedPeriodEndTime - Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
+				new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount);
+			}
 			RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
 
 			Intent intent = new Intent(this, CounterService.class);
@@ -1414,7 +1417,10 @@ public class MainActivity extends AppCompatActivity implements
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
+		if((functionCalendar - Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
+			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
+		}
+
 		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
@@ -1657,14 +1663,16 @@ public class MainActivity extends AppCompatActivity implements
 			default:
 				break;
 		}
-		functionCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
+		long currentTime = Calendar.getInstance().getTimeInMillis();
+		functionCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, currentTime, 1, 0L);
 
 		extendCount = 0;
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
 			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
-
-		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
+		if((functionCalendar-currentTime)>=RReminder.SHORT_PERIOD_LIMIT){
+			new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
+		}
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType, functionCalendar,extendCount, true, wearOn);
 
 		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
@@ -1762,10 +1770,12 @@ public class MainActivity extends AppCompatActivity implements
 				//intent after calling next period start from notification activity
 				case RReminder.ACTION_MANUAL_START_NEXT_PERIOD: {
 					@RReminder.PeriodType int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
-					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), Calendar.getInstance().getTimeInMillis(), 1, 0L);
+					long currentTime = Calendar.getInstance().getTimeInMillis();
+					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), currentTime, 1, 0L);
 
-
-					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
+					if((nextPeriodEnd - currentTime)>=RReminder.SHORT_PERIOD_LIMIT){
+						new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
+					}
 					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {

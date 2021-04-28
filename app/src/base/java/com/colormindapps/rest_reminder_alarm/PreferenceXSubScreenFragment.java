@@ -23,10 +23,13 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getHourFromString;
+import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getMinuteFromString;
+
 public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = PreferenceXSubScreenFragment.class.getName();
     Uri originalWorkUri, originalRestUri, newWorkUri, newRestUri;
-    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey;
+    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, enableShortPeriodsKey;
     String testWorkAudioSummary, testRestAudioSummary, testWorkLengthSummary, testRestLengthSummary, testExtendCountSummary, testExtendLengthSummary;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
@@ -34,6 +37,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
     Context context;
     String workPeriodLength, restPeriodLength;
     String preferenceScreenKey;
+    private boolean shortDisabled = false;
 
     int REQUEST_CODE_ALERT_WORK_RINGTONE = 1;
     int REQUEST_CODE_ALERT_REST_RINGTONE = 2;
@@ -59,7 +63,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         setPreferencesFromResource(R.xml.preferences_x, rootKey);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        editor = sharedPreferences.edit();
         Log.d(TAG, "onCreatePreferences of the sub screen " + rootKey);
         context = getActivity();
 
@@ -71,11 +74,19 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         extendBaseLengthKey = getString(R.string.pref_period_extend_length_key);
         workPeriodSoundKey = getString(R.string.pref_work_period_start_sound_key);
         restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
+        enableShortPeriodsKey = getString(R.string.pref_enable_short_periods_key);
 
         if (getArguments() == null || !getArguments().containsKey(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT)) {
             throw new RuntimeException("You must provide a pluginKey by calling setArguments(@NonNull String pluginKey)");
         }
         preferenceScreenKey = getArguments().getString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT);
+
+        //disable preference for enabling shorter than 10 min periods in order to avoid messy interactions when updating current running periods, that were <10 mins to new min 10 min value (unnecessary work)
+        if(RReminderMobile.isCounterServiceRunning(context)){
+            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(false);
+        } else {
+            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(true);
+        }
 
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
             Log.d("X_SUBSCREEN_FRAGMENT", "setting the preference summaries for period preferences");
@@ -158,6 +169,12 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         if (preference instanceof PeriodLengthPreference) {
             // Create a new instance of TimePreferenceDialogFragment with the key of the related
             // Preference
+            String periodLengthString = ((PeriodLengthPreference) preference).getPeriodLength();
+            int periodLength = getHourFromString(periodLengthString) * 60 + getMinuteFromString(periodLengthString);
+            if(shortDisabled && periodLength<10){
+                ((PeriodLengthPreference) preference).setPeriodLength("00:10");
+            }
+
             dialogFragment = PeriodLengthPreferenceDialogFragmentCompat
                     .newInstance(preference.getKey());
         } else if (preference instanceof NumberXPreference) {
@@ -214,6 +231,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 }
 
             }  else if (key.equals(workPeriodSoundKey)){
+                Log.d("PREFERENCE_SUBSCREEN", "work period sound was changed");
 
                 name = sharedPreferences.getString(key, "DEFAULT_RINGTONE_URI");
                 if (name.equals("DEFAULT_RINGTONE_URI")){
@@ -263,12 +281,35 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         long newPeriodEndValue = periodEndTimeValue + difference;
 
                         //starting counterservice and setting new alarms
+                        //setting alarm via alarmmanager if period length is >=10 mins
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
                         restPeriodLength = updatedRestPeriodLength;
                     }
                 }
+            } else if (key.equals(enableShortPeriodsKey)) {
+                //if short periods setting is disabled, period length is set to 10 mins for each preference that had a stored value <10 before disabling short periods
+                boolean shortEnabled = sharedPreferences.getBoolean(key, false);
+                if(!shortEnabled){
+                    shortDisabled = true;
+                    String workPeriod = sharedPreferences.getString(workPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
+                    String restPeriod = sharedPreferences.getString(restPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
+                    int workPeriodValue = getHourFromString(workPeriod) * 60 + getMinuteFromString(workPeriod);
+                    int restPeriodValue = getHourFromString(restPeriod) * 60 + getMinuteFromString(restPeriod);
+                    if(workPeriodValue<10){
+                        String output = RReminder.getFormatedValue(context, 0, "00:10");
+                        workPeriodLengthPreference.setSummary(output);
+                    }
+                    if(restPeriodValue<10){
+                        String output = RReminder.getFormatedValue(context, 0, "00:10");
+                        restPeriodLengthPreference.setSummary(output);
+                    }
+
+                } else {
+                    shortDisabled = false;
+                }
+                // TO-DO: write logic for changing less than 10 min periods to 10 mins, if enableshortperiod preference is turned off
             }
         } else if (preferenceScreenKey.equals(getString(R.string.pref_screen_period_extend_key))){
             if (key.equals(extendCountKey)){
@@ -294,7 +335,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             }
         }
 
-
+        sendEspressoBroadcast();
 
 
     }
@@ -431,12 +472,35 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
     public long getUpdatedDiffrerence(String oldString, String newString){
         int difference;
-        int oldHour = CustomTimePreference.getHour(oldString);
-        int oldMinute = CustomTimePreference.getMinute(oldString);
-        int newHour = CustomTimePreference.getHour(newString);
-        int newMinute = CustomTimePreference.getMinute(newString);
+        int oldHour = PeriodLengthPreferenceDialogFragmentCompat.getHour(oldString);
+        int oldMinute = PeriodLengthPreferenceDialogFragmentCompat.getMinute(oldString);
+        int newHour = PeriodLengthPreferenceDialogFragmentCompat.getHour(newString);
+        int newMinute = PeriodLengthPreferenceDialogFragmentCompat.getMinute(newString);
         difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
 
         return (long)difference;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        sendEspressoBroadcast();
+
+    }
+
+    private void sendEspressoBroadcast(){
+        Intent testIntent = new Intent();
+        if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
+            testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_PERIOD);
+            testIntent.putExtra(RReminder.PREFERENCE_WORK_LENGTH_SUMMARY, testWorkLengthSummary);
+            testIntent.putExtra(RReminder.PREFERENCE_REST_LENGTH_SUMMARY, testRestLengthSummary);
+            testIntent.putExtra(RReminder.PREFERENCE_WORK_AUDIO_SUMMARY, testWorkAudioSummary);
+            testIntent.putExtra(RReminder.PREFERENCE_REST_AUDIO_SUMMARY, testRestAudioSummary);
+        } else {
+            testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_EXTEND);
+            testIntent.putExtra(RReminder.PREFERENCE_EXTEND_COUNT_SUMMARY, testExtendCountSummary);
+            testIntent.putExtra(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY, testExtendLengthSummary);
+        }
+        getActivity().sendBroadcast(testIntent);
     }
 }

@@ -15,6 +15,7 @@ import androidx.annotation.IntDef;
 import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -33,6 +34,7 @@ public class RReminder {
 	public static final String TURN_OFF = "turn_off";
 	public static final String MANUAL_MODE_NEXT_PERIOD_TYPE = "manual_mode_next_period_type";
 	public static final String PERIOD_END_TIME = "period_end";
+	public static final String IS_SHORT_PERIOD = "is_short_period";
 	public static final String NEXT_PERIOD_END_TIME = "next_period_end";
 	public static final String EXTENDED_PERIOD_TYPE = "extended_period_type";
 	public static final String START_COUNTER = "start_counter";
@@ -121,7 +123,9 @@ public class RReminder {
 	public static final int SHOWCASEVIEW_MENU = 5;
 
 	//variables for testing purposes. remove after finishing testing
-	public static final String CUSTOM_INTENT_TEST_PREFERENCES = "com.colormindapps.rest_reminder_alarm.ACTION_TEST_PREFERENCES";
+	public static final String CUSTOM_INTENT_TEST_PREFERENCES_MODE = "com.colormindapps.rest_reminder_alarm.ACTION_TEST_PREFERENCES_MODE";
+	public static final String CUSTOM_INTENT_TEST_PREFERENCES_PERIOD = "com.colormindapps.rest_reminder_alarm.ACTION_TEST_PREFERENCES_PERIOD";
+	public static final String CUSTOM_INTENT_TEST_PREFERENCES_EXTEND = "com.colormindapps.rest_reminder_alarm.ACTION_TEST_PREFERENCES_EXTEND";
 	public static final String PREFERENCE_MODE_SUMMARY = "preference_mode_summary";
 	public static final String PREFERENCE_WORK_LENGTH_SUMMARY = "preference_work_length_summary";
 	public static final String PREFERENCE_REST_LENGTH_SUMMARY = "preference_rest_length_summary";
@@ -170,6 +174,7 @@ public class RReminder {
 			return workPeriodValue;
 		}
 	}
+
 	
 	public static long getTimeAfterExtend(Context context, int multiplier, long timeRemaining){
 		int addMins = getExtendBaseLength(context);
@@ -284,6 +289,12 @@ public class RReminder {
 		String key = context.getString(R.string.pref_enable_extend_key);
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 		return prefs.getBoolean(key, true);
+	}
+
+	public static boolean isShortPeriodsEnabled(Context context){
+		String key = context.getString(R.string.pref_enable_short_periods_key);
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+		return prefs.getBoolean(key, false);
 	}
 	
 	public static boolean isLedEnabled(Context context){

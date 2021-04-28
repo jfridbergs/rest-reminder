@@ -105,11 +105,12 @@
     <string name="pref_screen_periods_title">Work and rest period settings</string>
     <string name="pref_screen_extension_title">Period extension settings</string>
     <string name="pref_work_period_length_key">work_period_length</string>
-    <string name="pref_work_period_length_title">Work period duration</string>
-    <string name="pref_work_period_length_dialog_text">Set period duration in hours and minutes</string>
+    <string name="pref_work_period_length_title">Work period length</string>
+    <string name="pref_work_period_length_dialog_text">Set period length in hours and minutes</string>
+    <string name="short_period_warning">Note: Selecting a period length, that is shorter than 10 minutes, can result in delayed period end notifications. If such issues occur, try disabling battery optimisation for Rest Reminder in device settings.</string>
     <string name="pref_rest_period_length_key">rest_period_length</string>
-    <string name="pref_rest_period_length_title">Rest period duration</string>
-    <string name="pref_rest_period_length_dialog_text">Set period duration in hours and minutes</string>
+    <string name="pref_rest_period_length_title">Rest period length</string>
+    <string name="pref_rest_period_length_dialog_text">Set period length in hours and minutes</string>
     <string name="pref_work_period_start_sound_key">work_period_start_sound</string>
     <string name="pref_work_period_start_sound_title">Work period start sound</string>
     <string name="pref_rest_period_start_sound_key">rest_period_start_sound</string>
@@ -138,6 +139,9 @@
     <string name="pref_enable_extend_key">enable_end_extend</string>
     <string name="pref_enable_extend_summary">Extend current period</string>
     <string name="pref_enable_extend_title">Extend period</string>
+    <string name="pref_enable_short_periods_key">enable_short_periods_extend</string>
+    <string name="pref_enable_short_periods_summary">Periods can be less than 10 minutes short</string>
+    <string name="pref_enable_short_periods_title">Allow short periods</string>
     <string name="pref_period_extend_length_key">end_extend_length_key</string>
     <string name="pref_period_extend_length_title">Extension base length</string>
     <string name="pref_period_extend_length_summary">Set the period end extend duration in minutes</string>

@@ -108,6 +108,10 @@
     <string name="pref_enable_extend_key">enable_end_extend</string>
     <string name="pref_enable_extend_summary">Pagarināt tekošo periodu</string>
     <string name="pref_enable_extend_title">Pagarināt periodu</string>
+    <string name="pref_enable_short_periods_key">enable_short_periods_extend</string>
+    <string name="pref_enable_short_periods_summary">Periodi var būt īsāki par 10 minūtēm</string>
+    <string name="pref_enable_short_periods_title">Atļaut īsus periodus</string>
+    <string name="short_period_warning">Piezīme: Izvēloties perioda ilgumu, kas ir mazāks par 10 minūtēm, var izraisīt perioda beigu paziņojumu kavēšanos. Šo problēmu var mazināt vai pat atrisināt, atslēdzot baterija optimizāciju Atpūtu atgādinātāja lietotnei.</string>
     <string name="pref_period_extend_length_key">end_extend_length_key</string>
     <string name="pref_period_extend_length_title">Perioda paildzināšanas ilgums</string>
     <string name="pref_period_extend_length_summary">Ievadīt perioda atlikšanas ilgumu minūtēs</string>

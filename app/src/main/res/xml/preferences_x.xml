@@ -45,6 +45,11 @@
 					android:key="@string/pref_rest_period_start_sound_key"
 					android:title="@string/pref_rest_period_start_sound_title"
 					android:defaultValue="content://settings/system/notification_sound" />
+				<SwitchPreference
+					android:key="@string/pref_enable_short_periods_key"
+					android:summary="@string/pref_enable_short_periods_summary"
+					android:title="@string/pref_enable_short_periods_title"
+					android:defaultValue="false" />
 			</PreferenceCategory>
 
 		</PreferenceScreen>

@@ -9,8 +9,12 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
@@ -28,6 +32,8 @@ public class CounterService extends Service {
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
 	private Context context;
+
+	String debug = "COUNTER_SERVICE";
 
 	/* for testing purposes */
 	public boolean created = false;
@@ -74,9 +80,13 @@ public class CounterService extends Service {
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);
 			periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+			//boolean for hiding the ongoing notification until the period end notification, which takes a higher priority compared to ongoing
 			excludeOngoing = intent.getExtras().getBoolean(RReminder.EXCLUDE_ONGOING);
 		}
 		periodLength = periodEndTime - startTime.getTimeInMillis();
+
+
+
 
 		if(RReminder.isActiveModeNotificationEnabled(this) && !excludeOngoing){
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(this, RReminder.CHANNEL_ONGOING_ID);

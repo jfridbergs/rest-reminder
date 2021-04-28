@@ -184,7 +184,9 @@ public class ExtendDialog extends DialogFragment{
 		
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
-		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
+		if((functionCalendar-Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
+			new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
+		}
 		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount, true);

@@ -86,8 +86,8 @@ public class ManualActivity extends AppCompatActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected (MenuItem item){
-		if (item.getItemId()==R.id.menu_settings){
-				Intent i = new Intent(this, PreferenceActivity.class);
+		if (item.getItemId()==R.id.menu_settings_x){
+				Intent i = new Intent(this, PreferenceXActivity.class);
 				startActivity(i);
 				return true;
 		} else if (item.getItemId() == R.id.menu_feedback){

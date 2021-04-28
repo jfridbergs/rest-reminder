@@ -179,6 +179,10 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 	@Override
 	public void onDestroy(){
 		super.onDestroy();
+		Intent testIntent = new Intent();
+		testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_MODE);
+		testIntent.putExtra(RReminder.PREFERENCE_MODE_SUMMARY, testModeSummary);
+		getActivity().sendBroadcast(testIntent);
 	}
     
     @Override
