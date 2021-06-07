@@ -65,6 +65,9 @@
     <string name="extend_dialog_title">Pagarināt periodu</string>
     <string name="extend_dialog_close_dialog_text">Atcelt</string>
     <string name="extend_dialog_button">Pagarināt par %1$d minūtēm</string>
+    <string name="battery_dialog_inconsistent_warning">Izvēloties īsus periodu ilgumus, Rest Reminder darbība var palikt neparedzama (novēloti periodu beigu signāli)</string>
+    <string name="battery_dialog_inconsistency_solution">Šo neprecīzo Atpūtu atgādinātāja darbību ar īsiem periodiem var uzlabot vai pat pilnībā atrisināt, izslēdzot akumulatora optimizāciju Atpūtu atgādinātāja lietotnei ierīces iestatījumos. To var izdarīt ierīces <![CDATA[<b> Akumulatora optimizācijas iestatījumos </b>]]> atverot <![CDATA[<b> "Visas lietotnes" </b>]]> sadaļu, atrodot <![CDATA[<b> "Atpūtu atgādinātājs" </b>]]> un ivēloties <![CDATA[<b> "Neatļaut" </b>]]>  opciju. </string>
+    <string name="battery_dialog_question">Vai vēlaties atslēgt baterijas optimizāciju Atpūtu atgādinātājam?</string>
     <!-- Preferences -->
     <string name="pref_mode_title">Atgādinātāja režīms</string>
     <string name="pref_mode_summary_manual">Periodi tiek sākti ar apstiprinājumu</string>
@@ -84,6 +87,11 @@
     <string name="pref_work_period_start_sound_key">work_period_start_sound</string>
     <string name="pref_work_period_start_sound_title">Darba atsākšanas signāls</string>
     <string name="pref_rest_period_start_sound_key">rest_period_start_sound</string>
+    <string name="pref_disable_battery_optimization_key">disable_battery_optimization</string>
+    <string name="pref_disable_battery_optimization_title">Atvērt baterijas optimizācijas iestatījumus</string>
+    <string name="pref_disable_battery_optimization_prefix">Baterijas optimizācija ir </string>
+    <string name="pref_disable_battery_optimization_disabled">ATSLĒGTA</string>
+    <string name="pref_disable_battery_optimization_enabled">AKTĪVA</string>
     <string name="pref_category_features_key">features_category</string>
     <string name="pref_category_features_title">Programmas iespēju iestatījumi</string>
     <string name="pref_category_period_settings_key">period_settings_category</string>

@@ -10,13 +10,12 @@ import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
 public class MobilePeriodManager {
-	private Context mContext;
-	private AlarmManager mAlarmManager;
+	private final Context mContext;
+	private final AlarmManager mAlarmManager;
 
 	public MobilePeriodManager(Context context){
 		mContext = context;
@@ -34,8 +33,6 @@ public class MobilePeriodManager {
 		i.putExtra(RReminder.PERIOD_END_TIME, when);
 		i.putExtra(RReminder.IS_SHORT_PERIOD, false);
 		i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
-		Log.d("PERIOD_MANAGER", "New Alarm: type: "+type+", extendCount: "+extendCount+", endTime: "+when);
-		SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
 		Calendar endTime = Calendar.getInstance();
 		endTime.setTimeInMillis(when);
 

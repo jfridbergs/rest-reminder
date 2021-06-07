@@ -10,7 +10,6 @@ public class NumberXPreference extends DialogPreference {
     private int mPreferenceInt;
     private int minValue, maxValue;
     private String headerText;
-    private int mDialogLayoutResId = R.layout.number_preference;
 
     public NumberXPreference(Context context){
         this(context, null);
@@ -75,6 +74,6 @@ public class NumberXPreference extends DialogPreference {
 
     @Override
     public int getDialogLayoutResource() {
-        return mDialogLayoutResId;
+        return R.layout.number_preference;
     }
 }

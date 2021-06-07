@@ -3,11 +3,11 @@ package com.colormindapps.rest_reminder_alarm;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 
 public class MobileOnAlarmReceiver extends BroadcastReceiver {
@@ -17,13 +17,12 @@ public class MobileOnAlarmReceiver extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context context, Intent intent){
 	    currentTime = Calendar.getInstance().getTimeInMillis();
-		type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
+		type = Objects.requireNonNull(intent.getExtras()).getInt(RReminder.PERIOD_TYPE);
 		Intent playIntent = new Intent(context, PlaySoundService.class);
 		playIntent.putExtra(RReminder.PERIOD_TYPE,type);
 		playIntent.putExtra(RReminder.PERIOD_END_TIME,currentTime);
 		nextType = RReminder.getNextPeriodType(type);
 		nextPeriodEndTime = RReminder.getNextPeriodEndTime(context, nextType, currentTime, 1, 0L);
-		Log.d("ALARM_RECEIVER", "nextPeriodValue: "+nextPeriodEndTime);
 		intent.putExtra(RReminder.NEXT_PERIOD_END_TIME, nextPeriodEndTime);
 		context.startService(playIntent);
 

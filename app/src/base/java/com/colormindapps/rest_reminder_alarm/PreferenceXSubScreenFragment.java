@@ -10,11 +10,15 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
@@ -22,21 +26,22 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Objects;
 
 import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getHourFromString;
 import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getMinuteFromString;
 
 public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private static final String TAG = PreferenceXSubScreenFragment.class.getName();
     Uri originalWorkUri, originalRestUri, newWorkUri, newRestUri;
-    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, enableShortPeriodsKey;
-    String testWorkAudioSummary, testRestAudioSummary, testWorkLengthSummary, testRestLengthSummary, testExtendCountSummary, testExtendLengthSummary;
+    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, enableShortPeriodsKey, disableBatteryOptKey;
+    String testWorkAudioSummary, testRestAudioSummary, testWorkLengthSummary, testRestLengthSummary, testExtendCountSummary, testExtendLengthSummary, testDisableBatteryOptSummary;
     SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
-    Preference workSoundPreference, restSoundPreference, workPeriodLengthPreference, restPeriodLengthPreference, extendCountpreference, extendBasePreference;
+    Preference workSoundPreference, restSoundPreference, workPeriodLengthPreference, restPeriodLengthPreference, extendCountpreference, extendBasePreference, disableBatteryOptPreference;
     Context context;
     String workPeriodLength, restPeriodLength;
     String preferenceScreenKey;
+    DialogFragment batterySettingsDialog;
+
     private boolean shortDisabled = false;
 
     int REQUEST_CODE_ALERT_WORK_RINGTONE = 1;
@@ -62,8 +67,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         // rootKey is the name of preference sub screen key name , here--customPrefKey
         setPreferencesFromResource(R.xml.preferences_x, rootKey);
 
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Log.d(TAG, "onCreatePreferences of the sub screen " + rootKey);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireActivity());
         context = getActivity();
 
         String output;
@@ -75,21 +79,20 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         workPeriodSoundKey = getString(R.string.pref_work_period_start_sound_key);
         restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
         enableShortPeriodsKey = getString(R.string.pref_enable_short_periods_key);
+        disableBatteryOptKey = getString(R.string.pref_disable_battery_optimization_key);
 
         if (getArguments() == null || !getArguments().containsKey(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT)) {
             throw new RuntimeException("You must provide a pluginKey by calling setArguments(@NonNull String pluginKey)");
         }
         preferenceScreenKey = getArguments().getString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT);
 
-        //disable preference for enabling shorter than 10 min periods in order to avoid messy interactions when updating current running periods, that were <10 mins to new min 10 min value (unnecessary work)
-        if(RReminderMobile.isCounterServiceRunning(context)){
-            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(false);
-        } else {
-            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(true);
-        }
+
 
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
-            Log.d("X_SUBSCREEN_FRAGMENT", "setting the preference summaries for period preferences");
+
+            //disable preference for enabling shorter than 10 min periods in order to avoid messy interactions when updating current running periods, that were <10 mins to new min 10 min value (unnecessary work)
+            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(!RReminderMobile.isCounterServiceRunning(context));
+
             workSoundPreference = findPreference(workPeriodSoundKey);
             String valueString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
             if (valueString.equals("DEFAULT_RINGTONE_URI")){
@@ -116,6 +119,25 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             restSoundPreference.setSummary(output);
 
             testRestAudioSummary = restSoundPreference.getSummary().toString();
+
+            //show preference for disabling battery optimization only for devices with Android API >= 23
+            disableBatteryOptPreference = findPreference(disableBatteryOptKey);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+
+                output = getString(R.string.pref_disable_battery_optimization_prefix);
+                if (isBatteryOptimizationIgnored()){
+                    output+=" "+ getString(R.string.pref_disable_battery_optimization_disabled);
+                } else {
+                    output+=" "+ getString(R.string.pref_disable_battery_optimization_enabled);
+                }
+                disableBatteryOptPreference.setSummary(output);
+
+                testDisableBatteryOptSummary = disableBatteryOptPreference.getSummary().toString();
+            } else {
+                PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_period_settings_key));
+                preferenceCategory.removePreference(disableBatteryOptPreference);
+            }
+
 
 
             workPeriodLengthPreference = findPreference(workPeriodLengthKey);
@@ -187,7 +209,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         // If it was one of our cutom Preferences, show its dialog
         if (dialogFragment != null) {
             dialogFragment.setTargetFragment(this, 0);
-            dialogFragment.show(this.getFragmentManager(),
+            dialogFragment.show(this.getParentFragmentManager(),
                     "android.support.v7.preference" +
                             ".PreferenceFragment.DIALOG");
         }
@@ -202,10 +224,10 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         int periodType = 0;
         int extendCount = 0;
         long periodEndTimeValue = 0L;
-        boolean failCondition = true;
         Bundle dataFromCounterSerivce;
         Preference preference = findPreference(key);
         int value;
+        boolean batteryOptDisabled;
         String name, outputName;
         Uri ringtoneUri;
         String updatedWorkPeriodLength, updatedRestPeriodLength;
@@ -223,6 +245,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             if (key.equals(workPeriodLengthKey) || key.equals(restPeriodLengthKey)){
                 String valueString = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
                 String output = RReminder.getFormatedValue(context, RReminder.PREFERENCE_SUMMARY_HHMM, valueString);
+                assert preference != null;
                 preference.setSummary(output);
                 if(key.equals(workPeriodLengthKey)){
                     testWorkLengthSummary = preference.getSummary().toString();
@@ -231,8 +254,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 }
 
             }  else if (key.equals(workPeriodSoundKey)){
-                Log.d("PREFERENCE_SUBSCREEN", "work period sound was changed");
-
                 name = sharedPreferences.getString(key, "DEFAULT_RINGTONE_URI");
                 if (name.equals("DEFAULT_RINGTONE_URI")){
                     ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -241,6 +262,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 }
                 Ringtone ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
                 outputName = ringtone.getTitle(context);
+                assert preference != null;
                 preference.setSummary(outputName);
             }
 
@@ -256,7 +278,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         updatedWorkPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
                         long difference = getUpdatedDiffrerence(workPeriodLength, updatedWorkPeriodLength);
                         long newPeriodEndValue = periodEndTimeValue + difference;
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                         Calendar time = Calendar.getInstance();
                         time.setTimeInMillis(newPeriodEndValue);
 
@@ -299,14 +320,25 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                     int restPeriodValue = getHourFromString(restPeriod) * 60 + getMinuteFromString(restPeriod);
                     if(workPeriodValue<10){
                         String output = RReminder.getFormatedValue(context, 0, "00:10");
+                        sharedPreferences.edit().putString(workPeriodLengthKey,"00:10" ).commit();
                         workPeriodLengthPreference.setSummary(output);
                     }
                     if(restPeriodValue<10){
                         String output = RReminder.getFormatedValue(context, 0, "00:10");
+                        sharedPreferences.edit().putString(restPeriodLengthKey,"00:10" ).commit();
                         restPeriodLengthPreference.setSummary(output);
                     }
 
                 } else {
+                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                        if(!isBatteryOptimizationIgnored() && batterySettingsDialog==null){
+                            batterySettingsDialog = BatterySettingsDialog.newInstance(
+                                    R.string.intro_title);
+                            batterySettingsDialog.setTargetFragment(this, 0);
+                            batterySettingsDialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.BatterySettingsDialog );
+                            batterySettingsDialog.show(this.getParentFragmentManager(), "batterySettingsDialog");
+                        }
+                    }
                     shortDisabled = false;
                 }
                 // TO-DO: write logic for changing less than 10 min periods to 10 mins, if enableshortperiod preference is turned off
@@ -376,6 +408,19 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 testRestAudioSummary = restSoundPreference.getSummary().toString();
                 originalRestUri = newRestUri;
             }
+            //update disable battery optimization summary when resuming the preference screen (returning from battery optimization device settings)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                String outputName = getString(R.string.pref_disable_battery_optimization_prefix);
+                if (isBatteryOptimizationIgnored()){
+                    outputName+=" "+ getString(R.string.pref_disable_battery_optimization_disabled);
+                } else {
+                    outputName+=" "+ getString(R.string.pref_disable_battery_optimization_enabled);
+                }
+                if(sharedPreferences.getBoolean(disableBatteryOptKey, false)!=isBatteryOptimizationIgnored()){
+                    sharedPreferences.edit().putBoolean(disableBatteryOptKey, isBatteryOptimizationIgnored()).commit();
+                }
+                disableBatteryOptPreference.setSummary(outputName);
+            }
         }
 
 
@@ -399,16 +444,11 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_NOTIFICATION_URI);
 
             String existingValue = sharedPreferences.getString(preference.getKey(), "DEFAULT_RINGTONE_URI"); // TODO
-            if (existingValue != null) {
-                if (existingValue.length() == 0) {
-                    // Select "Silent"
-                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
-                } else {
-                    intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(existingValue));
-                }
+            if (existingValue.length() == 0) {
+                // Select "Silent"
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
             } else {
-                // No ringtone has been selected, set to the default
-                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Settings.System.DEFAULT_NOTIFICATION_URI);
+                intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(existingValue));
             }
             if(preference.getKey().equals(workPeriodSoundKey)){
                 startActivityForResult(intent, REQUEST_CODE_ALERT_WORK_RINGTONE);
@@ -417,9 +457,28 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             }
 
             return true;
-        } else {
+        } else if(preference.getKey().equals(disableBatteryOptKey)&&Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
+            openOptimizationSettings();
+            return true;
+        }
+        else {
             return super.onPreferenceTreeClick(preference);
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void openOptimizationSettings() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+        context.startActivity(intent);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public boolean isBatteryOptimizationIgnored(){
+        String packageName = context.getPackageName();
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        assert pm != null;
+        return pm.isIgnoringBatteryOptimizations(packageName);
     }
 
     @Override
@@ -448,7 +507,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
     @TargetApi(23)
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
             setParentActivity((PreferenceActivityLinkedService) getActivity());
@@ -459,7 +518,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onAttach(Activity activity) {
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         if (Build.VERSION.SDK_INT < 23) {
             try {
@@ -478,7 +537,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         int newMinute = PeriodLengthPreferenceDialogFragmentCompat.getMinute(newString);
         difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
 
-        return (long)difference;
+        return difference;
     }
 
     @Override
@@ -496,11 +555,12 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             testIntent.putExtra(RReminder.PREFERENCE_REST_LENGTH_SUMMARY, testRestLengthSummary);
             testIntent.putExtra(RReminder.PREFERENCE_WORK_AUDIO_SUMMARY, testWorkAudioSummary);
             testIntent.putExtra(RReminder.PREFERENCE_REST_AUDIO_SUMMARY, testRestAudioSummary);
+            testIntent.putExtra(RReminder.PREFERENCE_DISABLE_BATTERY_OPT_SUMMARY, testDisableBatteryOptSummary);
         } else {
             testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_EXTEND);
             testIntent.putExtra(RReminder.PREFERENCE_EXTEND_COUNT_SUMMARY, testExtendCountSummary);
             testIntent.putExtra(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY, testExtendLengthSummary);
         }
-        getActivity().sendBroadcast(testIntent);
+        requireActivity().sendBroadcast(testIntent);
     }
 }

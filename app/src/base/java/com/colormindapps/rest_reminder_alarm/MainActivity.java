@@ -24,12 +24,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.MarginLayoutParamsCompat;
 import androidx.core.view.MotionEventCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -129,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	float mLastTouchX, mLastTouchY, startX, startY;
 	private int mActivePointerId;
 
-	String debug = "MAIN_ACTIVITY";
 
 	//for testing purposes only. remove before release
 	//boolean isOngoingNotificationOn;
@@ -190,11 +187,10 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
     	*/
 
-	private ServiceConnection mConnection = new ServiceConnection() {
+	private final ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className,
 									   IBinder service) {
-			Log.d("MAIN_ACTIVITY", "onServiceConnected");
 			binder = (CounterBinder) service;
 			mService = binder.getService();
 			mBound = true;
@@ -221,9 +217,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
 					startNotificationActivity(periodType, extendCount, periodEndTimeValue);
 				} else {
-					Log.d("MAIN", "visibleState value: "+getVisibleState());
 					if(getVisibleState()){
-						Log.d("MAIN", "visiblestate is true");
 						manageUI(true);
 						if (dialogOnScreen || stopTimerInServiceConnectedAfterPause) {
 							manageTimer(false);
@@ -269,7 +263,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.d(debug, "onCreate()");
 		setContentView(R.layout.activity_main);
 		toolBar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolBar);
@@ -312,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.d(debug, "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
@@ -407,7 +399,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			}
 		 	*/
 
-		Log.d("MAIN", "setVisible to true");
 		setVisibleState(true);
 		//dismissExtendDialog();
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
@@ -440,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				//correctPreferencePeriodLength();
 			}
 
-		} else if(currentVersionNumber+1 > savedVersionNumber){
+		} else if(currentVersionNumber > savedVersionNumber && !RReminderMobile.isCounterServiceRunning(MainActivity.this)){
 			showPatchNotesDialog();
 			Editor editor = sharedPref.edit();
 			editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
@@ -453,7 +444,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(debug, "onResume");
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
@@ -483,7 +473,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onPause() {
-		Log.d(debug, "onPause()");
 		super.onPause();
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
@@ -502,7 +491,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		super.onStop();
-		Log.d(debug, "onStop");
 		setVisibleState(false);
 		//stopCountDownTimer();
 		if (mBound) {
@@ -548,24 +536,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	}
 
-	//Function to update stored user preferences to work with new RReminder restriction of periods not shorter than 10 minutes
-	private void correctPreferencePeriodLength(){
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-		SharedPreferences.Editor editor   = preferences.edit();
 
-		String workPeriod = preferences.getString(RReminder.PREF_WORK_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
-		String restPeriod = preferences.getString(RReminder.PREF_REST_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
-		int workPeriodValue = RReminder.getHourFromString(workPeriod) * 60 + RReminder.getMinuteFromString(workPeriod);
-		int restPeriodValue = RReminder.getHourFromString(restPeriod) * 60 + RReminder.getMinuteFromString(restPeriod);
-		if(workPeriodValue<10){
-			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:10");
-		}
-		if(restPeriodValue<10){
-			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:10");
-		}
-		editor.commit();
-		manageTimer(false);
-	}
 
 	private void setUpNotificationChannels(){
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -575,6 +546,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 			NotificationManager notificationManager = getSystemService(NotificationManager.class);
+			assert notificationManager != null;
 			notificationManager.createNotificationChannels(notifChannels);
 		}
 	}
@@ -632,7 +604,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	private void setReminderOn() {
 		periodType = 1;
-		long currentTime = Calendar.getInstance().getTimeInMillis();
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
 
@@ -643,14 +614,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 		bgAnimation = ValueAnimator.ofObject(new ArgbEvaluator(),colorBlack, colorWork);
 		bgAnimation.setDuration(200);
-		bgAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-
-			@Override
-			public void onAnimationUpdate(ValueAnimator animator) {
-				rootLayout.setBackgroundColor((int) animator.getAnimatedValue());
-			}
-
-		});
+		bgAnimation.addUpdateListener(animator -> rootLayout.setBackgroundColor((int) animator.getAnimatedValue()));
 		bgAnimation.start();
 
 		Intent intent = new Intent(this, CounterService.class);
@@ -688,20 +652,19 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		periodType = 0;
 		storedPeriodEndTime = 0;
 		periodEndTimeValue = 0;
+		//display review screen 2 days after the reminder was launched for the first time
 		long eulaTime = sharedPref.getLong(RReminder.EULA_ACCEPT_TIME, 0L);
-		if(eulaTime > 0 && Calendar.getInstance().getTimeInMillis() - eulaTime > 60*60*1000){
+		if(eulaTime > 0 && Calendar.getInstance().getTimeInMillis() - eulaTime > 48*60*60*1000){
 			openReview();
 		}
 		//increase turn off count for purposes of turn off hin
 		//if turn off hint was previously disabled, skip the turn off count increase
 		if(displayTurnOffHint()){
 			int turnOffCount = sharedPref.getInt(RReminder.TURN_OFF_COUNT, 0);
-			Log.d(debug, "app has been previously turned off times: "+ turnOffCount);
 			turnOffCount++;
 			Editor editor = sharedPref.edit();
 			editor.putInt(RReminder.TURN_OFF_COUNT, turnOffCount);
 			if(turnOffCount>=3){
-				Log.d(debug, "reminder has been turned off "+ turnOffCount+ " times, turn off hint will not be displayed any more");
 				editor.putBoolean(RReminder.DISPLAY_TURN_OFF_HINT, false);
 			}
 			editor.apply();
@@ -716,7 +679,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		request.addOnCompleteListener(requestTask -> {
 			if (requestTask.isSuccessful()) {
 				// We can get the ReviewInfo object
-				Log.d(debug, "review request approved");
 				ReviewInfo reviewInfo = requestTask.getResult();
 				Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
 				flow.addOnCompleteListener(openTask -> {
@@ -724,10 +686,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					// reviewed or not, or even whether the review dialog was shown. Thus, no
 					// matter the result, we continue our app flow.
 				});
-			} else {
-				Log.d(debug, "review request denied");
-				// There was some problem, continue regardless of the result.
 			}
+
+
 		});
 
 	}
@@ -840,11 +801,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					int ticks = 0;
 					public void onTick(long millisUntilFinished) {
 						if(ticks>0){
-							if(ticks % 2 == 0){
-								animateDescription(false);
-							}else {
-								animateDescription(true);
-							}
+							animateDescription(ticks % 2 != 0);
 						}
 						ticks++;
 					}
@@ -1407,7 +1364,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	private class MyShowcaseViewListener implements OnShowcaseEventListener {
 
-		private int showcaseType;
+		private final int showcaseType;
 
 		MyShowcaseViewListener(int showcase) {
 			this.showcaseType = showcase;
@@ -1566,7 +1523,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	}
 
 	public boolean displayTurnOffHint(){
-		Log.d(debug, "displayTurnOffHint: "+sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true));
 		return sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true);
 	}
 
@@ -1816,7 +1772,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		@Override
 		public boolean onTouch(View v, MotionEvent ev) {
 			swipeAreaListenerUsed = true;
-			final int action = MotionEventCompat.getActionMasked(ev);
+			final int action = ev.getActionMasked();
 
 
 			switch (action) {
@@ -1844,13 +1800,11 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 					tempDescription = description.getText();
-					final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+					final int pointerIndex = ev.getActionIndex();
 					final float x = ev.getX(pointerIndex);
 					final float y = ev.getY(pointerIndex);
 					mLastTouchX = startX = swipeStartX = x;
-					swipeStartX = x;
 					mLastTouchY = startY = swipeStartY = y;
-					swipeStartY = y;
 					titleForRestore = activityTitle.getText();
 
 					mActivePointerId = ev.getPointerId(0);
@@ -2243,20 +2197,19 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					final int arrayLength = colorIds.length;
 					for (int i = 0; i < arrayLength; i++) {
 						final int runnableAnimationIndex = i;
-						myOffMainThreadHandler.post(new Runnable() {  // this is on the main thread
-							public void run() {
+						// this is on the main thread
+						myOffMainThreadHandler.post(() -> {
 
-								activityTitle.setTextColor(Color.parseColor(titleColors[colorIds.length - runnableAnimationIndex - 1]));
-								rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
-								infoButton.setTextColor(colorIds[runnableAnimationIndex]);
-								if (runnableAnimationIndex > titleChangeId) {
-									activityTitle.setText(titleForRestore.toString().toUpperCase(Locale.ENGLISH));
-									titleSequence = activityTitle.getText();
-									activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
-								}
-
-
+							activityTitle.setTextColor(Color.parseColor(titleColors[colorIds.length - runnableAnimationIndex - 1]));
+							rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
+							infoButton.setTextColor(colorIds[runnableAnimationIndex]);
+							if (runnableAnimationIndex > titleChangeId) {
+								activityTitle.setText(titleForRestore.toString().toUpperCase(Locale.ENGLISH));
+								titleSequence = activityTitle.getText();
+								activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 							}
+
+
 						});
 
 						try {
@@ -2369,37 +2322,31 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 
 
-		Runnable runnableOffMain = new Runnable() {
-			@Override
-			public void run() {  // this thread is not on the main
-				if (colorIds.length > 50) {
-					titleChangeId = colorIds.length - 50;
-				}
-				int arrayLength = colorIds.length;
-				for (int i = 0; i < arrayLength; i++) {
-					runnableAnimationIndex = i;
-					myOffMainThreadHandler.post(new Runnable() {  // this is on the main thread
-						public void run() {
-							rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
-							//activityTitle.setTextColor(Color.parseColor(titlePowerColors[49-colorIds.length-runnableAnimationIndex]));
-						}
-					});
+		Runnable runnableOffMain = () -> {  // this thread is not on the main
+			if (colorIds.length > 50) {
+				titleChangeId = colorIds.length - 50;
+			}
+			int arrayLength = colorIds.length;
+			for (int i = 0; i < arrayLength; i++) {
+				runnableAnimationIndex = i;
+				// this is on the main thread
+				myOffMainThreadHandler.post(() -> {
+					rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
+					//activityTitle.setTextColor(Color.parseColor(titlePowerColors[49-colorIds.length-runnableAnimationIndex]));
+				});
 
-					try {
+				try {
 
-						Thread.sleep(3);
+					Thread.sleep(3);
 
-					} catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 
-						e.printStackTrace();
-
-					}
-
+					e.printStackTrace();
 
 				}
+
 
 			}
-
 
 		};
 

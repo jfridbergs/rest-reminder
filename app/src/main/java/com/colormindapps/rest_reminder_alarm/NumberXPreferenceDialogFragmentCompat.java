@@ -1,7 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
@@ -13,7 +12,6 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 public class NumberXPreferenceDialogFragmentCompat extends PreferenceDialogFragmentCompat {
 
     private NumberPicker numberPicker;
-    private TextView title;
 
     private int lastValue, restoreValue = -1;
     private final String SAVE_NUMBER_PREF_STATE = "save_number_preference_state";
@@ -31,7 +29,6 @@ public class NumberXPreferenceDialogFragmentCompat extends PreferenceDialogFragm
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if(savedInstanceState!=null){
-            Log.d("NUMBER_X_PREFERENCE", "restoring numberpicker value");
             restoreValue = savedInstanceState.getInt(SAVE_NUMBER_PREF_STATE);
         }
     }
@@ -39,8 +36,8 @@ public class NumberXPreferenceDialogFragmentCompat extends PreferenceDialogFragm
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        title = (TextView)view.findViewById(R.id.number_preference_title);
-        numberPicker = (NumberPicker) view.findViewById(R.id.number_preference_picker);
+        TextView title = view.findViewById(R.id.number_preference_title);
+        numberPicker = view.findViewById(R.id.number_preference_picker);
         DialogPreference preference = getPreference();
         if (preference instanceof NumberXPreference) {
             title.setText(((NumberXPreference) preference).getHeaderText());

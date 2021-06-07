@@ -50,6 +50,10 @@
 					android:summary="@string/pref_enable_short_periods_summary"
 					android:title="@string/pref_enable_short_periods_title"
 					android:defaultValue="false" />
+				<Preference
+					android:key="@string/pref_disable_battery_optimization_key"
+					android:title="@string/pref_disable_battery_optimization_title"/>
+
 			</PreferenceCategory>
 
 		</PreferenceScreen>

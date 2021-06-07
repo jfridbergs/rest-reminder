@@ -9,11 +9,8 @@ import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
@@ -31,9 +28,7 @@ public class CounterService extends Service {
 	private int extendCount;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
-	private Context context;
 
-	String debug = "COUNTER_SERVICE";
 
 	/* for testing purposes */
 	public boolean created = false;
@@ -75,7 +70,6 @@ public class CounterService extends Service {
 		editor.putBoolean(RReminder.COUNTERSERVICE_STATUS, true);
 		editor.apply();
 		startTime = Calendar.getInstance();
-		context = getApplicationContext();
 		if(intent.getExtras()!=null){
 			type = intent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = intent.getExtras().getInt(RReminder.EXTEND_COUNT);

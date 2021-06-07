@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
@@ -19,12 +18,9 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 	CounterService mService;
 	boolean mBound = false;
 	CounterService.CounterBinder binder;
-	long periodEndTimeValue;
-	int periodType, extendCount;
 
-	String debug = "PREFERENCE_ACTIVITY_X";
 
-	private ServiceConnection mConnection = new ServiceConnection() {
+	private final ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className,
 									   IBinder service) {
@@ -48,7 +44,6 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		Log.d(debug, "onCreate");
 		setContentView(R.layout.activity_preferences_x);
 	       if (savedInstanceState == null)
 	        {
@@ -70,7 +65,6 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 	@Override
 	public boolean onPreferenceStartScreen(PreferenceFragmentCompat preferenceFragmentCompat,
 										   PreferenceScreen preferenceScreen) {
-		Log.d(debug, "callback called to attach the preference sub screen");
 		FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 		PreferenceXSubScreenFragment fragment = PreferenceXSubScreenFragment.newInstance("Advanced Settings Subscreen");
 		Bundle args = new Bundle();

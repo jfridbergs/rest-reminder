@@ -10,6 +10,7 @@
    	<color name="red">#FFFF1919</color>
 	<color name="toolbar">#ca454545</color>
 	<color name="showcase_button">#00d9ff</color>
+	<color name="dialog_title">#FF028678</color>
 
 	<color name="notif_bg_work">#33CCFF33</color>
 	<color name="notif_bg_rest">#3369D2FF</color>

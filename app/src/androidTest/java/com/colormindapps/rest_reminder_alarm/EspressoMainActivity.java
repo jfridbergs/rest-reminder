@@ -191,16 +191,16 @@ public class EspressoMainActivity {
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         String expectednotificationRestTitle = getResourceString((R.string.notification_work_end_title));
         onView(withId(R.id.notification_title)).check(matches(withText(expectednotificationRestTitle)));
-        int textSize = 50;
-        int tabletTextSize = 100;
+        int textSize = 38;
+        int tabletTextSize = 76;
 
         int symbolCount = expectednotificationRestTitle.length();
         int expectedSize = RReminder.adjustTitleSize(appContext, symbolCount, false);
 
         if(RReminder.isTablet(appContext)){
-            Assert.assertEquals("the adjustTitleSize on tablet should return size 100 for 12 symbol text string", tabletTextSize, expectedSize);
+            Assert.assertEquals("the adjustTitleSize on tablet should return size 76 for 12 symbol text string", tabletTextSize, expectedSize);
         } else {
-            Assert.assertEquals("the adjustTitleSize should return size 50 for 12 symbol text string", textSize, expectedSize);
+            Assert.assertEquals("the adjustTitleSize should return size 38 for 12 symbol text string", textSize, expectedSize);
         }
         onView(withId(R.id.notification_title)).check(matches(CustomMatchers.withTextSize(expectedSize)));
 
@@ -242,7 +242,7 @@ public class EspressoMainActivity {
         int initialExtendCount = data.getInt(RReminder.EXTEND_COUNT);
         String expectedButtonText = getResourceString(com.colormindapps.rest_reminder_alarm.R.string.extend_current_period);
         onView(withId(R.id.button_period_end_extend)).check(matches(withText(expectedButtonText)));
-        expectedButtonTextSize = (RReminder.isTablet(appContext) ? 28:20);
+        expectedButtonTextSize = (RReminder.isTablet(appContext) ? 30:20);
         onView(withId(R.id.button_period_end_extend)).check(matches(CustomMatchers.withTextSize(expectedButtonTextSize)));
         int expectedColor = appContext.getResources().getColor(com.colormindapps.rest_reminder_alarm.R.color.black);
         onView(withId(R.id.button_period_end_extend)).check(matches(CustomMatchers.withTextColor(expectedColor)));
@@ -960,7 +960,7 @@ public class EspressoMainActivity {
         expectedColor = getApplicationContext().getResources().getColor(com.colormindapps.rest_reminder_alarm.R.color.black);
         onView(withId(R.id.description_text)).check(matches(CustomMatchers.withTextColor(expectedColor)));
         if(RReminder.isTablet(getApplicationContext())){
-            expectedSize = 28;
+            expectedSize = 30;
         } else {
             expectedSize = (RReminder.isPortrait(getApplicationContext()) ? 20:18);
         }
@@ -1034,13 +1034,13 @@ public class EspressoMainActivity {
         intended(hasComponent(new ComponentName(getTargetContext(), NotificationActivity.class)));
         String extendDialogTitle = getResourceString(com.colormindapps.rest_reminder_alarm.R.string.extend_dialog_title);
         onView(withId(R.id.button_notification_period_end_extend)).perform(click());
-        onView(withId(R.id.extend_dialog_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.extend_dialog_button_extend)).check(matches(isDisplayed()));
         onView(isRoot()).perform(CustomActions.waitFor(13000));
         // veikt parbaudi, meklejot dialoga title
-        onView(withId(R.id.extend_dialog_title)).check((doesNotExist()));
+        onView(withId(R.id.extend_dialog_button_extend)).check((doesNotExist()));
         onView(withId(R.id.button_notification_period_end_extend)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
-        onView(withId(R.id.extend_dialog_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.extend_dialog_button_extend)).check(matches(isDisplayed()));
         onView(withText("Cancel")).perform(click());
         onView(withId(R.id.notification_button)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(2000));

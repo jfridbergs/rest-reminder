@@ -29,8 +29,6 @@ public class CustomMatchers {
             public boolean matchesSafely(View view) {
                 Drawable background = view.getBackground();
                 if (background instanceof ColorDrawable){
-                    Log.d("MATCHER", "expectedColor: "+color);
-                    Log.d("MATCHER", "actual color: "+((ColorDrawable) background).getColor());
                     return color == ((ColorDrawable) background).getColor();
                 } else return false;
             }
@@ -82,9 +80,8 @@ public class CustomMatchers {
             @Override
             protected boolean matchesSafely(TextView textView) {
                 float scaledDensity = getApplicationContext().getResources().getDisplayMetrics().scaledDensity;
+                Log.d("CUSTOM_MATCHER", "actual text size: "+(int)(textView.getTextSize()/scaledDensity));
                 int actualSize = (int)(textView.getTextSize()/scaledDensity);
-                Log.d("CUSTOM_MATCHER", "expectedSize: "+expectedSize);
-                Log.d("CUSTOM_MATCHER", "actualSize: "+actualSize);
                 return actualSize == expectedSize;
             }
 
@@ -101,7 +98,6 @@ public class CustomMatchers {
 
             @Override
             protected boolean matchesSafely(WebView webView) {
-                Log.d("CUSTOM_MATCHERS", "vertical position: "+ webView.getScrollY());
                 return webView.getScrollY() == expectedVerticalPosition;
             }
 
@@ -118,7 +114,6 @@ public class CustomMatchers {
 
             @Override
             protected boolean matchesSafely(WebView webView) {
-                Log.d("CUSTOM_MATCHERS", "vertical position: "+ webView.getScrollY());
                 return webView.getScrollY() > 1000;
             }
 

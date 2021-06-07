@@ -22,6 +22,8 @@ import org.junit.runner.RunWith;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.swipeDown;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.intent.Intents.intended;
 import static androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent;
@@ -152,17 +154,23 @@ public class EspressoPreferencesOnly {
         onView(withId(R.id.time_preference_first_picker)).check(matches(CustomMatchers.withNumberPickerValue(expectedHour)));
         onView(withId(R.id.time_preference_second_picker)).check(matches(CustomMatchers.withNumberPickerValue(expectedMinute)));
 
-        Espresso.pressBack();
-
         if(RReminder.isPortrait(getApplicationContext())){
             pActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             pActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         onView(isRoot()).perform(CustomActions.waitFor(2000));
+
+        Espresso.pressBack();
+
+
+
+
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title))).check(matches(isDisplayed()));
 
         Espresso.pressBack();
+        onView(isRoot()).perform(swipeUp());
+        onView(isRoot()).perform(CustomActions.waitFor(2000));
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title))).perform(click());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
@@ -180,15 +188,16 @@ public class EspressoPreferencesOnly {
         onView(isRoot()).perform(CustomActions.waitFor(2000));
         onView(withId(R.id.number_preference_picker)).check(matches(isDisplayed()));
         onView(withId(R.id.number_preference_picker)).check(matches(CustomMatchers.withNumberPickerValue(expectedCount)));
-        onView(withText("Cancel")).perform(click());
-
-
         if(RReminder.isPortrait(getApplicationContext())){
             pActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else {
             pActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         onView(isRoot()).perform(CustomActions.waitFor(2000));
+        onView(withText("CANCEL")).perform(click());
+
+
+
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title))).check(matches(isDisplayed()));
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));

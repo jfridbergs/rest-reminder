@@ -5,39 +5,25 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.Objects;
 
+@RequiresApi(api = Build.VERSION_CODES.M)
+public class BatterySettingsDialog extends DialogFragment {
 
-public class PatchNotesDialog extends DialogFragment {
-	WebView patchnotes;
-
-	
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        try {
-        	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
-        	setParentActivity((OnDialogCloseListener) getActivity());
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
-        }
-    }
-    
-	private OnDialogCloseListener parentActivity;
-	
-	private void setParentActivity(OnDialogCloseListener activity){
-		parentActivity = activity;
-	}
-	
 	@Override
 	@NonNull
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -49,24 +35,32 @@ public class PatchNotesDialog extends DialogFragment {
 
 	    // Inflate and set the layout for the dialog
 	    // Pass null as the parent view because its going in the dialog layout
-		View view = inflater.inflate(R.layout.patch_notes_dialog,new LinearLayout(getActivity()), false);
+		View view = inflater.inflate(R.layout.battery_settings_dialog,new LinearLayout(getActivity()), false);
 	    builder.setView(view)
 				.setCancelable(true)
 	    // Add action buttons
-	           .setPositiveButton(R.string.close, (dialog, id) -> {
-				   parentActivity.dialogIsClosed(true);
-				   Objects.requireNonNull(PatchNotesDialog.this.getDialog()).cancel();
+	           .setPositiveButton(android.R.string.ok, (dialog, id) -> {
+	           		openOptimizationSettings();
+				   Objects.requireNonNull(BatterySettingsDialog.this.getDialog()).cancel();
 			   })
+				.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
+					Objects.requireNonNull(BatterySettingsDialog.this.getDialog()).cancel();
+				})
 ;
-		patchnotes = view.findViewById(R.id.patch_notes);
-		patchnotes.loadUrl("file:///android_asset/html/patchnotes.html");
 	    return builder.create();
+	}
+
+	@RequiresApi(api = Build.VERSION_CODES.M)
+	public void openOptimizationSettings() {
+		Intent intent = new Intent();
+		intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+		requireActivity().startActivity(intent);
 	}
 
 
 	
-    public static PatchNotesDialog newInstance(int title) {
-    	PatchNotesDialog frag = new PatchNotesDialog();
+    public static BatterySettingsDialog newInstance(int title) {
+    	BatterySettingsDialog frag = new BatterySettingsDialog();
         Bundle args = new Bundle();
         args.putInt("title", title);
         frag.setArguments(args);
@@ -75,7 +69,6 @@ public class PatchNotesDialog extends DialogFragment {
 
 	@Override
 	public void onDismiss(@NonNull DialogInterface dialog){
-		parentActivity = null;
 		super.onDismiss(dialog);
 	}
 

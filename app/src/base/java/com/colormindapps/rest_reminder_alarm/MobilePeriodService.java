@@ -19,7 +19,7 @@ public class MobilePeriodService extends JobIntentService {
 	int type;
 	int extendCount;
 	int typeForNotification;
-	long periodEndedTime, nextPeriodEndTime, periodLength;
+	long periodEndedTime, nextPeriodEndTime;
 	String notificationMessage;
 	NotificationManagerCompat mgr;
 
@@ -54,7 +54,6 @@ public class MobilePeriodService extends JobIntentService {
 */
 
 		//playSound();
-		Log.d("PERIOD_SERVICE", "nextPeriodEndValue: "+intent.getExtras().getLong(RReminder.NEXT_PERIOD_END_TIME));
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 		mgr.cancel(24);
 
@@ -83,8 +82,6 @@ public class MobilePeriodService extends JobIntentService {
 				*/
 
 		//Set the next period end alarms and start service, if any automatic mode is selected
-		if(RReminder.getMode(this) != 1){
-		}
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
 		actionIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);

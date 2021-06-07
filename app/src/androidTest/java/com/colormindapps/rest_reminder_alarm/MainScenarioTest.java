@@ -219,6 +219,11 @@ public class MainScenarioTest {
 
     @Test
     public void testTurnOffHintExtended(){
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        editor   = preferences.edit();
+        editor.putInt(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 1);
+        editor.commit();
         firstInstall();
 
         try (ActivityScenario<MainActivity> scenario =
@@ -306,6 +311,8 @@ public class MainScenarioTest {
             timerLongPress(2000);
             onView(withId(R.id.description_text)).check(matches(withText("")));
         }
+        editor.putInt(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 3);
+        editor.commit();
     }
 
     @Test
@@ -352,9 +359,9 @@ public class MainScenarioTest {
         expectedTabletSize = 140;
         actualSize = RReminder.adjustTitleSize(appContext, count, false);
         if(RReminder.isTablet(appContext)){
-            assertWithMessage("normal screen (tablet) with 10 symbol string should have font size 100"). that(expectedTabletSize).isEqualTo(actualSize);
+            assertWithMessage("normal screen (tablet) with 10 symbol string should have font size 100"). that(actualSize).isEqualTo(expectedTabletSize);
         } else {
-            assertWithMessage("normal screen with 10 symbol string should have font size 50"). that(expectedSize).isEqualTo(actualSize);
+            assertWithMessage("normal screen with 10 symbol string should have font size 50"). that(actualSize).isEqualTo(expectedSize);
         }
 
         count = 20;
@@ -409,6 +416,11 @@ public class MainScenarioTest {
 
     @Test
     public void testTimerStopOnPause() {
+
+        privatePreferences = getApplicationContext().getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
+        privateEditor = privatePreferences.edit();
+        privateEditor.putBoolean(RReminder.EULA_ACCEPTED, true);
+        privateEditor.commit();
         try (ActivityScenario<MainActivity> scenario =
                      ActivityScenario.launch(MainActivity.class)) {
             scenario.moveToState(Lifecycle.State.CREATED);
@@ -453,7 +465,6 @@ public class MainScenarioTest {
     private void firstInstall(){
         privatePreferences = getApplicationContext().getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
         privateEditor = privatePreferences.edit();
-        privateEditor.putInt(RReminder.VERSION_KEY, 0);
         privateEditor.putBoolean(RReminder.EULA_ACCEPTED, false);
         privateEditor.putBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true);
         privateEditor.putInt(RReminder.TURN_OFF_COUNT,0);

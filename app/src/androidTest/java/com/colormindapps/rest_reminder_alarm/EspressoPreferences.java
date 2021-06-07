@@ -9,9 +9,11 @@ import android.content.pm.ActivityInfo;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.espresso.Espresso;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
@@ -33,7 +35,9 @@ import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.swipeDown;
 import static androidx.test.espresso.action.ViewActions.swipeRight;
+import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.intent.Intents.intended;
@@ -56,11 +60,11 @@ public class EspressoPreferences {
     float scaledDensity;
     String expectedOfflineTitle, expectedOnlineWorkTitle, expectedOnlineRestTitle;
     int extendOptionCount, extendBaseLength;
-    String workPeriodLengthKey, restPeriodLengthKey, workPeriodSoundKey, restPeriodSoundKey, extendCountKey, extendBaseLengthKey, reminderModeKey;
+    String workPeriodLengthKey, restPeriodLengthKey, workPeriodSoundKey, restPeriodSoundKey, extendCountKey, extendBaseLengthKey, reminderModeKey, disableBatteryOptKey;
     IntentFilter filter;
     MyReceiver receiver;
-    String actualModeSummary, actualWorkLengthSummary, actualRestLengthSummary, actualWorkAudioSummary, actualRestAudioSummary, actualExtendCountSummary, actualExtendLenghtSummary;
-    String expectedModeSummary, expectedWorkLengthSummary, expectedRestLengthSummary, expectedWorkAudioSummary, expectedRestAudioSummary, expectedExtendCountSummary, expectedExtendBaseLengthSummary;
+    String actualModeSummary, actualWorkLengthSummary, actualRestLengthSummary, actualWorkAudioSummary, actualRestAudioSummary, actualExtendCountSummary, actualExtendLengthSummary, actualDisableBatteryOptSummary;
+    String expectedModeSummary, expectedWorkLengthSummary, expectedRestLengthSummary, expectedWorkAudioSummary, expectedRestAudioSummary, expectedExtendCountSummary, expectedExtendBaseLengthSummary, expectedDisableBatteryOptSummary;
     Uri originalWorkUri, originalRestUri, originalApproxUri;
 
     String debug = "ESPRESSO_PREFERENCES";
@@ -89,7 +93,9 @@ public class EspressoPreferences {
         workPeriodSoundKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_start_sound_key);
         restPeriodSoundKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_start_sound_key);
         extendCountKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key);
+        disableBatteryOptKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_disable_battery_optimization_key);
         extendBaseLengthKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_length_key);
+
         reminderModeKey = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_mode_key);
 
         filter = new IntentFilter();
@@ -102,6 +108,7 @@ public class EspressoPreferences {
         editor.putBoolean(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_end_period_key), true);
         editor.putString(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:20");
         editor.putString(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:15");
+        editor.putBoolean(RReminderTest.getResourceString(R.string.pref_enable_short_periods_key), false);
         editor.putInt(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_key), 1);
         editor.commit();
         receiver = new MyReceiver();
@@ -135,6 +142,7 @@ public class EspressoPreferences {
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         Espresso.pressBack();
+        onView(isRoot()).perform(swipeUp());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         Espresso.pressBack();
@@ -185,13 +193,24 @@ public class EspressoPreferences {
             expectedExtendBaseLengthSummary = getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_minute_multiple, value);
         }
 
+        expectedDisableBatteryOptSummary = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_disable_battery_optimization_prefix);
+        boolean disabled = preferences.getBoolean(disableBatteryOptKey, false);
+        if(disabled){
+            expectedDisableBatteryOptSummary+=" "+RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_disable_battery_optimization_disabled);
+        } else {
+            expectedDisableBatteryOptSummary+=" "+RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_disable_battery_optimization_enabled);
+        }
+
         assertWithMessage("the summary of mode preference should say automatic").that(expectedModeSummary).isEqualTo( actualModeSummary);
        assertWithMessage("the summary of work length preference should match").that(expectedWorkLengthSummary).isEqualTo(actualWorkLengthSummary);
         assertWithMessage("the summary of rest length preference should match").that(expectedRestLengthSummary).isEqualTo(actualRestLengthSummary);
        assertWithMessage("the summary of work period audio preference should match").that(expectedWorkAudioSummary).isEqualTo(actualWorkAudioSummary);
        assertWithMessage("the summary of rest period audio preference should match").that(expectedRestAudioSummary).isEqualTo(actualRestAudioSummary);
         assertWithMessage("the summary of extend count preference should match").that(expectedExtendCountSummary).isEqualTo(actualExtendCountSummary);
-        assertWithMessage("tthe summary of extend base length preference should match").that(expectedExtendBaseLengthSummary).isEqualTo(actualExtendLenghtSummary);
+        assertWithMessage("the summary of extend base length preference should match").that(expectedExtendBaseLengthSummary).isEqualTo(actualExtendLengthSummary);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            assertWithMessage("tthe summary of extend base length preference should match").that(expectedDisableBatteryOptSummary).isEqualTo(actualDisableBatteryOptSummary);
+        }
 
     }
 
@@ -246,6 +265,7 @@ public class EspressoPreferences {
         onView(withText(RReminderTest.getResourceString(R.string.pref_enable_short_periods_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         shortPeriodsEnabled = preferences.getBoolean(getApplicationContext().getResources().getString(R.string.pref_enable_short_periods_key), false);
+
         assertWithMessage("while the reminder is running, the enable short periods preference should be disabled (clicking on it wont have any effect)").that( shortPeriodsEnabled).isFalse();
         Espresso.pressBack();
         Espresso.pressBack();
@@ -256,6 +276,16 @@ public class EspressoPreferences {
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         shortPeriodsEnabled = preferences.getBoolean(getApplicationContext().getResources().getString(R.string.pref_enable_short_periods_key), false);
         assertWithMessage("when reminder is no longer running, short period preference can be interacted with, one click on it enables short periods").that( shortPeriodsEnabled).isTrue();
+
+        onView(withId(R.id.inconsistent_behaviour_battery)).check(matches(isDisplayed()));
+        onView(isRoot()).perform(CustomActions.waitFor(1000));
+        onView(withText("CANCEL")).perform(click());
+        onView(isRoot()).perform(CustomActions.waitFor(1000));
+        //after clicking OK, device battery optimizations settings are opened (neither dialog or Rest Reminders preference screen is visible)
+        //assertWithMessage("batterySettingsdialog is visible").that( batterySettingsDialog.getShowsDialog()).isFalse();
+        onView(withId(R.id.inconsistent_behaviour_battery)).check(doesNotExist());
+        onView(withText(RReminderTest.getResourceString(R.string.pref_enable_short_periods_title))).check(matches(isDisplayed()));
+
         Espresso.pressBack();
         Espresso.pressBack();
         onView(withId(R.id.timer_layout)).perform(click());
@@ -277,10 +307,12 @@ public class EspressoPreferences {
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_periods_title))).perform(click());
         onView(withText(RReminderTest.getResourceString(R.string.pref_enable_short_periods_title))).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            onView(withText("CANCEL")).perform(click());
+        }
         shortPeriodsEnabled = preferences.getBoolean(getApplicationContext().getResources().getString(R.string.pref_enable_short_periods_key), false);
         assertWithMessage("short period preference is now enabled").that( shortPeriodsEnabled).isTrue();
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title))).perform(click());
-        onView(withId(R.id.short_period_warning)).check(matches(isDisplayed()));
         //TO-DO: finish the test
         onView(withId(R.id.time_preference_second_picker)).perform(CustomActions.setValue(5));
         onView(withText("OK")).perform(click());
@@ -289,7 +321,6 @@ public class EspressoPreferences {
         Log.d("ESPR_PREF", "actualWorkLengthSummary: "+actualWorkLengthSummary);
         assertWithMessage("the summary of work length preference should be 5 minutes").that(actualWorkLengthSummary).isEqualTo(expectedWorkLengthSummary);
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title))).perform(click());
-        onView(withId(R.id.short_period_warning)).check(matches(isDisplayed()));
         onView(withId(R.id.time_preference_second_picker)).perform(CustomActions.setValue(3));
         onView(withText("OK")).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
@@ -298,23 +329,21 @@ public class EspressoPreferences {
         assertWithMessage("the summary of rest length preference should be 3 minutes").that(actualRestLengthSummary).isEqualTo(expectedRestLengthSummary);
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title))).perform(click());
         onView(withId(R.id.time_preference_second_picker)).check(matches(CustomMatchers.withNumberPickerValue(5)));
-        onView(withText("Cancel")).perform(click());
+        onView(withText("CANCEL")).perform(click());
         onView(withText(RReminderTest.getResourceString(R.string.pref_enable_short_periods_title))).perform(click());
         expectedWorkLengthSummary = RReminder.getFormatedValue(getApplicationContext(), 0, preferences.getString(workPeriodLengthKey, RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.default_work_length_string)));
         assertWithMessage("after disabling the short period the summary of work length preference should be 10 minutes").that(actualWorkLengthSummary).isEqualTo(expectedWorkLengthSummary);
         expectedRestLengthSummary = RReminder.getFormatedValue(getApplicationContext(), 0, preferences.getString(restPeriodLengthKey, RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.default_rest_length_string)));
         assertWithMessage("after disabling the short periodsthe summary of rest length preference should be 10 minutes").that(actualRestLengthSummary).isEqualTo(expectedRestLengthSummary);
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_title))).perform(click());
-        onView(withId(R.id.short_period_warning)).check(matches(not(isDisplayed())));
         onView(withId(R.id.time_preference_first_picker)).check(matches(CustomMatchers.withNumberPickerValue(0)));
         onView(withId(R.id.time_preference_second_picker)).check(matches(CustomMatchers.withNumberPickerValue(10)));
 
         onView(withId(R.id.time_preference_second_picker)).perform(CustomActions.setValue(3));
         onView(withId(R.id.time_preference_second_picker)).check(matches(CustomMatchers.withNumberPickerValue(53)));
-        onView(withText("Cancel")).perform(click());
+        onView(withText("CANCEL")).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_title))).perform(click());
-        onView(withId(R.id.short_period_warning)).check(matches(not(isDisplayed())));
         onView(withId(R.id.time_preference_first_picker)).check(matches(CustomMatchers.withNumberPickerValue(0)));
         onView(withId(R.id.time_preference_second_picker)).check(matches(CustomMatchers.withNumberPickerValue(10)));
 
@@ -354,7 +383,12 @@ public class EspressoPreferences {
 
         //testing rest period preferences with 3 changes within 1 preference session
         //switching to rest period
-        onView(withId(R.id.swipe_area_text)).perform(swipeRight());
+        if(RReminder.isPortrait(getApplicationContext())){
+            onView(withId(R.id.swipe_area_text)).perform(swipeRight());
+        } else {
+            onView(withId(R.id.swipe_area_text)).perform(swipeDown());
+        }
+
         onView(isRoot()).perform(CustomActions.waitFor(1000));
 
         periodEndTimeValue = mActivityRule.getActivity().periodEndTimeValue;
@@ -391,7 +425,12 @@ public class EspressoPreferences {
     public void testUpdatedRestPeriodAfterPreferenceChange(){
         onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(1000));
-        onView(withId(R.id.swipe_area_text)).perform(swipeRight());
+        if(RReminder.isPortrait(getApplicationContext())){
+            onView(withId(R.id.swipe_area_text)).perform(swipeRight());
+        } else {
+            onView(withId(R.id.swipe_area_text)).perform(swipeDown());
+        }
+
         long periodEndTimeValue = mActivityRule.getActivity().periodEndTimeValue;
         //Since we are changing rest period lenght to 40 mins, we need to add 25 mins to the expected time, because the original rest period length is set to 15 mins
         long expectedPeriodEndTime1 = periodEndTimeValue + 25*60*1000;
@@ -441,7 +480,7 @@ public class EspressoPreferences {
         changePeriodLengthPreference(RReminder.REST, 2,45);
 
         Espresso.pressBack();
-
+        onView(isRoot()).perform(swipeUp());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title))).perform(click());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title))).perform(click());
         onView(withId(R.id.number_preference_picker)).perform(CustomActions.setValue(2));
@@ -502,7 +541,7 @@ public class EspressoPreferences {
         //assertEquals("after updating work period ringtone preference the summary should be updated", expectedWorkAudioSummary, actualWorkAudioSummary);
         //assertEquals("after updating rest period ringtone preference the summary should be updated", expectedRestAudioSummary, actualRestAudioSummary);
         assertWithMessage("after updating extend options count preference the summary should be updated").that(expectedExtendCountSummary).isEqualTo(actualExtendCountSummary);
-        assertWithMessage("after updating extend lenght preference the summary should be updated").that(expectedExtendBaseLengthSummary).isEqualTo(actualExtendLenghtSummary);
+        assertWithMessage("after updating extend length preference the summary should be updated").that(expectedExtendBaseLengthSummary).isEqualTo(actualExtendLengthSummary);
     }
 
     @Test
@@ -545,6 +584,7 @@ public class EspressoPreferences {
         onView(withId(R.id.button_period_end_extend)).check(matches(withText(extendButtonOneOption)));
         openPreferences();
         intended(hasComponent(PreferenceXActivity.class.getName()));
+        onView(isRoot()).perform(swipeUp());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_screen_period_extend_title))).perform(click());
         onView(withText(RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.pref_period_extend_options_title))).perform(click());
         onView(withId(R.id.number_preference_picker)).perform(CustomActions.setValue(3));
@@ -649,12 +689,13 @@ public class EspressoPreferences {
                         actualRestLengthSummary = intent.getExtras().getString(RReminder.PREFERENCE_REST_LENGTH_SUMMARY);
                         actualWorkAudioSummary = intent.getExtras().getString(RReminder.PREFERENCE_WORK_AUDIO_SUMMARY);
                         actualRestAudioSummary = intent.getExtras().getString(RReminder.PREFERENCE_REST_AUDIO_SUMMARY);
+                        actualDisableBatteryOptSummary = intent.getExtras().getString(RReminder.PREFERENCE_DISABLE_BATTERY_OPT_SUMMARY);
                         break;
                     }
                     case RReminder.CUSTOM_INTENT_TEST_PREFERENCES_EXTEND :
                     {
                         actualExtendCountSummary = intent.getExtras().getString(RReminder.PREFERENCE_EXTEND_COUNT_SUMMARY);
-                        actualExtendLenghtSummary = intent.getExtras().getString(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY);
+                        actualExtendLengthSummary = intent.getExtras().getString(RReminder.PREFERENCE_EXTEND_LENGTH_SUMMARY);
                         break;
                     }
                     default: break;

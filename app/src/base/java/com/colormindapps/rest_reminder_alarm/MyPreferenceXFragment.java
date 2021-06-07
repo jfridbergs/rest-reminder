@@ -7,42 +7,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.Settings;
-import android.util.Log;
 
-import androidx.fragment.app.Fragment;
+import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
-import androidx.preference.PreferenceScreen;
+
 import androidx.preference.SwitchPreference;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Objects;
 
 
 public class MyPreferenceXFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener{
-	public String reminderModeKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, workPeriodSoundKey, restPeriodSoundKey, enableColorizedNotificationsKey, enableExtendKey, prefScreenExtendKey;
-	public String testModeSummary,testWorkLenghtSummary, testRestLenghtSummary, testWorkAudioSummary, testRestAudioSummary, testExtendCountSummary, testExtendLengthSummary;
-	Uri originalWorkUri, originalRestUri, newWorkUri, newRestUri;
+	public String reminderModeKey, enableColorizedNotificationsKey, enableExtendKey, prefScreenExtendKey;
+	public String testModeSummary;
 	SharedPreferences sharedPreferences;
 
-	SharedPreferences.Editor editor;
-	Preference workSoundPreference, restSoundPreference;
 	Context context;
 	private PreferenceActivityLinkedService parentActivity;
 
 
-	String debug = "PreferenceFragment X";
 
 	public static MyPreferenceXFragment newInstance() {
 		return new MyPreferenceXFragment();
@@ -55,10 +46,8 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 	@Override
 	public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-		Log.d(debug, "onCreatePreference()");
 		setPreferencesFromResource(R.xml.preferences_x, rootKey);
-		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		editor = sharedPreferences.edit();
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireActivity());
 		int value;
 		context = getActivity();
 
@@ -67,15 +56,19 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		enableExtendKey = getString(R.string.pref_enable_extend_key);
 		enableColorizedNotificationsKey = getString(R.string.pref_colorize_notifications_key);
 
-		final SwitchPreference customPreference = (SwitchPreference) findPreference(enableExtendKey);
-		final Preference customSettings = (Preference) findPreference(prefScreenExtendKey);
+		final SwitchPreference customPreference = findPreference(enableExtendKey);
+		final Preference customSettings = findPreference(prefScreenExtendKey);
 		// First time loading the preference screen, we check the saved settings and enable/disable the custom settings, based on the custom check box
 		//get the customSettings value from shared preferences
 		if (sharedPreferences.getBoolean(enableExtendKey, true)) {
+			assert customPreference != null;
 			customPreference.setChecked(true);
+			assert customSettings != null;
 			customSettings.setEnabled(true);
 		} else {
+			assert customPreference != null;
 			customPreference.setChecked(false);
+			assert customSettings != null;
 			customSettings.setEnabled(false);
 		}
 
@@ -84,11 +77,13 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		value = Integer.parseInt(sharedPreferences.getString(reminderModeKey,"0"));
 		switch(value){
 			case 0: {
+				assert preference != null;
 				preference.setTitle(getString(R.string.pref_mode_title_first_part,getString(R.string.pref_mode_title_automatic)));
 				preference.setSummary(getString(R.string.pref_mode_summary_automatic));
 				break;
 			}
 			case 1:{
+				assert preference != null;
 				preference.setTitle(getString(R.string.pref_mode_title_first_part,getString(R.string.pref_mode_title_manual)));
 				preference.setSummary(getString(R.string.pref_mode_summary_manual));
 				break;
@@ -96,11 +91,13 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 			default: break;
 		}
 
+		assert preference != null;
 		testModeSummary = preference.getSummary().toString();
 
 		//display the preference for enabling notification color only on devices with oreo or newer
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
 			PreferenceCategory mCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_basic_settings_key));
+			assert mCategory != null;
 			mCategory.removePreference(findPreference(enableColorizedNotificationsKey));
 		} else {
 
@@ -119,8 +116,9 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		} else {
 			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(true);
 		}
-		Vibrator vib = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+		Vibrator vib = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
+		assert vib != null;
 		if(vib.hasVibrator()){
 			getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key)).setEnabled(true);
 		} else {
@@ -151,6 +149,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
             value = Integer.parseInt(sharedPreferences.getString(key,"0"));
             switch(value){
         	case 0:{
+				assert preference != null;
 				preference.setTitle(getString(R.string.pref_mode_title_first_part,getString(R.string.pref_mode_title_automatic)));
 				preference.setSummary(getString(R.string.pref_mode_summary_automatic));
 				break;
@@ -163,12 +162,15 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
         	default: break;
             }
 
+			assert preference != null;
 			testModeSummary = preference.getSummary().toString();
         }   else if (key.equals(enableExtendKey)){
 			Preference extendSettings = findPreference(prefScreenExtendKey);
 			if (sharedPreferences.getBoolean(key, true)) {
+				assert extendSettings != null;
 				extendSettings.setEnabled(true);
 			} else {
+				assert extendSettings != null;
 				extendSettings.setEnabled(false);
 			}
 		}
@@ -182,7 +184,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		Intent testIntent = new Intent();
 		testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES_MODE);
 		testIntent.putExtra(RReminder.PREFERENCE_MODE_SUMMARY, testModeSummary);
-		getActivity().sendBroadcast(testIntent);
+		requireActivity().sendBroadcast(testIntent);
 	}
     
     @Override
@@ -201,7 +203,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 	@TargetApi(23)
 	@Override
-	public void onAttach(Context context) {
+	public void onAttach(@NonNull Context context) {
 		super.onAttach(context);
 		try {
 			setParentActivity((PreferenceActivityLinkedService) getActivity());
@@ -212,7 +214,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onAttach(Activity activity) {
+	public void onAttach(@NonNull Activity activity) {
 		super.onAttach(activity);
 		if (Build.VERSION.SDK_INT < 23) {
 			try {

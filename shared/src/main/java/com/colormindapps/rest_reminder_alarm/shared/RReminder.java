@@ -15,7 +15,6 @@ import androidx.annotation.IntDef;
 import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -135,6 +134,7 @@ public class RReminder {
 	public static final String PREFERENCE_WORK_AUDIO_SUMMARY = "preference_work_audio_summary";
 	public static final String PREFERENCE_REST_AUDIO_SUMMARY = "preference_rest_audio_summary";
 	public static final String PREFERENCE_PROXIMITY_AUDIO_SUMMARY = "preference_proximity_audio_summary";
+	public static final String PREFERENCE_DISABLE_BATTERY_OPT_SUMMARY = "preference_disable_battery_opt_summary";
 	//end of testing variables
 
 	

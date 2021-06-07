@@ -200,7 +200,7 @@ public class EspressoNotificationActivity {
     public void testDescription(){
         int expectedFontSize;
         if(RReminder.isTablet(getApplicationContext())){
-            expectedFontSize = 28;
+            expectedFontSize = 30;
         } else {
             expectedFontSize = RReminder.isPortrait(getApplicationContext()) ? 20:18;
         }
@@ -359,7 +359,7 @@ public class EspressoNotificationActivity {
     public void testExtendButton(){
         String expectedButtonText = RReminderTest.getResourceString(com.colormindapps.rest_reminder_alarm.R.string.extend_current_period);
         onView(withId(R.id.button_notification_period_end_extend)).check(matches(withText(expectedButtonText)));
-        int expectedButtonTextSize = RReminder.isTablet(getApplicationContext()) ? 28 :20;
+        int expectedButtonTextSize = RReminder.isTablet(getApplicationContext()) ? 30 :20;
         onView(withId(R.id.button_notification_period_end_extend)).check(matches(CustomMatchers.withTextSize(expectedButtonTextSize)));
         int expectedColor = getApplicationContext().getResources().getColor(com.colormindapps.rest_reminder_alarm.R.color.black);
         onView(withId(R.id.button_notification_period_end_extend)).check(matches(CustomMatchers.withTextColor(expectedColor)));

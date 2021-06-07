@@ -6,6 +6,8 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.app.NotificationManagerCompat;
@@ -167,13 +169,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 
                 extendPeriodEnd.setTypeface(descriptionFont);
                 extendPeriodEnd.setVisibility(View.VISIBLE);
-                extendPeriodEnd.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v){
-                        showExtendDialog();
-
-                    }
-                });
+                extendPeriodEnd.setOnClickListener(v -> showExtendDialog());
             }
 
 
@@ -319,7 +315,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 
 	
 	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
+	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
 	  super.onSaveInstanceState(savedInstanceState);
 	  // Save UI state changes to the savedInstanceState.
 	  // This bundle will be passed to onCreate if the process is

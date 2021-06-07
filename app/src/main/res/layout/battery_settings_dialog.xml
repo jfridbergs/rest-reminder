@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/battery_settings_dialog"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    style="@style/BatterySettingsDialog" >
+
+    <TextView
+        android:id="@+id/inconsistent_behaviour_battery"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/battery_dialog_inconsistent_warning"
+        style="@style/BatteryDialogTitle"/>
+
+
+    <TextView
+        android:id="@+id/inconsistent_behaviour_solution"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/battery_dialog_inconsistency_solution"/>
+
+    <TextView
+        android:id="@+id/open_settings_question"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/battery_dialog_question"
+        style="@style/BatteryDialogQuestion"/>
+
+    
+    
+</LinearLayout>

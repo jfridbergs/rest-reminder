@@ -25,7 +25,7 @@ public class ManualActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_manual);
 		
-		manual = (WebView) findViewById(R.id.manual);
+		manual = findViewById(R.id.manual);
 		manual.loadUrl("file:///android_asset/html/manual.html");
 		
 		if(savedInstanceState!=null){
@@ -33,11 +33,11 @@ public class ManualActivity extends AppCompatActivity {
 
 		}
 
-		Toolbar toolbar = (Toolbar) findViewById(R.id.manualToolbar);
+		Toolbar toolbar = findViewById(R.id.manualToolbar);
 		setSupportActionBar(toolbar);
 		if(getSupportActionBar()!=null)
 			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		rootLayout = (RelativeLayout) findViewById(R.id.manual_root_layout);
+		rootLayout = findViewById(R.id.manual_root_layout);
 		toolbar.setVisibility(View.GONE);
 		rootLayout.setPadding(0,0,0,0);
 
@@ -57,16 +57,13 @@ public class ManualActivity extends AppCompatActivity {
 				   super.onPageFinished(view, url);
 				if(!loadingFinished){
 
-					view.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							float webviewsize = manual.getContentHeight() - manual.getTop();
-							float positionInWV = webviewsize * progress;
+					// Delay the scrollTo to make it work
+					view.postDelayed(() -> {
+						float webviewsize = manual.getContentHeight() - manual.getTop();
+						float positionInWV = webviewsize * progress;
 
-							int positionY =  (int)positionInWV;
-							manual.scrollTo(0, positionY);
-						}
-						// Delay the scrollTo to make it work
+						int positionY =  (int)positionInWV;
+						manual.scrollTo(0, positionY);
 					}, 300);
 					loadingFinished = true;
 				}

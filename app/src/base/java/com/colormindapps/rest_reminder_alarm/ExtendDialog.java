@@ -9,7 +9,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 
 public class ExtendDialog extends DialogFragment{
@@ -39,7 +39,7 @@ public class ExtendDialog extends DialogFragment{
 	}
 	
 	@Override
-	public void onDismiss(DialogInterface dialog){
+	public void onDismiss(@NonNull DialogInterface dialog){
 		parentActivity.resumeCounter(positiveDismissal);
 		dialogIsOpen = false;
 		positiveDismissal = false;
@@ -75,80 +75,46 @@ public class ExtendDialog extends DialogFragment{
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		Bundle data = getArguments();
 		context = getActivity();
-		periodType = data.getInt(RReminder.PERIOD_TYPE);
-		extendCount = data.getInt(RReminder.EXTEND_COUNT);
-		periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-		activityType = data.getInt(RReminder.ACTIVITY_TYPE);
-		LayoutInflater inflater = getActivity().getLayoutInflater();
+		if(data!=null){
+			periodType = data.getInt(RReminder.PERIOD_TYPE);
+			extendCount = data.getInt(RReminder.EXTEND_COUNT);
+			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
+			activityType = data.getInt(RReminder.ACTIVITY_TYPE);
+		}
+		LayoutInflater inflater = requireActivity().getLayoutInflater();
 		View view = inflater.inflate(R.layout.extend_dialog,new LinearLayout(context), false);
 		builder.setView(view);
-		builder.setNegativeButton(R.string.extend_dialog_close_dialog_text, new DialogInterface.OnClickListener(){
-			@Override
-			public void onClick(DialogInterface dialog, int id){
-				ExtendDialog.this.getDialog().cancel();
-			}
-		});
+		builder.setNegativeButton(R.string.extend_dialog_close_dialog_text, (dialog, id) -> Objects.requireNonNull(ExtendDialog.this.getDialog()).cancel());
 
 		
 		int extendBaseLength = RReminder.getExtendBaseLength(context);
 
 
-        TextView dialogTitle = view.findViewById(R.id.extend_dialog_title);
 		Button extendOptionButton = view.findViewById(R.id.extend_dialog_button_extend);
-        if(activityType==0){
-            dialogTitle.setText(getString(R.string.extend_dialog_title));
-            extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
-        } else {
-            dialogTitle.setText(getString(R.string.extend_dialog_title));
-            extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
-        }
-		extendOptionButton.setOnClickListener(new View.OnClickListener(){
-			@Override
-			public void onClick(View v){
-				buttonAction(context,1);
-			}
-		});
+		extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
+		extendOptionButton.setOnClickListener(v -> buttonAction(context,1));
 		
 		if(RReminder.getExtendOptionsCount(context)>1){
 			Button extendOptionButton1 = view.findViewById(R.id.extend_dialog_button_extend1);
-            if(activityType==0){
-                extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*2));
-            } else {
-                extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength * 2));
-
-            }
+			extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*2));
 			extendOptionButton1.setVisibility(View.VISIBLE);
 			
-			extendOptionButton1.setOnClickListener(new View.OnClickListener(){
-				@Override
-				public void onClick(View v){
-					buttonAction(context, 2);
-				}
-			});
+			extendOptionButton1.setOnClickListener(v -> buttonAction(context, 2));
 		}
 		
 		if(RReminder.getExtendOptionsCount(context)>2){
 			Button extendOptionButton2 = view.findViewById(R.id.extend_dialog_button_extend2);
-            if(activityType==0){
-                extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
-            } else {
-                extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
-            }
+			extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
 			extendOptionButton2.setVisibility(View.VISIBLE);
 			
-			extendOptionButton2.setOnClickListener(new View.OnClickListener(){
-				@Override
-				public void onClick(View v){
-					buttonAction(context, 3);
-				}
-			});
+			extendOptionButton2.setOnClickListener(v -> buttonAction(context, 3));
 		}
 		dialogIsOpen = true;	
 		return builder.create();
 	}
 
 	@Override
-	public void onCancel(DialogInterface dialog){
+	public void onCancel(@NonNull DialogInterface dialog){
 
 		super.onCancel(dialog);
 	}
@@ -165,7 +131,6 @@ public class ExtendDialog extends DialogFragment{
 				toastText = getString(R.string.toast_period_end_extended);
 				break;
 			case 1:
-				Log.d("EXTEND_DIALOG", "Cancelling alarm: type: "+RReminder.getNextType(periodType)+", extendCount: "+extendCount+", endTime: "+periodEndTimeValue);
 				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue);
 				toastText = getString(R.string.notification_toast_period_extended);
 				break;
@@ -192,7 +157,7 @@ public class ExtendDialog extends DialogFragment{
 		switch(activityType){
 		case 0:
 			parentActivity.bindFromFragment(functionCalendar);
-			ExtendDialog.this.getDialog().cancel();
+			Objects.requireNonNull(ExtendDialog.this.getDialog()).cancel();
 			dialogIsOpen = false;
 			break;
 		case 1:
@@ -203,7 +168,7 @@ public class ExtendDialog extends DialogFragment{
 			i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 			dialogIsOpen = false;
 			context.startActivity(i);
-			getActivity().finish();
+			requireActivity().finish();
 			break;
 		default: break;
 		}
@@ -214,7 +179,7 @@ public class ExtendDialog extends DialogFragment{
 
 	
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         try {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();

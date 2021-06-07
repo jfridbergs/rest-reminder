@@ -3,7 +3,6 @@ package com.colormindapps.rest_reminder_alarm;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import androidx.preference.DialogPreference;
 
@@ -11,7 +10,6 @@ public class PeriodLengthPreference extends DialogPreference {
     private String mPeriodLength;
     private int firstMaxValue;
     private String headerText;
-    private int mDialogLayoutResId = R.layout.period_length_pref_dialog;
 
     public PeriodLengthPreference (Context context){
         this(context, null);
@@ -50,7 +48,6 @@ public class PeriodLengthPreference extends DialogPreference {
     }
 
     public void setPeriodLength(String periodLength){
-        Log.d("PERIOD_PREFERENCE", "setPeriodLength");
         mPeriodLength = periodLength;
         persistString(periodLength);
     }
@@ -73,6 +70,6 @@ public class PeriodLengthPreference extends DialogPreference {
 
     @Override
     public int getDialogLayoutResource() {
-        return mDialogLayoutResId;
+        return R.layout.period_length_pref_dialog;
     }
 }

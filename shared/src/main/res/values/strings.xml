@@ -77,6 +77,10 @@
     <string name="extend_dialog_title">Extend period</string>
     <string name="extend_dialog_close_dialog_text">Cancel</string>
     <string name="extend_dialog_button">Extend for %1$d minutes</string>
+    <!-- battery settings Dialog -->
+    <string name="battery_dialog_inconsistent_warning">Selecting short period lengths (less than 10 minutes) can result in delayed (late) period end notifications</string>
+    <string name="battery_dialog_inconsistency_solution">This delayed notification behavior with short periods can be minimized or even solved by turning off (not allowing) battery optimization for Rest Reminder app. It can be done in device\'s <b>Battery Optimization Settings</b> by choosing <b>"All Apps"</b> in dropdown menu, selecting <b>"Rest Reminder"</b> and then selecting <b>"Don't allow"</b>.</string>
+    <string name="battery_dialog_question">Would you like to turn off battery optimization for Rest Reminder?</string>
     <!--Showcase-->
     <string name="showcase_start_title">Starting the reminder</string>
     <string name="showcase_start_description">Press the timer button to start reminder. \n (To turn off reminder, press and hold timer button)</string>
@@ -115,6 +119,11 @@
     <string name="pref_work_period_start_sound_title">Work period start sound</string>
     <string name="pref_rest_period_start_sound_key">rest_period_start_sound</string>
     <string name="pref_rest_period_start_sound_title">Rest period start sound</string>
+    <string name="pref_disable_battery_optimization_key">disable_battery_optimization</string>
+    <string name="pref_disable_battery_optimization_title">Open battery optimization settings</string>
+    <string name="pref_disable_battery_optimization_prefix">Battery optimization is </string>
+    <string name="pref_disable_battery_optimization_disabled">DISABLED</string>
+    <string name="pref_disable_battery_optimization_enabled">ENABLED</string>
     <string name="pref_category_features_key">features_category</string>
     <string name="pref_category_features_title">Feature settings</string>
     <string name="pref_category_period_settings_key">period_settings_category</string>
