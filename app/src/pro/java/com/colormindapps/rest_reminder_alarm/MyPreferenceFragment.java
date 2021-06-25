@@ -55,7 +55,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		
-		addPreferencesFromResource(R.xml.preferences);
+		addPreferencesFromResource(R.xml.preferences_x);
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		editor = sharedPreferences.edit();
 		int value;
@@ -300,7 +300,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 					//getting new values for service and alarm
 					updatedWorkPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
-					long difference = getUpdatedDiffrerence(workPeriodLength, updatedWorkPeriodLength);
+					long difference = RReminder.getUpdatedDifference(workPeriodLength, updatedWorkPeriodLength);
 					long newPeriodEndValue = periodEndTimeValue + difference;
 					SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
 					Calendar time = Calendar.getInstance();
@@ -325,7 +325,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 
 					//getting new values for service and alarm
 					updatedRestPeriodLength = sharedPreferences.getString(key, RReminder.DEFAULT_REST_PERIOD_STRING);
-					long difference = getUpdatedDiffrerence(restPeriodLength, updatedRestPeriodLength);
+					long difference = RReminder.getUpdatedDifference(restPeriodLength, updatedRestPeriodLength);
 					long newPeriodEndValue = periodEndTimeValue + difference;
 
 					//starting counterservice and setting new alarms
@@ -345,7 +345,6 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 	public void onDestroy(){
 		super.onDestroy();
 		Intent testIntent = new Intent();
-		testIntent.setAction(RReminder.CUSTOM_INTENT_TEST_PREFERENCES);
 		testIntent.putExtra(RReminder.PREFERENCE_MODE_SUMMARY, testModeSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_WORK_LENGTH_SUMMARY, testWorkLengthSummary);
 		testIntent.putExtra(RReminder.PREFERENCE_REST_LENGTH_SUMMARY, testRestLengthSummary);
@@ -425,16 +424,7 @@ public class MyPreferenceFragment extends PreferenceFragment implements OnShared
 		}
 	}
 
-	public long getUpdatedDiffrerence(String oldString, String newString){
-		int difference;
-		int oldHour = CustomTimePreference.getHour(oldString);
-		int oldMinute = CustomTimePreference.getMinute(oldString);
-		int newHour = CustomTimePreference.getHour(newString);
-		int newMinute = CustomTimePreference.getMinute(newString);
 
-		difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
-		return (long)difference;
-	}
 
 
 	

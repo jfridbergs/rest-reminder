@@ -6,14 +6,15 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.util.Log;
 
+import com.colormindapps.rest_reminder_alarm.shared.PeriodManager;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
 
 
-public class MobilePeriodManager {
+public class MobilePeriodManager extends PeriodManager {
+	int buildNumber;
 	private final Context mContext;
 	private final AlarmManager mAlarmManager;
 
@@ -23,7 +24,7 @@ public class MobilePeriodManager {
 	}
 	@TargetApi(Build.VERSION_CODES.M)
 	public void setPeriod(int type, long when, int extendCount){
-		int buildNumber = Build.VERSION.SDK_INT;
+		buildNumber = Build.VERSION.SDK_INT;
 
 		PendingIntent pi;
 
@@ -48,11 +49,9 @@ public class MobilePeriodManager {
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, when, pi);
 		}
 
-
 	}
 
-
-
-
-
 }
+
+
+

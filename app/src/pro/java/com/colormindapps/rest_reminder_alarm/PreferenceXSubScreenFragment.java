@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -24,16 +23,14 @@ import androidx.preference.PreferenceManager;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Objects;
 
 import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getHourFromString;
 import static com.colormindapps.rest_reminder_alarm.shared.RReminder.getMinuteFromString;
 
 public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     Uri originalWorkUri, originalRestUri, newWorkUri, newRestUri;
-    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, enableShortPeriodsKey, disableBatteryOptKey;
+    String workPeriodSoundKey, restPeriodSoundKey, workPeriodLengthKey, restPeriodLengthKey, extendCountKey, extendBaseLengthKey, enableShortPeriodsKey, disableBatteryOptKey, extendEnabledKey, startNextEnabledKey, reminderModeKey;
     String testWorkAudioSummary, testRestAudioSummary, testWorkLengthSummary, testRestLengthSummary, testExtendCountSummary, testExtendLengthSummary, testDisableBatteryOptSummary;
     SharedPreferences sharedPreferences;
     Preference workSoundPreference, restSoundPreference, workPeriodLengthPreference, restPeriodLengthPreference, extendCountpreference, extendBasePreference, disableBatteryOptPreference;
@@ -41,6 +38,9 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
     String workPeriodLength, restPeriodLength;
     String preferenceScreenKey;
     DialogFragment batterySettingsDialog;
+    String wearWorkLength, wearRestLength, wearReminderMode;
+    int wearExtendLength;
+    boolean wearExtendEnabled, wearStartNextEnabled;
 
     private boolean shortDisabled = false;
 
@@ -72,12 +72,15 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
         String output;
 
+        reminderModeKey = getString(R.string.pref_mode_key);
         workPeriodLengthKey = getString(R.string.pref_work_period_length_key);
         restPeriodLengthKey = getString(R.string.pref_rest_period_length_key);
         extendCountKey = getString(R.string.pref_period_extend_options_key);
         extendBaseLengthKey = getString(R.string.pref_period_extend_length_key);
         workPeriodSoundKey = getString(R.string.pref_work_period_start_sound_key);
         restPeriodSoundKey = getString(R.string.pref_rest_period_start_sound_key);
+        extendEnabledKey = getString(R.string.pref_enable_extend_key);
+        startNextEnabledKey = getString(R.string.pref_end_period_key);
         enableShortPeriodsKey = getString(R.string.pref_enable_short_periods_key);
         disableBatteryOptKey = getString(R.string.pref_disable_battery_optimization_key);
 
@@ -241,6 +244,17 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             }
 
         }
+
+        //updating the preferences values on wear device
+        wearWorkLength = sharedPreferences.getString(workPeriodLengthKey, RReminder.DEFAULT_WORK_PERIOD_STRING);
+        wearRestLength = sharedPreferences.getString(restPeriodLengthKey, RReminder.DEFAULT_REST_PERIOD_STRING);
+        wearExtendLength = sharedPreferences.getInt(extendBaseLengthKey, RReminder.DEFAULT_EXTEND_COUNT);
+        wearExtendEnabled = sharedPreferences.getBoolean(extendEnabledKey, true);
+        wearStartNextEnabled = sharedPreferences.getBoolean(startNextEnabledKey, true);
+        wearReminderMode = sharedPreferences.getString(reminderModeKey, "0");
+
+        parentActivity.updateWearPreferences(wearReminderMode, wearWorkLength, wearRestLength, wearExtendLength, wearExtendEnabled, wearStartNextEnabled);
+
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
             if (key.equals(workPeriodLengthKey) || key.equals(restPeriodLengthKey)){
                 String valueString = sharedPreferences.getString(key, RReminder.DEFAULT_WORK_PERIOD_STRING);
@@ -286,6 +300,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
+                        parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         workPeriodLength = updatedWorkPeriodLength;
                     }
                 }
@@ -306,6 +321,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
 
+                        parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         restPeriodLength = updatedRestPeriodLength;
                     }
                 }
@@ -528,6 +544,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             }
         }
     }
+
 
 
     @Override

@@ -31,15 +31,7 @@ public class PeriodLengthPreferenceDialogFragmentCompat extends PreferenceDialog
     private String restoreValue;
     private final String SAVE_PERIOD_PREF_STATE = "save_period_preference_state";
 
-    static int getHour(String time){
-        String[] pieces = time.split(":");
-        return (Integer.parseInt(pieces[0]));
-    }
 
-    static int getMinute(String time){
-        String[] pieces = time.split(":");
-        return (Integer.parseInt(pieces[1]));
-    }
 
     public static PeriodLengthPreferenceDialogFragmentCompat newInstance(String key){
         final PeriodLengthPreferenceDialogFragmentCompat fragment = new PeriodLengthPreferenceDialogFragmentCompat();
@@ -55,8 +47,8 @@ public class PeriodLengthPreferenceDialogFragmentCompat extends PreferenceDialog
         if(savedInstanceState!=null && savedInstanceState.getString(SAVE_PERIOD_PREF_STATE)!=null){
             restoreValue = savedInstanceState.getString(SAVE_PERIOD_PREF_STATE);
             assert restoreValue != null;
-            restoreHour = getHour(restoreValue);
-            restoreMinute = getMinute(restoreValue);
+            restoreHour = RReminder.getHour(restoreValue);
+            restoreMinute = RReminder.getMinute(restoreValue);
         }
     }
 
@@ -129,8 +121,8 @@ public class PeriodLengthPreferenceDialogFragmentCompat extends PreferenceDialog
 
             // Set the time to the NumberPickers
             if (periodLength != null) {
-                lastHour = getHour(periodLength);
-                lastMinute = getMinute(periodLength);
+                lastHour = RReminder.getHour(periodLength);
+                lastMinute = RReminder.getMinute(periodLength);
                 if(restoreValue != null){
                     firstPicker.setValue(restoreHour);
                 } else {

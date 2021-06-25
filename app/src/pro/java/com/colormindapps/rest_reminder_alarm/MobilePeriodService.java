@@ -47,7 +47,7 @@ public class MobilePeriodService extends JobIntentService implements
 	int type;
 	int extendCount;
 	int typeForNotification;
-	long periodEndedTime;
+	long periodEndedTime, nextPeriodEndTime;
 	boolean noReminderStatus = false;
 	Intent periodIntent;
 	String notificationMessage;
@@ -209,22 +209,18 @@ public class MobilePeriodService extends JobIntentService implements
 			type = periodIntent.getExtras().getInt(RReminder.PERIOD_TYPE);
 			extendCount = periodIntent.getExtras().getInt(RReminder.EXTEND_COUNT);
 			periodEndedTime = periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME);
+			nextPeriodEndTime = periodIntent.getExtras().getLong(RReminder.NEXT_PERIOD_END_TIME);
 		}
 
 		Log.d(debug, "periodEndTimeValue: "+ periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME));
 
 			//manage period end
 			RReminder.addDismissDialogFlag(this);
-
-
 			typeForNotification = type;
-
 			type = RReminder.getNextPeriodType(type);
-			mCalendar = RReminder.getNextPeriodEndTime(this, type, Calendar.getInstance().getTimeInMillis(), 1, 0L);
 
 			mgr = NotificationManagerCompat.from(getApplicationContext());
 			mgr.cancel(24);
-
 
 
 
@@ -233,11 +229,10 @@ public class MobilePeriodService extends JobIntentService implements
 			//getSystemService(Context.POWER_SERVICE);
 			//boolean isScreenOn = pm.isScreenOn();
 			if(RReminder.isActiveModeNotificationEnabled(this)){
-				mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, mCalendar, true));
+				mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, nextPeriodEndTime, true));
 			}
 			if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
 				gotoMainActivity();
-
 			} else {
 				launchNotification();
 			}
@@ -245,7 +240,7 @@ public class MobilePeriodService extends JobIntentService implements
 			Log.d(debug, "checking, if app is running on wear");
 			if(!noReminderStatus){
 				if(!statusData.isWearOn()){
-					updateReminderStatus(type, mCalendar,0, true, false);
+					updateReminderStatus(type, nextPeriodEndTime,0, true, false);
 				}
 
 			}
@@ -266,7 +261,7 @@ public class MobilePeriodService extends JobIntentService implements
 
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
-		actionIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);
+		actionIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 		actionIntent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		actionIntent.putExtra(RReminder.PLAY_SOUND, true);
 		actionIntent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);
@@ -285,7 +280,7 @@ public class MobilePeriodService extends JobIntentService implements
 		extendIntent.setAction(RReminder.ACTION_WEAR_NOTIFICATION_EXTEND);
 		extendIntent.putExtra(RReminder.PERIOD_TYPE,type);
 		extendIntent.putExtra(RReminder.EXTENDED_PERIOD_TYPE, typeForNotification);
-		extendIntent.putExtra(RReminder.PERIOD_END_TIME,mCalendar);
+		extendIntent.putExtra(RReminder.PERIOD_END_TIME,nextPeriodEndTime);
 		extendIntent.putExtra(RReminder.EXTEND_COUNT,extendCount);
 		PendingIntent extendPendingIntent = PendingIntent.getActivity(this,5,extendIntent,PendingIntent.FLAG_ONE_SHOT);
 
@@ -310,7 +305,7 @@ public class MobilePeriodService extends JobIntentService implements
 		}
 		Intent notificationIntent = new Intent(this, NotificationActivity.class);
 		notificationIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
-		notificationIntent.putExtra(RReminder.PERIOD_END_TIME, mCalendar);
+		notificationIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 		notificationIntent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		notificationIntent.putExtra(RReminder.PLAY_SOUND, false);
 		notificationIntent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);

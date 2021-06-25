@@ -6,4 +6,6 @@ public interface PreferenceActivityLinkedService {
 
 Bundle getDataFromService();
 
+
+
 }

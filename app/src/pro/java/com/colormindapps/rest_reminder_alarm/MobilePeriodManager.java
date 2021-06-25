@@ -10,19 +10,18 @@ import android.os.Build;
 import com.colormindapps.rest_reminder_alarm.shared.PeriodManager;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
 public class MobilePeriodManager extends PeriodManager {
 	int buildNumber;
-	private Context mContext;
-	private AlarmManager mAlarmManager;
+	private final Context mContext;
+	private final AlarmManager mAlarmManager;
+
 	public MobilePeriodManager(Context context){
 		mContext = context;
 		mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 	}
-
 	@TargetApi(Build.VERSION_CODES.M)
 	public void setPeriod(int type, long when, int extendCount){
 		buildNumber = Build.VERSION.SDK_INT;
@@ -33,8 +32,8 @@ public class MobilePeriodManager extends PeriodManager {
 		i.putExtra(RReminder.PERIOD_TYPE, type);
 		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		i.putExtra(RReminder.PERIOD_END_TIME, when);
+		i.putExtra(RReminder.IS_SHORT_PERIOD, false);
 		i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
-		SimpleDateFormat format = new SimpleDateFormat("hh:mm:ss");
 		Calendar endTime = Calendar.getInstance();
 		endTime.setTimeInMillis(when);
 
@@ -49,8 +48,6 @@ public class MobilePeriodManager extends PeriodManager {
 		} else {
 			mAlarmManager.set(AlarmManager.RTC_WAKEUP, when, pi);
 		}
-
-
 
 	}
 

@@ -255,6 +255,27 @@ public class RReminder {
 		}
 	}
 
+	public static int getHour(String time){
+		String[] pieces = time.split(":");
+		return (Integer.parseInt(pieces[0]));
+	}
+
+	public static int getMinute(String time){
+		String[] pieces = time.split(":");
+		return (Integer.parseInt(pieces[1]));
+	}
+
+	public static long getUpdatedDifference(String oldString, String newString){
+		int difference;
+		int oldHour = getHour(oldString);
+		int oldMinute = getMinute(oldString);
+		int newHour = getHour(newString);
+		int newMinute = getMinute(newString);
+		difference = (newHour*60*60*1000 + newMinute*60*1000) - (oldHour*60*60*1000 + oldMinute*60*1000);
+
+		return difference;
+	}
+
 
 	
 	public static boolean isEndPeriodEnabled(Context context){

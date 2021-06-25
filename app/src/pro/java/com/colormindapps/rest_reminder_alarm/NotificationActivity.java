@@ -8,6 +8,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.app.NotificationManagerCompat;
@@ -233,13 +235,7 @@ public class NotificationActivity extends FragmentActivity implements
 
                 extendPeriodEnd.setTypeface(descriptionFont);
                 extendPeriodEnd.setVisibility(View.VISIBLE);
-                extendPeriodEnd.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v){
-                        showExtendDialog();
-
-                    }
-                });
+				extendPeriodEnd.setOnClickListener(v -> showExtendDialog());
             }
 
 
@@ -306,9 +302,7 @@ public class NotificationActivity extends FragmentActivity implements
 			long currentTime = Calendar.getInstance().getTimeInMillis();
 			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), currentTime, 1, 0L);
 
-			if((nextPeriodEnd-currentTime)>=RReminder.SHORT_PERIOD_LIMIT){
-				new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
-			}
+			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 
 		}
@@ -364,9 +358,8 @@ public class NotificationActivity extends FragmentActivity implements
 							long newPeriodEndTime = dataMap.getLong(RReminder.PERIOD_END_TIME);
 							int newExtendCount = dataMap.getInt(RReminder.EXTEND_COUNT);
 							boolean wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
-							if((newPeriodEndTime-Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
-								new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount);
-							}
+							new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount);
+
 							RReminderMobile.startCounterService(NotificationActivity.this.getApplicationContext(), newPeriodType, newExtendCount, newPeriodEndTime, false);
 							finish();
 						}
@@ -550,7 +543,7 @@ public class NotificationActivity extends FragmentActivity implements
 
 	
 	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
+	public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
 	  super.onSaveInstanceState(savedInstanceState);
 	  // Save UI state changes to the savedInstanceState.
 	  // This bundle will be passed to onCreate if the process is

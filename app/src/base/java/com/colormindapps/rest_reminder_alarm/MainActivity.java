@@ -48,7 +48,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.colormindapps.rest_reminder_alarm.CounterService.CounterBinder;
 import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
@@ -115,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	private RelativeLayout timerButtonLayout;
 	private Button extendPeriodEnd;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
-	CounterBinder binder;
+	CounterService.CounterBinder binder;
 	int turnOffValue=0;
 	private boolean turnOffFirstIntent;
 	private NotificationManagerCompat mgr;
@@ -191,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		@Override
 		public void onServiceConnected(ComponentName className,
 									   IBinder service) {
-			binder = (CounterBinder) service;
+			binder = (CounterService.CounterBinder) service;
 			mService = binder.getService();
 			mBound = true;
 			Bundle data = getDataFromService();
@@ -532,17 +531,13 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		titlePowerColors = null;
 		resources = null;
 		am = null;
-
-
 	}
-
-
 
 	private void setUpNotificationChannels(){
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			List<NotificationChannel> notifChannels =new ArrayList<>();
-			notifChannels.add(RReminder.createNotificationChannel(this.getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_PERIOD_END));
-			notifChannels.add(RReminder.createNotificationChannel(this.getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_ONGOING));
+			notifChannels.add(RReminder.createNotificationChannel(getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_PERIOD_END));
+			notifChannels.add(RReminder.createNotificationChannel(getApplicationContext(),RReminder.NOTIFICATION_CHANNEL_ONGOING));
 
 
 			NotificationManager notificationManager = getSystemService(NotificationManager.class);
@@ -715,11 +710,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	      });
 	      
 	      */
-
 		if(descriptionAnimTimer!=null){
 			descriptionAnimTimer.cancel();
 		}
-
 		if (isOn) {
 			activityTitle.setTextColor(colorBlack);
 			toolBar.setTitleTextColor(colorBlack);
@@ -812,8 +805,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			}
 
 			//show turnoff hint for new users
-
-
 			titleSequence = activityTitle.getText();
 			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 
@@ -939,16 +930,10 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		timerSecond2 =  findViewById(R.id.timer_second2);
 		colon = findViewById(R.id.timer_colon);
 		point =  findViewById(R.id.timer_point);
-
-
 		//adjustments for accessibility font sizes
 		int digitWidth = (int)resources.getDimension(R.dimen.timer_digit_width);
 		float scale = getResources().getConfiguration().fontScale;
 		float scaledWidth = digitWidth * scale;
-
-
-
-
 		if(scale > 1.0f){
 			ViewGroup.LayoutParams param = timerHour1.getLayoutParams();
 			param.width = (int)scaledWidth;
@@ -1042,7 +1027,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 				colon.setLayoutParams(param);
 			}
 		}
-
 
 
 		timerHour1.setTypeface(timerFont);
@@ -1147,7 +1131,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		introFragment.show(getSupportFragmentManager(), "introductionDialog");
 		dialogOnScreen = true;
 	}
-
 	public void showPatchNotesDialog() {
 		patchNotesFragment = PatchNotesDialog.newInstance(
 				R.string.intro_title);
@@ -1212,7 +1195,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 
 
-		RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
+		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 
 		String toastText;
 		if(flag==RReminder.EXTEND_PERIOD_SINGLE_OPTION){
@@ -1228,9 +1211,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			case 2:  functionType = 4; break;
 			default: break;
 		}
-		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
-		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		functionCalendar = RReminder.getTimeAfterExtend(getApplicationContext(), 1, timeRemaining);
+		new MobilePeriodManager(getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
+		RReminderMobile.startCounterService(getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1239,8 +1222,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	}
 
 	public void showHintDialog(View v) {
-
-
 		if (animateInfo) {
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
@@ -1442,7 +1423,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	public boolean isTablet() {
 
-		DisplayMetrics displayMetrics = MainActivity.this.getResources().getDisplayMetrics();
+		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 
 		float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
 		float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
@@ -1525,8 +1506,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public boolean displayTurnOffHint(){
 		return sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true);
 	}
-
-
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -1652,8 +1631,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		});
 		description.startAnimation(anim);
 	}
-
-
 
 	private class TimerButtonListener implements OnTouchListener {
 
@@ -2208,8 +2185,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 								titleSequence = activityTitle.getText();
 								activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 							}
-
-
 						});
 
 						try {
@@ -2226,18 +2201,12 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					}
 
 					addSwipeListener();
-
-
 				}
 
 
 			};
-
-
 			new Thread(runnableOffMain).start();
 		}
-
-
 	}
 
 	public void addSwipeListener() {
@@ -2340,7 +2309,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					Thread.sleep(3);
 
 				} catch (InterruptedException e) {
-
 					e.printStackTrace();
 
 				}
@@ -2352,10 +2320,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		new Thread(runnableOffMain).start();
-
-
 	}
-
 
 	public int getCurrentColorId(int type, int multiplier) {
 		int red;
@@ -2557,7 +2522,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			df.dismiss();
 		}
 	}
-
 
 	//for testing purposes only, remove before release
 	/*

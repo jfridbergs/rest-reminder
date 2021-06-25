@@ -8,10 +8,14 @@ import androidx.annotation.NonNull;
 @Entity(tableName = "period_table")
 public class Period {
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @NonNull
-    @ColumnInfo(name = "start_time")
-    private long startTime;
+    @ColumnInfo(name = "period_id")
+    private int  periodId;
+
+    @NonNull
+    @ColumnInfo(name = "previous_period_id")
+    private int previousPeriodId;
 
     @ColumnInfo(name = "end_time")
     private long endTime;
@@ -33,9 +37,10 @@ public class Period {
     @ColumnInfo(name = "is_ended")
     private int ended;
 
-    public Period(@NonNull long startTime, @NonNull int type, long endTime, int sessionId, int extended,  int extendCount, int ended){
+    public Period(@NonNull int periodId, @NonNull int previousPeriodId, @NonNull int type, long endTime, int sessionId, int extended,  int extendCount, int ended){
 
-        this.startTime = startTime;
+        this.periodId = periodId;
+        this.previousPeriodId = previousPeriodId;
         this.type = type;
         this.endTime = endTime;
         this.sessionId = sessionId;
@@ -44,8 +49,9 @@ public class Period {
         this.ended = ended;
     }
 
+    public int getPeriodId(){return this.periodId; }
 
-    public long getStartTime(){return this.startTime; }
+    public int getPreviousPeriodId(){return this.previousPeriodId; }
 
     public int getType(){return this.type; }
 

@@ -21,7 +21,7 @@ public interface PeriodDao {
     void deleteAll();
 
 
-    @Query("SELECT * FROM period_table WHERE session_id = :sessionId ORDER BY start_time ASC")
+    @Query("SELECT * FROM period_table WHERE session_id = :sessionId ORDER BY end_time ASC")
     LiveData<List<Period>> getSessionPeriods(int sessionId);
 
 

@@ -6,6 +6,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import java.util.Calendar;
@@ -16,15 +18,22 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
     public abstract PeriodDao periodDao();
     public abstract SessionDao sessionDao();
 
+
+
     private static volatile RReminderRoomDatabase INSTANCE;
 
     static RReminderRoomDatabase getDatabase(final Context context){
+        Log.d("ROOM_DATABASE", "getDatabase");
         if(INSTANCE == null){
+            Log.d("ROOM_DATABASE", "instance IS null");
             synchronized (RReminderRoomDatabase.class){
                 if(INSTANCE == null){
+                    Log.d("ROOM_DATABASE", "instance IS null IN SYNCRONIZED");
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(), RReminderRoomDatabase.class, "rreminder_database").addCallback(sRoomDatabaseCallback).build();
                 }
             }
+        } else {
+            Log.d("ROOM_DATABASE", "instance IS NOT null");
         }
         return INSTANCE;
     }
@@ -34,7 +43,8 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db){
                 super.onOpen(db);
-                new PopulateSessionDbAsync(INSTANCE).execute();
+                Log.d("ROOM_DATABASE", "onOpen");
+                //new PopulateSessionDbAsync(INSTANCE).execute();
             }
 
     };
@@ -60,13 +70,13 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             mDao.insertSession(session);
 
             //adding couple periods to the first session
-            Period period = new Period(time1, 1, endTime1, 12, 0,0,0);
-            mPeriodDao.insertPeriod(period);
+            //Period period = new Period(time1, 1, endTime1, 12, 0,0,0);
+           // mPeriodDao.insertPeriod(period);
 
             //2. period - rest - extended 2 times with total length of 25 mins
             long period2end = endTime1 + 25*60*1000;
-            period = new Period(endTime1, 2, period2end, 12, 1,2,0);
-            mPeriodDao.insertPeriod(period);
+           // period = new Period(endTime1, 2, period2end, 12, 1,2,0);
+           // mPeriodDao.insertPeriod(period);
 
 
             //-- end of first session records

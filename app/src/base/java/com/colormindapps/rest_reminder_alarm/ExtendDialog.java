@@ -85,10 +85,8 @@ public class ExtendDialog extends DialogFragment{
 		View view = inflater.inflate(R.layout.extend_dialog,new LinearLayout(context), false);
 		builder.setView(view);
 		builder.setNegativeButton(R.string.extend_dialog_close_dialog_text, (dialog, id) -> Objects.requireNonNull(ExtendDialog.this.getDialog()).cancel());
-
 		
 		int extendBaseLength = RReminder.getExtendBaseLength(context);
-
 
 		Button extendOptionButton = view.findViewById(R.id.extend_dialog_button_extend);
 		extendOptionButton.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength));
@@ -98,7 +96,6 @@ public class ExtendDialog extends DialogFragment{
 			Button extendOptionButton1 = view.findViewById(R.id.extend_dialog_button_extend1);
 			extendOptionButton1.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*2));
 			extendOptionButton1.setVisibility(View.VISIBLE);
-			
 			extendOptionButton1.setOnClickListener(v -> buttonAction(context, 2));
 		}
 		
@@ -106,7 +103,6 @@ public class ExtendDialog extends DialogFragment{
 			Button extendOptionButton2 = view.findViewById(R.id.extend_dialog_button_extend2);
 			extendOptionButton2.setText(String.format(getString(R.string.extend_dialog_button), extendBaseLength*3));
 			extendOptionButton2.setVisibility(View.VISIBLE);
-			
 			extendOptionButton2.setOnClickListener(v -> buttonAction(context, 3));
 		}
 		dialogIsOpen = true;	

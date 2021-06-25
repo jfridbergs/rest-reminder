@@ -84,10 +84,9 @@ public class PeriodListAdapter extends RecyclerView.Adapter<PeriodListAdapter.Pe
                     break;
 
             }
-            String startTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getStartTime()).toString();
             String endTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getEndTime()).toString();
 
-            String time = startTime +" - "+ endTime;
+            String time = endTime;
             holder.periodTimeView.setText(time);
 
             if(extendCount>0){

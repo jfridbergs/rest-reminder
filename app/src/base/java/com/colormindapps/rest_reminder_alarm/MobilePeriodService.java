@@ -47,13 +47,6 @@ public class MobilePeriodService extends JobIntentService {
 		RReminder.addDismissDialogFlag(this);
 		typeForNotification = type;
 		type = RReminder.getNextPeriodType(type);
-		/*
-		if(intent.getExtras().getBoolean(RReminder.IS_SHORT_PERIOD) && RReminder.getMode(getApplicationContext())==0){
-			RReminderMobile.startCounterService(getApplicationContext(), type, 0, nextPeriodEndTime, true);
-		}
-*/
-
-		//playSound();
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 		mgr.cancel(24);
 
@@ -168,7 +161,6 @@ public class MobilePeriodService extends JobIntentService {
 				break;
 		}
 				/*
-				//
 				if(am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && callState == TelephonyManager.CALL_STATE_IDLE){
 					builder.setSound(Scheduler.getRingtone(getBaseContext(),typeForNotification));
 				}

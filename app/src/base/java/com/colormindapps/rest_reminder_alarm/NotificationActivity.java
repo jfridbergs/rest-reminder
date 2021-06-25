@@ -100,13 +100,13 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 	protected void onStart(){
 		super.onStart();
 		RelativeLayout rootLayout;
-        TextView notificationTitle =  findViewById(R.id.notification_title);
+        TextView notificationTitle = findViewById(R.id.notification_title);
 		TextView extendDescription = findViewById(R.id.notification_extend_description);
         notificationTitle.setTypeface(titleFont);
-        ImageView image = findViewById(R.id.notification_image);
-        TextView notificationDescription = findViewById(R.id.notification_description);
+        ImageView image =findViewById(R.id.notification_image);
+        TextView notificationDescription =findViewById(R.id.notification_description);
         notificationDescription.setTypeface(descriptionFont);
-        Button notificationButton =  findViewById(R.id.notification_button);
+        Button notificationButton = findViewById(R.id.notification_button);
 		Button extendPeriodEnd = findViewById(R.id.button_notification_period_end_extend);
         notificationButton.setTypeface(buttonFont);
         rootLayout = findViewById(R.id.root_layout);

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import androidx.core.app.NotificationCompat;
-import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 

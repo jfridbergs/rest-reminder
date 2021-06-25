@@ -7,7 +7,8 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,11 +28,12 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import androidx.annotation.Nullable;
+
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.core.app.NotificationManagerCompat;
@@ -48,13 +50,14 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.colormindapps.rest_reminder_alarm.CounterService.CounterBinder;
 import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
@@ -80,14 +83,16 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.tasks.Task;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements
 		DataApi.DataListener,
@@ -99,12 +104,14 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	public int periodType = 0;
+	private int sessionID;
 	public int extendCount;
 	private int requiredSwipeDistance;
-	private boolean turnOffIntent = false;
+	boolean turnOffIntent = false;
 	public MyCountDownTimer countdown;
 	public long periodEndTimeValue;
 	public long sessionStartTime;
+	private long firstPeriodEndTime;
 	private long counterTimeValue;
 	private boolean dialogOnScreen;
 	public int restoreAnimateCounter = 0;
@@ -142,18 +149,24 @@ public class MainActivity extends AppCompatActivity implements
 	private int colorRest, colorWork, colorBlack, colorRed, colorWhite, colorInactive;
 	private TextView swipeArea;
 	private Button infoButton;
-	private Typeface font, titleFont, swipeFont, timerFont;
+	private Typeface font;
+	private Typeface titleFont;
+	private Typeface swipeFont;
+	private Typeface timerFont;
 	private RelativeLayout timerButtonLayout;
 	private Button extendPeriodEnd, sessions;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
-	private CounterBinder binder;
 	private int turnOffValue=0;
 	private boolean turnOffFirstIntent;
 	private NotificationManagerCompat mgr;
-	private String debug = "MAIN_ACTIVITY";
+	private CountDownTimer descriptionAnimTimer;
+	private SharedPreferences sharedPref;
+	private final String debug = "MAIN_ACTIVITY";
 	private boolean wearOn = false;
 	private SessionsViewModel mSessionsViewModel;
+	private PeriodViewModel mPeriodViewModel;
 	private Session currentSession;
+	private Period period;
 	private boolean initialObserverCall;
 	private LiveData<Session> currentLDSession;
 	private Observer<Session> sessionObserver;
@@ -173,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements
 	//private NotificationReceiver nReceiver;
 
 
-	DialogFragment introFragment, extendFragment;
+	DialogFragment introFragment, extendFragment, patchNotesFragment;
 
 	private static class MyHandler extends Handler {
 		private final WeakReference<MainActivity> mActivity;
@@ -226,11 +239,11 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	//Binding MainActivity to CounterService
-	private ServiceConnection mConnection = new ServiceConnection() {
+	private final ServiceConnection mConnection = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName className,
 									   IBinder service) {
-			binder = (CounterBinder) service;
+			CounterService.CounterBinder binder = (CounterService.CounterBinder) service;
 			mService = binder.getService();
 			mBound = true;
 			Bundle data = getDataFromService();
@@ -320,20 +333,21 @@ public class MainActivity extends AppCompatActivity implements
 		swipeRestLand = getString(R.string.swipe_area_text_land_rest);
 		mgr = NotificationManagerCompat.from(getApplicationContext());
 
-		mSessionsViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
+		mSessionsViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
+		mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
 
 		setUpNotificationChannels();
 
 
 
 		//Setting the period lenght lower than min value for development
-
+		/*
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
 		SharedPreferences.Editor editor   = preferences.edit();
 		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:03");
 		editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:02");
 		editor.commit();
-
+		*/
 
 		if (savedInstanceState != null) {
 			dialogOnScreen = savedInstanceState.getBoolean("dialogOnScreen");
@@ -394,6 +408,7 @@ public class MainActivity extends AppCompatActivity implements
 		titleFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
 		swipeFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-UltLt.otf");
 		timerFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
+		Typeface infoFont = Typeface.createFromAsset(getAssets(), "fonts/Blenda Script.otf");
 
 		activityTitle = (TextView) findViewById(R.id.period_title);
 
@@ -419,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements
 		swipeArea.setTypeface(swipeFont);
 		activityTitle.setTypeface(titleFont);
 		description.setTypeface(font);
-
+		infoButton.setTypeface(infoFont);
 
 		description.setText("");
 
@@ -473,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		//showing an EULA dialog after each update
 
-		SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
+		sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 		int currentVersionNumber = 0;
 		boolean eulaAccepted = sharedPref.getBoolean(RReminder.EULA_ACCEPTED, false);
 		int savedVersionNumber = sharedPref.getInt(RReminder.VERSION_KEY, 0);
@@ -484,15 +499,18 @@ public class MainActivity extends AppCompatActivity implements
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (!eulaAccepted || currentVersionNumber > savedVersionNumber) {
+		if (!eulaAccepted) {
 			if(!dialogOnScreen){
 				showIntroductionDialog();
-				Editor editor = sharedPref.edit();
-				editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
-				editor.putBoolean(RReminder.EULA_ACCEPTED, false);
-				editor.apply();
-				correctPreferencePeriodLength();
+
+				//correctPreferencePeriodLength();
 			}
+
+		} else if(currentVersionNumber > savedVersionNumber && !RReminderMobile.isCounterServiceRunning(MainActivity.this)){
+			showPatchNotesDialog();
+			Editor editor = sharedPref.edit();
+			editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
+			editor.apply();
 
 		}
 
@@ -538,6 +556,9 @@ public class MainActivity extends AppCompatActivity implements
 		stopTimerInServiceConnectedAfterPause = true;
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			stopCountDownTimer();
+			if(descriptionAnimTimer!=null){
+				descriptionAnimTimer.cancel();
+			}
 		}
 	}
 
@@ -595,26 +616,6 @@ public class MainActivity extends AppCompatActivity implements
 		titlePowerColors = null;
 		resources = null;
 		am = null;
-
-	}
-
-	//Function to update stored user preferences to work with new RReminder restriction of periods not shorter than 10 minutes
-	private void correctPreferencePeriodLength(){
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
-		SharedPreferences.Editor editor   = preferences.edit();
-
-		String workPeriod = preferences.getString(RReminder.PREF_WORK_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
-		String restPeriod = preferences.getString(RReminder.PREF_REST_LENGTH_KEY, this.getApplicationContext().getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
-		int workPeriodValue = RReminder.getHourFromString(workPeriod) * 60 + RReminder.getMinuteFromString(workPeriod);
-		int restPeriodValue = RReminder.getHourFromString(restPeriod) * 60 + RReminder.getMinuteFromString(restPeriod);
-		if(workPeriodValue<10){
-			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_work_period_length_key), "00:10");
-		}
-		if(restPeriodValue<10){
-			editor.putString(this.getResources().getString(com.colormindapps.rest_reminder_alarm.R.string.pref_rest_period_length_key), "00:10");
-		}
-		editor.commit();
-		manageTimer(false);
 	}
 
 	private void setUpNotificationChannels(){
@@ -625,6 +626,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
 			NotificationManager notificationManager = getSystemService(NotificationManager.class);
+			assert notificationManager != null;
 			notificationManager.createNotificationChannels(notifChannels);
 		}
 	}
@@ -741,24 +743,28 @@ public class MainActivity extends AppCompatActivity implements
 		periodType = 1;
 		sessionStartTime = Calendar.getInstance().getTimeInMillis();
 		Log.d(debug, "SET_REMINDER_ON sessionStartTime: "+sessionStartTime);
-		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, sessionStartTime, 1, 0L);
-		if ((mCalendar - sessionStartTime)>= RReminder.SHORT_PERIOD_LIMIT){
-			new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
-		}
-		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+		firstPeriodEndTime = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, sessionStartTime, 1, 0L);
+
+		RReminderMobile.startCounterService(MainActivity.this, 1, 0, firstPeriodEndTime, false);
+
 		currentSession = new Session(0,sessionStartTime,0L);
 		mSessionsViewModel.insert(currentSession);
-
+		/*
 		new Timer().schedule(new TimerTask() {
 			@Override
 			public void run() {
 				getCurrentSessionId(sessionStartTime);
 			}
 		}, 2000);
+		*/
+
+
+		final Handler handler = new Handler(Looper.getMainLooper());
+		handler.postDelayed(() -> getCurrentSessionId(sessionStartTime), 2000);
 
 		initialObserverCall = true;
 
-		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,mCalendar,0, true, wearOn);
+		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,firstPeriodEndTime,0, true, wearOn);
 		updateWearPreferences();
 		if(bgAnimation!=null){
 			bgAnimation.removeAllUpdateListeners();
@@ -786,15 +792,17 @@ public class MainActivity extends AppCompatActivity implements
 
 	public void getCurrentSessionId(long sessionStart){
 		currentLDSession = mSessionsViewModel.getSessionId(sessionStart);
-		sessionObserver = new Observer<Session>(){
-			@Override
-			public void onChanged(@Nullable final Session session){
-				Log.d(debug, "observer onChanged called");
-				Log.d(debug, "OBSERVER onChanged sessionStartValue: "+session.getSessionStart());
-				if(session!=null){
-					updateCurrentSession(session.getSessionId());
-				}
-			}
+		sessionObserver = session -> {
+			Log.d(debug, "observer onChanged called");
+			Log.d(debug, "OBSERVER onChanged sessionStartValue: "+session.getSessionStart());
+			sessionID = session.getSessionId();
+			updateCurrentSession(sessionID);
+			//updating counterservice with the session ID value
+			//add first session period in DB with the just obtained session id
+			new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, firstPeriodEndTime, 0);
+			period = new Period(0,-1,1,firstPeriodEndTime,session.getSessionId(),0,0,0);
+			mPeriodViewModel.insert(period);
+
 		};
 		currentLDSession.observe(this, sessionObserver);
 	}
@@ -843,8 +851,45 @@ public class MainActivity extends AppCompatActivity implements
 		periodType = 0;
 		storedPeriodEndTime = 0;
 		periodEndTimeValue = 0;
+		//display review screen 2 days after the reminder was launched for the first time
+		long eulaTime = sharedPref.getLong(RReminder.EULA_ACCEPT_TIME, 0L);
+		if(eulaTime > 0 && Calendar.getInstance().getTimeInMillis() - eulaTime > 48*60*60*1000){
+			openReview();
+		}
+		//increase turn off count for purposes of turn off hin
+		//if turn off hint was previously disabled, skip the turn off count increase
+		if(displayTurnOffHint()){
+			int turnOffCount = sharedPref.getInt(RReminder.TURN_OFF_COUNT, 0);
+			turnOffCount++;
+			Editor editor = sharedPref.edit();
+			editor.putInt(RReminder.TURN_OFF_COUNT, turnOffCount);
+			if(turnOffCount>=3){
+				editor.putBoolean(RReminder.DISPLAY_TURN_OFF_HINT, false);
+			}
+			editor.apply();
+		}
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType,0L,0, false, false);
+	}
+
+	public void openReview(){
+		ReviewManager manager = ReviewManagerFactory.create(this);
+		Task<ReviewInfo> request = manager.requestReviewFlow();
+		request.addOnCompleteListener(requestTask -> {
+			if (requestTask.isSuccessful()) {
+				// We can get the ReviewInfo object
+				ReviewInfo reviewInfo = requestTask.getResult();
+				Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+				flow.addOnCompleteListener(openTask -> {
+					// The flow has finished. The API does not indicate whether the user
+					// reviewed or not, or even whether the review dialog was shown. Thus, no
+					// matter the result, we continue our app flow.
+				});
+			}
+
+
+		});
+
 	}
 
 
@@ -942,10 +987,7 @@ public class MainActivity extends AppCompatActivity implements
 			if(periodType!=0){
 				RReminderMobile.cancelCounterAlarm(MainActivity.this.getApplicationContext(), periodType, extendCount,periodEndTimeValue);
 			}
-
-			if((updatedPeriodEndTime - Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
-				new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType, updatedPeriodEndTime, updatedExtendCount);
-			}
+			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(updatedType,updatedPeriodEndTime, updatedExtendCount);
 			RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
 
 			Intent intent = new Intent(this, CounterService.class);
@@ -1031,18 +1073,22 @@ public class MainActivity extends AppCompatActivity implements
 	      });
 	      
 	      */
-
+		if(descriptionAnimTimer!=null){
+			descriptionAnimTimer.cancel();
+		}
 		if (isOn) {
 			sessions.setVisibility(View.GONE);
 			activityTitle.setTextColor(colorBlack);
 			toolBar.setTitleTextColor(colorBlack);
+			if(displayTurnOffHint()){
+				description.setText(R.string.description_turn_off);
+			}
 
 			switch (periodType) {
 				case 1:
 					activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(colorWork);
 					infoButton.setTextColor(colorWork);
-					description.setText("");
 					if(RReminder.isPortrait(this)){
 						swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
 					} else {
@@ -1053,7 +1099,6 @@ public class MainActivity extends AppCompatActivity implements
 					activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(colorRest);
 					infoButton.setTextColor(colorRest);
-					description.setText("");
 					if(RReminder.isPortrait(this)){
 						swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
 					} else {
@@ -1102,12 +1147,27 @@ public class MainActivity extends AppCompatActivity implements
 					}
 					break;
 				default:
-					activityTitle.setText("No title".toUpperCase(Locale.ENGLISH));
 					rootLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.blue));
 					break;
 
 			}
 
+			if(displayTurnOffHint() && extendCount>0){
+				descriptionAnimTimer = new CountDownTimer((periodEndTimeValue-Calendar.getInstance().getTimeInMillis()), 10000) {
+					int ticks = 0;
+					public void onTick(long millisUntilFinished) {
+						if(ticks>0){
+							animateDescription(ticks % 2 != 0);
+						}
+						ticks++;
+					}
+
+					public void onFinish() {
+					}
+				}.start();
+			}
+
+			//show turnoff hint for new users
 			titleSequence = activityTitle.getText();
 			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 
@@ -1184,6 +1244,7 @@ public class MainActivity extends AppCompatActivity implements
 			activityTitle.setTextColor(colorWhite);
 			activityTitle.setText(getString(R.string.reminder_off_title));
 			description.setText("");
+			description.setVisibility(View.VISIBLE);
 			titleSequence = activityTitle.getText();
 			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 			infoButton.setTextColor(colorWhite);
@@ -1233,6 +1294,105 @@ public class MainActivity extends AppCompatActivity implements
 		timerSecond2 = (TextView) findViewById(R.id.timer_second2);
 		colon = (TextView) findViewById(R.id.timer_colon);
 		point = (TextView) findViewById(R.id.timer_point);
+
+		//adjustments for accessibility font sizes
+		int digitWidth = (int)resources.getDimension(R.dimen.timer_digit_width);
+		float scale = getResources().getConfiguration().fontScale;
+		float scaledWidth = digitWidth * scale;
+
+		if(scale > 1.0f){
+			ViewGroup.LayoutParams param = timerHour1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerHour1.setLayoutParams(param);
+
+			param = timerMinute1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerMinute1.setLayoutParams(param);
+
+			param = timerSecond1.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerSecond1.setLayoutParams(param);
+
+			param = timerHour2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerHour2.setLayoutParams(param);
+
+			param = timerMinute2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerMinute2.setLayoutParams(param);
+
+			param = timerSecond2.getLayoutParams();
+			param.width = (int)scaledWidth;
+			timerSecond2.setLayoutParams(param);
+
+			float density = getApplicationContext().getResources().getDisplayMetrics().density;
+
+			int colonMargin = (int)resources.getDimension(R.dimen.timer_sepparator_colon_marginTop);
+			int pointMargin = (int)resources.getDimension(R.dimen.timer_sepparator_point_marginTop);
+			float colonScaledMargin, pointScaledMargin;
+			if(scale>=1.3f){
+				colonScaledMargin = colonMargin - 9*density;
+				pointScaledMargin = pointMargin - 9*density;
+			} else {
+				colonScaledMargin = colonMargin - 7*density;
+				pointScaledMargin = pointMargin - 7*density;
+			}
+
+
+			float marginTop = -5 *density;
+			ViewGroup.MarginLayoutParams marginParam = (ViewGroup.MarginLayoutParams) timerHour1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerHour1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerMinute1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerMinute1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerSecond1.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerSecond1.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerHour2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerHour2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerMinute2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerMinute2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) timerSecond2.getLayoutParams();
+			marginParam.setMargins(0,(int)marginTop,0,0);
+			timerSecond2.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) colon.getLayoutParams();
+			marginParam.setMargins(0,(int)colonScaledMargin,0,0);
+			colon.setLayoutParams(marginParam);
+
+			marginParam = (ViewGroup.MarginLayoutParams) point.getLayoutParams();
+			marginParam.setMargins(0,(int)pointScaledMargin,0,0);
+			point.setLayoutParams(marginParam);
+
+			if(scale>=1.3f){
+				int timerButtonWidth = (int)resources.getDimension(R.dimen.timer_layout_width);
+				int timerButtonHeight = (int)resources.getDimension(R.dimen.timer_layout_height);
+				int sepparatorWidth = (int)resources.getDimension(R.dimen.timer_sepparator_width);
+				param = timerButtonLayout.getLayoutParams();
+				float scaledTimerWidth = timerButtonWidth * 1.1f;
+				float scaledTimerHeight = timerButtonHeight * 1.1f;
+				param.width = (int)scaledTimerWidth;
+				param.height = (int)scaledTimerHeight;
+				timerButtonLayout.setLayoutParams(param);
+
+				float pointScaledWidth = 3 * density + sepparatorWidth;
+				param = point.getLayoutParams();
+				param.width = (int)pointScaledWidth;
+				point.setLayoutParams(param);
+
+				param = colon.getLayoutParams();
+				param.width = (int)pointScaledWidth;
+				colon.setLayoutParams(param);
+			}
+		}
 
 
 		timerHour1.setTypeface(timerFont);
@@ -1304,8 +1464,8 @@ public class MainActivity extends AppCompatActivity implements
 			Intent ih = new Intent(this, ManualActivity.class);
 			startActivity(ih);
 			return true;
-		} else if (item.getItemId() == R.id.menu_settings) {
-				Intent i = new Intent(this, PreferenceActivity.class);
+		} else if (item.getItemId() == R.id.menu_settings_x) {
+				Intent i = new Intent(this, PreferenceXActivity.class);
 				startActivity(i);
 			return true;
 		} else if (item.getItemId() == R.id.menu_feedback){
@@ -1325,16 +1485,20 @@ public class MainActivity extends AppCompatActivity implements
 
 	public String getWorkPeriodLengthString() {
 		String result;
-		result = RReminder.getPreferencePeriodLength(MainActivity.this, RReminder.WORK) + ".00";
+		result = RReminder.getPreferencePeriodLength(MainActivity.this, 1) + ".00";
 		return result;
 	}
 
 	public void showIntroductionDialog() {
-
-
 		introFragment = IntroductionDialog.newInstance(
 				R.string.intro_title);
 		introFragment.show(getSupportFragmentManager(), "introductionDialog");
+		dialogOnScreen = true;
+	}
+	public void showPatchNotesDialog() {
+		patchNotesFragment = PatchNotesDialog.newInstance(
+				R.string.intro_title);
+		patchNotesFragment.show(getSupportFragmentManager(), "patchNotesDialog");
 		dialogOnScreen = true;
 	}
 
@@ -1417,10 +1581,7 @@ public class MainActivity extends AppCompatActivity implements
 			default: break;
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(MainActivity.this.getApplicationContext(), 1, timeRemaining);
-		if((functionCalendar - Calendar.getInstance().getTimeInMillis())>=RReminder.SHORT_PERIOD_LIMIT){
-			new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
-		}
-
+		new MobilePeriodManager(MainActivity.this.getApplicationContext()).setPeriod(functionType,functionCalendar, extendCount);
 		RReminderMobile.startCounterService(MainActivity.this.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
@@ -1432,7 +1593,6 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	public void showHintDialog(View v) {
-
 		if (animateInfo) {
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
@@ -1467,13 +1627,13 @@ public class MainActivity extends AppCompatActivity implements
 
 	}
 
-	public void createShowcaseView(int showcaseType, int nextShowcaseView) {
+	public void createShowcaseView(int type, int nextShowcaseView) {
 		int targetId;
 		int titleId;
 		int descriptionId;
 		Target viewTarget;
 
-		switch (showcaseType) {
+		switch (type) {
 			case RReminder.SHOWCASEVIEW_START: {
 				targetId = R.id.timer_layout;
 				titleId = R.string.showcase_start_title;
@@ -1513,7 +1673,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 
 
-		if (showcaseType == RReminder.SHOWCASEVIEW_MENU) {
+		if (type == RReminder.SHOWCASEVIEW_MENU) {
 			View menu3dots;
 			if (toolBar != null) {
 				// 0 - title
@@ -1556,9 +1716,9 @@ public class MainActivity extends AppCompatActivity implements
 
 	private class MyShowcaseViewListener implements OnShowcaseEventListener {
 
-		private int showcaseType;
+		private final int showcaseType;
 
-		public MyShowcaseViewListener(int showcase) {
+		MyShowcaseViewListener(int showcase) {
 			this.showcaseType = showcase;
 		}
 
@@ -1670,9 +1830,7 @@ public class MainActivity extends AppCompatActivity implements
 		if (RReminder.isActiveModeNotificationEnabled(MainActivity.this)) {
 			mgr.notify(1, RReminderMobile.updateOnGoingNotification(MainActivity.this, periodType,functionCalendar, true));
 		}
-		if((functionCalendar-currentTime)>=RReminder.SHORT_PERIOD_LIMIT){
-			new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
-		}
+		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,periodType, functionCalendar,extendCount, true, wearOn);
 
 		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
@@ -1698,6 +1856,7 @@ public class MainActivity extends AppCompatActivity implements
 			SharedPreferences sharedPref = getSharedPreferences(RReminder.PRIVATE_PREF, Context.MODE_PRIVATE);
 			Editor editor = sharedPref.edit();
 			editor.putBoolean(RReminder.EULA_ACCEPTED, true);
+			editor.putLong(RReminder.EULA_ACCEPT_TIME, Calendar.getInstance().getTimeInMillis());
 			editor.apply();
 		}
 
@@ -1715,6 +1874,9 @@ public class MainActivity extends AppCompatActivity implements
 		setReminderOff(periodEndTimeValue);
 	}
 
+	public boolean displayTurnOffHint(){
+		return sharedPref.getBoolean(RReminder.DISPLAY_TURN_OFF_HINT, true);
+	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -1773,9 +1935,7 @@ public class MainActivity extends AppCompatActivity implements
 					long currentTime = Calendar.getInstance().getTimeInMillis();
 					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), currentTime, 1, 0L);
 
-					if((nextPeriodEnd - currentTime)>=RReminder.SHORT_PERIOD_LIMIT){
-						new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
-					}
+					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type),  nextPeriodEnd, extendCount);
 					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
 					manageUI(true);
 					if (!dialogOnScreen) {
@@ -1819,6 +1979,39 @@ public class MainActivity extends AppCompatActivity implements
 
 	float mLastTouchX, mLastTouchY, startX, startY;
 	private int mActivePointerId;
+
+	public void animateDescription(boolean switchToHint){
+		AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+		anim.setDuration(1000);
+		anim.setRepeatCount(1);
+		anim.setRepeatMode(Animation.REVERSE);
+		anim.setAnimationListener(new Animation.AnimationListener() {
+			@Override
+			public void onAnimationStart(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationEnd(Animation animation) {
+
+			}
+
+			@Override
+			public void onAnimationRepeat(Animation animation) {
+				if(switchToHint){
+					description.setText(getString(R.string.description_turn_off));
+				} else {
+					if(extendCount==1){
+						description.setText(getString(R.string.description_extended_one_time));
+					} else {
+						description.setText(String.format(getString(R.string.description_extended),extendCount));
+					}
+				}
+
+			}
+		});
+		description.startAnimation(anim);
+	}
 
 	private class TimerButtonListener implements OnTouchListener {
 
@@ -1871,6 +2064,7 @@ public class MainActivity extends AppCompatActivity implements
 							if (ticks == 7) {
 
 								activityTitle.setText(getString(R.string.turning_off_text));
+								description.setVisibility(View.INVISIBLE);
 								titleSequence = activityTitle.getText();
 								activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 								activityTitle.setTextColor(colorWhite);
@@ -1894,6 +2088,7 @@ public class MainActivity extends AppCompatActivity implements
 					if (!turnedOff) {
 						activityTitle.setText(tempTitle);
 						activityTitle.setTextColor(colorBlack);
+						description.setVisibility(View.VISIBLE);
 						titleSequence = activityTitle.getText();
 						activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 						animatePowerDownRestore(frames);
@@ -1907,6 +2102,7 @@ public class MainActivity extends AppCompatActivity implements
 					titleSequence = activityTitle.getText();
 					activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 					activityTitle.setTextColor(colorBlack);
+					description.setVisibility(View.VISIBLE);
 					timerButtonLayout.setBackgroundResource(R.drawable.btn_timer_idle_np);
 					timer.cancel();
 					frames = 0;
@@ -1934,7 +2130,7 @@ public class MainActivity extends AppCompatActivity implements
 		@Override
 		public boolean onTouch(View v, MotionEvent ev) {
 			swipeAreaListenerUsed = true;
-			final int action = MotionEventCompat.getActionMasked(ev);
+			final int action = ev.getActionMasked();
 
 
 			switch (action) {
@@ -1962,24 +2158,22 @@ public class MainActivity extends AppCompatActivity implements
 
 
 					tempDescription = description.getText();
-					final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final int pointerIndex = ev.getActionIndex();
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					mLastTouchX = startX = swipeStartX = x;
-					swipeStartX = x;
 					mLastTouchY = startY = swipeStartY = y;
-					swipeStartY = y;
 					titleForRestore = activityTitle.getText();
 
-					mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+					mActivePointerId = ev.getPointerId(0);
 					break;
 				}
 
 				case MotionEvent.ACTION_MOVE: {
 
-					final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					int currentColorId;
 
 					float colorMultiplierFloat;
@@ -2110,9 +2304,9 @@ public class MainActivity extends AppCompatActivity implements
 
 
 					description.setText(tempDescription);
-					final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-					final float x = MotionEventCompat.getX(ev, pointerIndex);
-					final float y = MotionEventCompat.getY(ev, pointerIndex);
+					final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+					final float x = ev.getX(pointerIndex);
+					final float y = ev.getY(pointerIndex);
 					float z;
 					int orientation;
 					vib.cancel();
@@ -2362,19 +2556,16 @@ public class MainActivity extends AppCompatActivity implements
 					final int arrayLength = colorIds.length;
 					for (int i = 0; i < arrayLength; i++) {
 						final int runnableAnimationIndex = i;
-						myOffMainThreadHandler.post(new Runnable() {  // this is on the main thread
-							public void run() {
+						// this is on the main thread
+						myOffMainThreadHandler.post(() -> {
 
-								activityTitle.setTextColor(Color.parseColor(titleColors[colorIds.length - runnableAnimationIndex - 1]));
-								rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
-								infoButton.setTextColor(colorIds[runnableAnimationIndex]);
-								if (runnableAnimationIndex > titleChangeId) {
-									activityTitle.setText(titleForRestore.toString().toUpperCase(Locale.ENGLISH));
-									titleSequence = activityTitle.getText();
-									activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
-								}
-
-
+							activityTitle.setTextColor(Color.parseColor(titleColors[colorIds.length - runnableAnimationIndex - 1]));
+							rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
+							infoButton.setTextColor(colorIds[runnableAnimationIndex]);
+							if (runnableAnimationIndex > titleChangeId) {
+								activityTitle.setText(titleForRestore.toString().toUpperCase(Locale.ENGLISH));
+								titleSequence = activityTitle.getText();
+								activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
 							}
 						});
 
@@ -2412,7 +2603,7 @@ public class MainActivity extends AppCompatActivity implements
 			multiplier = 0;
 		colorIds = new int[multiplier];
 		int j = 0;
-		for (int i = multiplier - 1; i >= 0; i--) {
+		for (int i = multiplier - 2; i >= 0; i--) {
 			if (i > 50) {
 				switch (periodType) {
 					case 1:
@@ -2454,23 +2645,46 @@ public class MainActivity extends AppCompatActivity implements
 			}
 			j++;
 		}
-
-
-		Runnable runnableOffMain = new Runnable() {
-			@Override
-			public void run() {  // this thread is not on the main
-				if (colorIds.length > 50) {
-					titleChangeId = colorIds.length - 50;
+		switch(periodType){
+			case 1: {
+				colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.work);
+				break;
+			}
+			case 2: {colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.rest);
+				break;
+			}
+			case 3: {
+				if(extendCount>3) {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.red);
+				} else {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.work);
 				}
-				int arrayLength = colorIds.length;
-				for (int i = 0; i < arrayLength; i++) {
-					runnableAnimationIndex = i;
-					myOffMainThreadHandler.post(new Runnable() {  // this is on the main thread
-						public void run() {
-							rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
-							//activityTitle.setTextColor(Color.parseColor(titlePowerColors[49-colorIds.length-runnableAnimationIndex]));
-						}
-					});
+				break;
+			}
+			case 4: {
+				if(extendCount>3) {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.red);
+				} else {
+					colorIds[multiplier-1] = ContextCompat.getColor(MainActivity.this, R.color.rest);
+				}
+				break;
+			}
+			default: break;
+		}
+
+
+		Runnable runnableOffMain = () -> {  // this thread is not on the main
+			if (colorIds.length > 50) {
+				titleChangeId = colorIds.length - 50;
+			}
+			int arrayLength = colorIds.length;
+			for (int i = 0; i < arrayLength; i++) {
+				runnableAnimationIndex = i;
+				// this is on the main thread
+				myOffMainThreadHandler.post(() -> {
+					rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
+					//activityTitle.setTextColor(Color.parseColor(titlePowerColors[49-colorIds.length-runnableAnimationIndex]));
+				});
 
 					try {
 
@@ -2479,10 +2693,9 @@ public class MainActivity extends AppCompatActivity implements
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-				}
+
 
 			}
-
 
 		};
 
@@ -2690,8 +2903,6 @@ public class MainActivity extends AppCompatActivity implements
 			df.dismiss();
 		}
 	}
-
-
 
 	//for testing purposes only, remove before release
 	/*
