@@ -13,6 +13,7 @@ public class RReminderRepository {
     private LiveData<List<Session>> mAllSessions;
     private LiveData<Session> mSession;
     private LiveData<List<Period>> mPeriods;
+    private LiveData<Period> mPeriod;
 
     RReminderRepository(Application application){
         RReminderRoomDatabase db = RReminderRoomDatabase.getDatabase(application);
@@ -26,8 +27,10 @@ public class RReminderRepository {
     LiveData<List<Session>> getAllSessions(){
         return mAllSessions;
     }
-    LiveData<Session> getSessionId(long sessionStartTime) {return mSessionDao.getSessionId(sessionStartTime);}
-    LiveData<List<Period>> getSessionPeriods(int sessionId){return mPeriodDao.getSessionPeriods(sessionId);}
+    LiveData<Session> getSessionByStart(long sessionStartTime) {return mSessionDao.getSessionByStart(sessionStartTime);}
+    LiveData<Session> getSessionById(int sessionId) {return mSessionDao.getSessionById(sessionId);}
+    LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
+    LiveData<Period> getPeriod(long endTime) {return mPeriodDao.getPeriod(endTime);}
 
 
 
@@ -67,23 +70,44 @@ public class RReminderRepository {
     }
 
     public void deleteOlderSessions (long currentTime){
-        new deleteAsyncTask(mSessionDao).execute(currentTime);
+        new deleteAsyncTask(mSessionDao, mPeriodDao).execute(currentTime);
+    }
+
+    public void deletePeriod(long endTime){
+        new deletePeriodAsyncTask(mPeriodDao).execute(endTime);
     }
 
     private static class deleteAsyncTask extends AsyncTask<Long, Void, Void>{
         private SessionDao mAsyncTaskDao;
-        deleteAsyncTask(SessionDao dao){
+        private PeriodDao mAsyncTaskPeriodDao;
+        deleteAsyncTask(SessionDao dao, PeriodDao pDao){
             mAsyncTaskDao = dao;
+            mAsyncTaskPeriodDao = pDao;
         }
 
         @Override
         protected Void doInBackground(final Long... params){
             if(params[0]>0L){
                 mAsyncTaskDao.deleteOlder(params[0]);
+                mAsyncTaskPeriodDao.deleteOlder(params[0]);
             } else {
                 mAsyncTaskDao.deleteAll();
+                mAsyncTaskPeriodDao.deleteAll();
             }
 
+            return null;
+        }
+    }
+
+    private static class deletePeriodAsyncTask extends AsyncTask<Long, Void, Void>{
+        private PeriodDao mAsyncTaskPeriodDao;
+        deletePeriodAsyncTask(PeriodDao pDao){
+            mAsyncTaskPeriodDao = pDao;
+        }
+
+        @Override
+        protected Void doInBackground(final Long... params){
+                mAsyncTaskPeriodDao.deletePeriod(params[0]);
             return null;
         }
     }

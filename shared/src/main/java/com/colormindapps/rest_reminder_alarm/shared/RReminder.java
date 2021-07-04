@@ -33,6 +33,7 @@ public class RReminder {
 	public static final String TURN_OFF = "turn_off";
 	public static final String MANUAL_MODE_NEXT_PERIOD_TYPE = "manual_mode_next_period_type";
 	public static final String PERIOD_END_TIME = "period_end";
+	public static final String PREVIOUS_PERIOD_END_TIME = "previous_period_end";
 	public static final String IS_SHORT_PERIOD = "is_short_period";
 	public static final String NEXT_PERIOD_END_TIME = "next_period_end";
 	public static final String EXTENDED_PERIOD_TYPE = "extended_period_type";
@@ -155,7 +156,9 @@ public class RReminder {
 	public static final int REST_EXTENDED = 4;
 	public static final int PERIOD_OFF = 0;
 
-	public static final String SESSION_ID = "session_id";
+	public static final String DB_SESSION_ID = "db_session_id";
+	public static final String DB_SESSION_START = "db_session_start";
+	public static final String DB_SESSION_END = "db_session_end";
 
 	@IntDef({WORK, REST, WORK_EXTENDED, REST_EXTENDED, PERIOD_OFF})
 	@Retention(RetentionPolicy.SOURCE)

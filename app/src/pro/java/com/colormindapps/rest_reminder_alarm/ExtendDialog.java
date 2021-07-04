@@ -9,6 +9,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -28,11 +33,17 @@ public class ExtendDialog extends DialogFragment{
 	private int extendCount;
 	private int periodType;
 	private int activityType;
-	private long periodEndTimeValue;
+	private long periodEndTimeValue, previousPeriodEndTime;
 	private OnDialogCloseListener parentActivity;
 	public boolean dialogIsOpen;
 	private boolean positiveDismissal = false;
 	private Context context;
+	private Period mPeriod;
+	private PeriodViewModel mPeriodViewModel;
+	private LiveData<Period> currentLDPeriod;
+	private Observer<Period> periodObserver;
+
+	String debug = "EXTEND_DIALOG";
 	
 	private void setParentActivity(OnDialogCloseListener activity){
 		parentActivity = activity;
@@ -55,13 +66,14 @@ public class ExtendDialog extends DialogFragment{
 	
 
 	
-	public static ExtendDialog newInstance(int title, @RReminder.PeriodType int periodType, int extendCount, long periodEndTimeValue, int activityType){
+	public static ExtendDialog newInstance(int title, @RReminder.PeriodType int periodType, int extendCount, long periodEndTimeValue, int activityType, long previousPeriodEnd){
 		ExtendDialog fragment = new ExtendDialog();
 		Bundle args = new Bundle();
 		args.putInt("title", title);
 		args.putInt(RReminder.PERIOD_TYPE, periodType);
 		args.putInt(RReminder.EXTEND_COUNT, extendCount);
 		args.putLong(RReminder.PERIOD_END_TIME, periodEndTimeValue);
+		args.putLong(RReminder.PREVIOUS_PERIOD_END_TIME, previousPeriodEnd);
 		args.putInt(RReminder.ACTIVITY_TYPE, activityType);
 		fragment.setArguments(args);
 		return fragment;
@@ -75,10 +87,12 @@ public class ExtendDialog extends DialogFragment{
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		Bundle data = getArguments();
 		context = getActivity();
+		mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
 		if(data!=null){
 			periodType = data.getInt(RReminder.PERIOD_TYPE);
 			extendCount = data.getInt(RReminder.EXTEND_COUNT);
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
+			previousPeriodEndTime = data.getLong(RReminder.PREVIOUS_PERIOD_END_TIME);
 			activityType = data.getInt(RReminder.ACTIVITY_TYPE);
 		}
 		LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -129,10 +143,13 @@ public class ExtendDialog extends DialogFragment{
 			case 1:
 				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue);
 				toastText = getString(R.string.notification_toast_period_extended);
+				mPeriodViewModel.deletePeriod(periodEndTimeValue);
 				break;
 			default:
 				toastText = "activity type exception"; break;
 		}
+
+		//update current period with current-end values
 
 		@RReminder.PeriodType int functionType = periodType;
 		long functionCalendar;
@@ -150,15 +167,18 @@ public class ExtendDialog extends DialogFragment{
 		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
 
 		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+
 		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount, true);
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){
 		case 0:
+			getAndUpdatePeriodDb(periodEndTimeValue,functionCalendar, functionType, extendCount);
 			parentActivity.bindFromFragment(functionCalendar);
 			Objects.requireNonNull(ExtendDialog.this.getDialog()).cancel();
 			dialogIsOpen = false;
 			break;
 		case 1:
+			getAndUpdatePeriodDb(previousPeriodEndTime,functionCalendar, periodType, extendCount);
 			Intent i = new Intent(context, MainActivity.class);
             i.setAction(RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY);
 			i.putExtra(RReminder.PERIOD_END_TIME, functionCalendar);
@@ -173,6 +193,26 @@ public class ExtendDialog extends DialogFragment{
 
 		Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
 	}
+
+	public void getAndUpdatePeriodDb(long endTime, long newEndTime, int type, int extendCount){
+		currentLDPeriod = mPeriodViewModel.getPeriod(endTime);
+		periodObserver = new Observer<Period>() {
+			@Override
+			public void onChanged(Period period) {
+				mPeriod = period;
+				mPeriod.setType(type);
+				mPeriod.setExtendCount(extendCount);
+				mPeriod.setEndTime(newEndTime);
+				Log.d(debug, "getPeriod observer onChanged");
+				mPeriodViewModel.update(mPeriod);
+				currentLDPeriod.removeObserver(periodObserver);
+			}
+		};
+
+		currentLDPeriod.observe(this, periodObserver);
+	}
+
+
 	
 
 	

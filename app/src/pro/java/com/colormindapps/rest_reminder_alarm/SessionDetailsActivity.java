@@ -1,6 +1,7 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
@@ -20,7 +21,10 @@ import java.util.List;
 public class SessionDetailsActivity extends AppCompatActivity {
     private TextView sessionTitle;
     private int sessionId;
+    private long sessionStart, sessionEnd;
     private PeriodViewModel mPeriodViewModel;
+
+    private String debug = "SESSION_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,20 +33,24 @@ public class SessionDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        sessionId = getIntent().getIntExtra(RReminder.SESSION_ID,0);
+        sessionId = getIntent().getIntExtra(RReminder.DB_SESSION_ID,0);
+        sessionStart = getIntent().getLongExtra(RReminder.DB_SESSION_START,0l);
+        sessionEnd = getIntent().getLongExtra(RReminder.DB_SESSION_END,0l);
+
 
         sessionTitle = findViewById(R.id.session_Id);
 
-        sessionTitle.setText("Session ID: "+sessionId);
+        sessionTitle.setText("Session ID: "+sessionId+ ". Started: "+RReminder.getTimeString(this, sessionStart).toString());
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview_periods);
         final PeriodListAdapter adapter = new PeriodListAdapter(this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mPeriodViewModel = ViewModelProviders.of(this).get(PeriodViewModel.class);
-
-        mPeriodViewModel.getSessionPeriods(sessionId).observe(this, new Observer<List<Period>>(){
+        mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
+        Log.d(debug, "session start: "+ sessionStart);
+        Log.d(debug, "session end: "+ sessionEnd);
+        mPeriodViewModel.getSessionPeriods(sessionStart, sessionEnd).observe(this, new Observer<List<Period>>(){
             @Override
             public void onChanged(@Nullable final List<Period> periods){
                 adapter.setPeriods(periods);

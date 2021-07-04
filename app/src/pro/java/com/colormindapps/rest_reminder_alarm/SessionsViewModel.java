@@ -25,7 +25,8 @@ public class SessionsViewModel extends AndroidViewModel {
     LiveData<List<Session>> getAllSessions(){
         return mAllSessions;
     }
-    LiveData<Session> getSessionId(long sessionStartTime){return mRepository.getSessionId(sessionStartTime);}
+    LiveData<Session> getSessionByStart(long sessionStartTime){return mRepository.getSessionByStart(sessionStartTime);}
+    LiveData<Session> getSessionById(int sessionId){return mRepository.getSessionById(sessionId);}
 
 
     public void insert(Session session){

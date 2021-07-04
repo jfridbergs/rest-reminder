@@ -54,7 +54,7 @@ public class NotificationActivity extends FragmentActivity implements
 		CapabilityApi.CapabilityListener,
 		GoogleApiClient.OnConnectionFailedListener,
 		GoogleApiClient.ConnectionCallbacks {
-	private long mCalendar;
+	private long mCalendar, previousPeriodEnd;
 	private int type, extendCount;
 	public static boolean isOnVisible;
 	public boolean hasntRestored = true;
@@ -127,6 +127,7 @@ public class NotificationActivity extends FragmentActivity implements
 			extendCount = getIntent().getExtras().getInt(RReminder.EXTEND_COUNT);
 			playSound = getIntent().getExtras().getBoolean(RReminder.PLAY_SOUND);
 			mCalendar = getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME);
+			previousPeriodEnd = getIntent().getExtras().getLong(RReminder.PREVIOUS_PERIOD_END_TIME);
 			redirectScreenOff = getIntent().getExtras().getBoolean(RReminder.REDIRECT_SCREEN_OFF);
 		}
 		work = getString(R.string.work);
@@ -300,10 +301,14 @@ public class NotificationActivity extends FragmentActivity implements
 		
 		if(RReminder.getMode(this)== 1){
 			long currentTime = Calendar.getInstance().getTimeInMillis();
-			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), currentTime, 1, 0L);
+			int nextType = RReminder.getNextType(type);
+			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, nextType, currentTime, 1, 0L);
 
-			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
-			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
+			new MobilePeriodManager(getApplicationContext()).setPeriod(nextType, nextPeriodEnd, extendCount);
+			RReminderMobile.startCounterService(this, nextType, 0, nextPeriodEnd, false);
+			Period nextPeriod = new Period(0,nextType,nextPeriodEnd,0,0);
+			RReminderRoomDatabase.getDatabase(this)
+					.insertPeriod(nextPeriod);
 
 		}
 		
@@ -361,6 +366,7 @@ public class NotificationActivity extends FragmentActivity implements
 							new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount);
 
 							RReminderMobile.startCounterService(NotificationActivity.this.getApplicationContext(), newPeriodType, newExtendCount, newPeriodEndTime, false);
+							// TO-DO: implement database update
 							finish();
 						}
 
@@ -529,7 +535,7 @@ public class NotificationActivity extends FragmentActivity implements
 	
 	
 	public void showExtendDialog(){
-		DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, mCalendar, 1);
+		DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, mCalendar, 1,previousPeriodEnd);
 		newFragment.show(getSupportFragmentManager(), "extendDialog");
 	}
 	

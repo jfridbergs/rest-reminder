@@ -232,7 +232,7 @@ public class MobilePeriodService extends JobIntentService implements
 				mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, nextPeriodEndTime, true));
 			}
 			if(MainActivity.getVisibleState() || NotificationActivity.getVisibleState() || RReminder.getMode(this) == 1){
-				gotoMainActivity();
+				gotoNotificationActivity();
 			} else {
 				launchNotification();
 			}
@@ -248,7 +248,7 @@ public class MobilePeriodService extends JobIntentService implements
 	}
 
 
-	public void gotoMainActivity(){
+	public void gotoNotificationActivity(){
 						/*
 				Intent playIntent = new Intent(context, PlaySoundService.class);
 				playIntent.putExtra(Scheduler.PERIOD_TYPE,typeForNotification);
@@ -261,6 +261,7 @@ public class MobilePeriodService extends JobIntentService implements
 
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
+		actionIntent.putExtra(RReminder.PREVIOUS_PERIOD_END_TIME, periodEndedTime);
 		actionIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
 		actionIntent.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		actionIntent.putExtra(RReminder.PLAY_SOUND, true);

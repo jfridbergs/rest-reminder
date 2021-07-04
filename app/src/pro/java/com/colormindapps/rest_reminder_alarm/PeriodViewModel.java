@@ -10,16 +10,24 @@ public class PeriodViewModel extends AndroidViewModel {
 
     private RReminderRepository mRepository;
     private LiveData<List<Period>> mSessionPeriods;
+    private LiveData<Period> mPeriod;
 
     public PeriodViewModel(Application application){
         super(application);
         mRepository = new RReminderRepository(application);
     }
 
-    LiveData<List<Period>> getSessionPeriods(int sessionId){
-        mSessionPeriods = mRepository.getSessionPeriods(sessionId);
+    LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){
+        mSessionPeriods = mRepository.getSessionPeriods(sessionStart, sessionEnd);
         return mSessionPeriods;
     }
+
+    LiveData<Period> getPeriod(long endTime){
+        mPeriod = mRepository.getPeriod(endTime);
+        return mPeriod;
+    }
+
+    public void deletePeriod(long endTime){mRepository.deletePeriod(endTime);}
 
 
     public void insert(Period period){

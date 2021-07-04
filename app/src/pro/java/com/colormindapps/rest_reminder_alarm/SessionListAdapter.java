@@ -32,7 +32,9 @@ public class SessionListAdapter extends RecyclerView.Adapter<SessionListAdapter.
         public void onClick(View view) {
             Session current = mSessions.get(getAdapterPosition());
             int sessionId = current.getSessionId();
-            onSessionListener.onSessionClick(sessionId);
+            long sessionStart = current.getSessionStart();
+            long sessionEnd = current.getSessionEnd();
+            onSessionListener.onSessionClick(sessionId, sessionStart, sessionEnd);
         }
     }
 

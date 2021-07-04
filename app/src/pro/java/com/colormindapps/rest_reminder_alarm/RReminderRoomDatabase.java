@@ -49,6 +49,23 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
     };
 
+    public void insertPeriod (Period period){
+        new insertPeriodAsyncTask(INSTANCE.periodDao()).execute(period);
+    }
+
+    private static class insertPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
+        private PeriodDao mAsyncTaskDao;
+        insertPeriodAsyncTask(PeriodDao dao){
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final Period... params){
+            mAsyncTaskDao.insertPeriod(params[0]);
+            return null;
+        }
+    }
+
     private static class PopulateSessionDbAsync extends AsyncTask<Void, Void, Void> {
         private final SessionDao mDao;
         private final PeriodDao mPeriodDao;

@@ -73,9 +73,11 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
 
 
     @Override
-    public void onSessionClick(int sessionId) {
+    public void onSessionClick(int sessionId, long startTime, long endTime) {
         Intent intent = new Intent(this, SessionDetailsActivity.class);
-        intent.putExtra(RReminder.SESSION_ID, sessionId);
+        intent.putExtra(RReminder.DB_SESSION_ID, sessionId);
+        intent.putExtra(RReminder. DB_SESSION_START, startTime);
+        intent.putExtra(RReminder. DB_SESSION_END, endTime);
         startActivity(intent);
     }
 
