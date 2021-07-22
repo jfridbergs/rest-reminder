@@ -9,7 +9,10 @@ import android.webkit.WebView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.internal.util.Checks;
 
@@ -19,6 +22,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import static androidx.core.util.Preconditions.checkNotNull;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
 
 public class CustomMatchers {
@@ -30,7 +34,9 @@ public class CustomMatchers {
                 Drawable background = view.getBackground();
                 if (background instanceof ColorDrawable){
                     return color == ((ColorDrawable) background).getColor();
-                } else return false;
+                } else {
+                    return false;
+                }
             }
 
             @Override
@@ -125,6 +131,27 @@ public class CustomMatchers {
         };
     }
 
+    public static Matcher<View> atPosition(final int position, @NonNull final Matcher<View> itemMatcher) {
+        checkNotNull(itemMatcher);
+        return new BoundedMatcher<View, RecyclerView>(RecyclerView.class) {
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has item at position " + position + ": ");
+                itemMatcher.describeTo(description);
+            }
+
+            @Override
+            protected boolean matchesSafely(final RecyclerView view) {
+                RecyclerView.ViewHolder viewHolder = view.findViewHolderForAdapterPosition(position);
+                if (viewHolder == null) {
+                    // has no item on such position
+                    return false;
+                }
+                return itemMatcher.matches(viewHolder.itemView);
+            }
+        };
+    }
+
 
 
     public static Matcher<View> withEnoughSpace() {
@@ -186,6 +213,7 @@ public class CustomMatchers {
             }
         };
     }
+
 
 
 }

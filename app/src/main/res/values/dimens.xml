@@ -21,6 +21,7 @@
     <dimen name="timer_sepparator_colon_marginTop">-9dp</dimen>
     <dimen name="timer_sepparator_point_marginTop">-5dp</dimen>
     <dimen name="button_period_end_extend_width">206dp</dimen>
+    <dimen name="button_multiple_width">100dp</dimen>
     <dimen name="button_period_end_extend_height">55dp</dimen>
     <dimen name="extend_button_text_size">20sp</dimen>
     <dimen name="swipe_area_text_text_size">27sp</dimen>

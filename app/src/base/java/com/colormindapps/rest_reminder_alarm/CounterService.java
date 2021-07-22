@@ -11,8 +11,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -26,6 +28,7 @@ public class CounterService extends Service {
 	private long periodLength;
 	private int type;
 	private int extendCount;
+	private boolean completed;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
 
@@ -76,8 +79,15 @@ public class CounterService extends Service {
 			periodEndTime = intent.getExtras().getLong(RReminder.PERIOD_END_TIME);
 			//boolean for hiding the ongoing notification until the period end notification, which takes a higher priority compared to ongoing
 			excludeOngoing = intent.getExtras().getBoolean(RReminder.EXCLUDE_ONGOING);
+			completed = intent.getExtras().getBoolean(RReminder.PERIOD_COMPLETED);
 		}
 		periodLength = periodEndTime - startTime.getTimeInMillis();
+
+		if(completed){
+			Log.d("COUNTER_SERVICE", "send broadcast");
+			Intent intentMainUi = new Intent(RReminder.ACTION_UPDATE_MAIN_UI);
+			LocalBroadcastManager.getInstance(this).sendBroadcast(intentMainUi);
+		}
 
 
 

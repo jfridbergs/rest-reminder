@@ -36,12 +36,13 @@ public class RReminderMobile {
 		context.stopService(i);
 	}
 
-	public static void startCounterService(Context context, int type, int extendCount, long periodEndTime, boolean excludeOngoing ){
+	public static void startCounterService(Context context, int type, int extendCount, long periodEndTime, boolean excludeOngoing, boolean completed ){
 		Intent i = new Intent(context, CounterService.class);
 		i.putExtra(RReminder.PERIOD_TYPE,type);
 		i.putExtra(RReminder.PERIOD_END_TIME, periodEndTime);
 		i.putExtra(RReminder.EXTEND_COUNT, extendCount);
 		i.putExtra(RReminder.EXCLUDE_ONGOING, excludeOngoing);
+		i.putExtra(RReminder.PERIOD_COMPLETED, completed);
 		context.startService(i);
 	}
 

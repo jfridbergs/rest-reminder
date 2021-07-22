@@ -21,6 +21,7 @@
 	    android:id="@+id/transparentImageView" >
 	
 		<ImageView
+			android:id="@+id/shadow"
 		    android:layout_width="200dp"
 		    android:layout_height="match_parent"
 		    android:background="@drawable/shadow_layer_land" />
@@ -72,8 +73,7 @@
 				android:background="@drawable/btn_timer_np"
 				android:layout_centerInParent="true"
 				android:focusable="true" 
-			    android:clickable="true"
-				android:onClick="callStartScheduler">	
+			    android:clickable="true">
 		
 		
 				    	<TextView
@@ -135,8 +135,8 @@
 					    
 			</RelativeLayout>
 			
-			<FrameLayout
-			    android:layout_width="wrap_content"
+			<RelativeLayout
+			    android:layout_width="match_parent"
 			    android:layout_height="match_parent"
 			    android:layout_below="@id/timer_layout"
 			    android:layout_centerInParent="true"
@@ -147,12 +147,23 @@
 			   	    style="@style/ExtendButton"
 			   	    android:layout_width="@dimen/button_period_end_extend_width"
 			   	    android:layout_height="@dimen/button_period_end_extend_height"
-			   	    android:layout_gravity="center"
+					android:layout_marginRight="15dp"
 			   	    android:background="@drawable/btn_extend_np"
 			   	    android:onClick="showExtendDialog"
 			   	    android:text="@string/extend_current_period" />
+
+				<Button
+					android:id="@+id/button_end_period"
+					style="@style/ExtendButton"
+					android:layout_width="@dimen/button_multiple_width"
+					android:layout_height="@dimen/button_period_end_extend_height"
+					android:layout_marginLeft="15dp"
+					android:layout_toRightOf="@id/button_period_end_extend"
+					android:background="@drawable/btn_extend_np"
+					android:onClick="endPeriod"
+					android:text="sessions" />
 		
-			</FrameLayout>    
+			</RelativeLayout>
 		
 			
 			<TextView

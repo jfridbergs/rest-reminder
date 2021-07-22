@@ -21,6 +21,7 @@
     <string name="close_notification">Close</string>
     <string name="on_work_period">Work</string>
     <string name="on_rest_period">Rest</string>
+    <string name="extend">extend</string>
     <string name="description_extended">extended %1$d times</string>
     <string name="description_turn_off">To turn off, press and hold timer</string>
     <string name="description_extended_one_time">extended</string>

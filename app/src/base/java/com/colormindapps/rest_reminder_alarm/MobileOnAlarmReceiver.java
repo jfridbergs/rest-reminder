@@ -30,7 +30,7 @@ public class MobileOnAlarmReceiver extends OnAlarmReceiver {
 	@Override
 	public void startNextPeriod(Context context, int nextType, long calendar){
 		new MobilePeriodManager(context.getApplicationContext()).setPeriod(nextType, calendar, 0);
-		RReminderMobile.startCounterService(context.getApplicationContext(), nextType, 0, calendar, true);
+		RReminderMobile.startCounterService(context.getApplicationContext(), nextType, 0, calendar, true, true);
 	}
 
 }

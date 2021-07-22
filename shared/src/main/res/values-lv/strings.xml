@@ -19,6 +19,7 @@
     <string name="close_notification">Aizvērt</string>
     <string name="on_work_period">Darbs</string>
     <string name="on_rest_period">Atpūta</string>
+    <string name="extend">pagarināt</string>
     <string name="description_extended">pagarināts %1$d reizes</string>
     <string name="extend_current_period">pagarināt periodu</string>
     <string name="toast_period_end_forced">Tekošais periods tika pārtraukts</string>

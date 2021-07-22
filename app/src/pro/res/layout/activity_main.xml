@@ -21,7 +21,8 @@
 		android:layout_below="@id/toolbar"
         />
     
-        <ImageView 
+	<ImageView
+		android:id="@+id/shadow"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:background="@drawable/shadow_layer_portrait"
@@ -150,10 +151,11 @@
 		    android:layout_below="@id/timer_layout"
 		    android:orientation="vertical" >
 
-			<FrameLayout
-			    android:layout_width="match_parent"
-			    android:layout_height="0dp"
-			    android:layout_weight="1" >
+			<RelativeLayout
+				android:layout_width="fill_parent"
+				android:layout_height="0dp"
+				android:gravity="center"
+				android:layout_weight="1">
 
 			   	<Button
 			   	    android:id="@+id/button_period_end_extend"
@@ -174,8 +176,18 @@
 					android:background="@drawable/btn_extend_np"
 					android:onClick="openSessions"
 					android:text="sessions" />
+
+				<Button
+					android:id="@+id/button_end_period"
+					style="@style/ExtendButton"
+					android:layout_width="@dimen/button_multiple_width"
+					android:layout_height="@dimen/button_period_end_extend_height"
+					android:layout_toRightOf="@id/button_period_end_extend"
+					android:layout_gravity="right"
+					android:background="@drawable/btn_extend_np"
+					android:onClick="endPeriod" />
  
-			</FrameLayout>
+			</RelativeLayout>
 
 		   	
 		   	<TextView

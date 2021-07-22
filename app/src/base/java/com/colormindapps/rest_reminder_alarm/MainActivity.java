@@ -5,9 +5,11 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -22,8 +24,11 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Vibrator;
+
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.core.app.NotificationManagerCompat;
@@ -31,8 +36,11 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.MotionEventCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -43,6 +51,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -87,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	public static boolean isOnVisible;
 	private boolean smallTitle = false;
 	private boolean stopTimerInServiceConnectedAfterPause = false;
+	private boolean isMultiWindow = false;
 	private String swipeWork, swipeRest, swipeWorkLand, swipeRestLand;
 	private RelativeLayout rootLayout;
 	private Resources resources;
@@ -112,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	Button infoButton;
 	Typeface font, titleFont, swipeFont, timerFont, infoFont;
 	private RelativeLayout timerButtonLayout;
-	private Button extendPeriodEnd;
+	private Button extendPeriodEnd, endPeriodMultipleWindow;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
 	CounterService.CounterBinder binder;
 	int turnOffValue=0;
@@ -125,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	float mLastTouchX, mLastTouchY, startX, startY;
 	private int mActivePointerId;
+
+	String debug = "RR_MAIN";
 
 
 	//for testing purposes only. remove before release
@@ -143,16 +155,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	}
 
-
-
-
-	
-	
-
-	
-
-    
-	
 	/*
 	private OnLongClickListener longClick = new OnLongClickListener(){
 		@Override
@@ -199,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			counterTimeValue = data.getLong(RReminder.COUNTER_TIME_VALUE);
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
 			long timeRemaining = mService.getCounterTimeValue();
+			Log.d(debug, "onServiceConnected");
 			//checking for special case where the reminder was turned off from notification bar after the the app was removed from active task list
 			if(getIntent().hasExtra(RReminder.TURN_OFF)){
 				if(getIntent().getAction()!=null && getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && getIntent().getExtras()!=null &&periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
@@ -262,6 +265,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.d(debug, "onCreate");
 		setContentView(R.layout.activity_main);
 		toolBar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolBar);
@@ -274,6 +278,10 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		//creating notification channel for API => Oreo
 		setUpNotificationChannels();
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			isMultiWindow = isInMultiWindow();
+		}
 
 
 		//Setting the period lenght lower than min value for development
@@ -300,17 +308,31 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	}
 
+	public void assignViews(){
+
+	}
+
 
 	@Override
 	protected void onStart() {
 		super.onStart();
+		Log.d(debug, "onStart");
 
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 		storedPeriodEndTime = periodEndTimeValue;
 
 		powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-		resources = getResources();
+
+
 		rootLayout = findViewById(R.id.mainActivityLayout);
+		activityTitle = findViewById(R.id.period_title);
+		description = findViewById(R.id.description_text);
+		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
+		endPeriodMultipleWindow = findViewById(R.id.button_end_period);
+		swipeArea = findViewById(R.id.swipe_area_text);
+		infoButton =  findViewById(R.id.info_button);
+		toolBar = findViewById(R.id.toolbar);
+		resources = getResources();
 
 		colorWork = ContextCompat.getColor(MainActivity.this,R.color.work);
 		colorRest = ContextCompat.getColor(MainActivity.this,R.color.rest);
@@ -334,35 +356,27 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		timerFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
 		infoFont = Typeface.createFromAsset(getAssets(), "fonts/Blenda Script.otf");
 
-		activityTitle = findViewById(R.id.period_title);
+		swipeAreaListenerUsed = false;
+
 
 		if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE && buildNumber <= Build.VERSION_CODES.HONEYCOMB) {
 			smallTitle = true;
 		}
 
-		description = findViewById(R.id.description_text);
-		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
 
-		swipeArea = findViewById(R.id.swipe_area_text);
-		swipeAreaListenerUsed = false;
-		infoButton =  findViewById(R.id.info_button);
 		
 		/*
 		if(buildNumber >= Build.VERSION_CODES.HONEYCOMB){
 			rootLayout.setPadding(0,actionBar.getHeight(),0,0);
 		}
 		*/
-
-
 		extendPeriodEnd.setTypeface(font);
 		swipeArea.setTypeface(swipeFont);
 		activityTitle.setTypeface(titleFont);
 		description.setTypeface(font);
 		infoButton.setTypeface(infoFont);
 
-
 		description.setText("");
-
 		/*
 			if (screenOrientation == Configuration.ORIENTATION_PORTRAIT){
 				if(isTablet()){
@@ -442,11 +456,14 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onResume() {
+		Log.d(debug, "onResume");
 		super.onResume();
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
 		manageUiOnResume();
+		IntentFilter iff= new IntentFilter(RReminder.ACTION_UPDATE_MAIN_UI);
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, iff);
 
 
 		if (RReminder.dismissDialogs(MainActivity.this)) {
@@ -472,12 +489,18 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	@Override
 	protected void onPause() {
+		Log.d(debug, "onPause");
 		super.onPause();
-		stopTimerInServiceConnectedAfterPause = true;
-		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
-			stopCountDownTimer();
-			if(descriptionAnimTimer!=null){
-				descriptionAnimTimer.cancel();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+		if(!isMultiWindow){
+			stopTimerInServiceConnectedAfterPause = true;
+
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
+				Log.d(debug, "onPause stopCountdownTimer");
+				stopCountDownTimer();
+				if(descriptionAnimTimer!=null){
+					descriptionAnimTimer.cancel();
+				}
 			}
 		}
 	}
@@ -487,7 +510,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		//dismissEulaDialog();
 
 		//dismiss EULA dialog
-
+		Log.d(debug, "onStop");
 
 		super.onStop();
 		setVisibleState(false);
@@ -495,6 +518,11 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
+		}
+
+		if(descriptionAnimTimer!=null){
+			stopCountDownTimer();
+			descriptionAnimTimer.cancel();
 		}
 
 		//releasing UI elements
@@ -546,6 +574,22 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 	}
 
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(debug, "update UI broadcast received");
+			//add an extra check for multi-window mode only?
+			if(mBound){
+				Bundle data = getDataFromService();
+				periodType = data.getInt(RReminder.PERIOD_TYPE);
+				extendCount = data.getInt(RReminder.EXTEND_COUNT);
+				counterTimeValue = data.getLong(RReminder.COUNTER_TIME_VALUE);
+				periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
+				manageUI(true);
+				manageTimer(true);
+			}
+		}
+	};
 
 	@Override
 	public void onUserInteraction() {
@@ -580,6 +624,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {
+					if(!isMultiWindow)
 					resumeCounter(false);
 				}
 			}
@@ -596,13 +641,20 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public boolean isInMultiWindow(){
+		return isInMultiWindowMode();
+	}
+
+
+
 
 	private void setReminderOn() {
 		periodType = 1;
 		long mCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, Calendar.getInstance().getTimeInMillis(), 1, 0L);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, mCalendar, 0);
 
-		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false);
+		RReminderMobile.startCounterService(MainActivity.this, 1, 0, mCalendar, false, false);
 
 		if(bgAnimation!=null){
 			bgAnimation.removeAllUpdateListeners();
@@ -617,6 +669,20 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		turnedOff = false;
 
+
+	}
+
+	@Override
+	public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+		Log.d(debug, "onMultiWindowModeChanged");
+		super.onMultiWindowModeChanged(isInMultiWindowMode);
+		/*
+		if(isInMultiWindowMode){
+			infoButton.setVisibility(View.GONE);
+		} else {
+			infoButton.setVisibility(View.VISIBLE);
+		}
+		*/
 
 	}
 
@@ -710,136 +776,141 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	      });
 	      
 	      */
+		Log.d(debug, "manageUi");
 		if(descriptionAnimTimer!=null){
 			descriptionAnimTimer.cancel();
 		}
+		endPeriodMultipleWindow.setVisibility(View.GONE);
+
 		if (isOn) {
-			activityTitle.setTextColor(colorBlack);
-			toolBar.setTitleTextColor(colorBlack);
-			if(displayTurnOffHint()){
-				description.setText(R.string.description_turn_off);
-			}
 
-			switch (periodType) {
-				case 1:
-					activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
-					rootLayout.setBackgroundColor(colorWork);
-					infoButton.setTextColor(colorWork);
-					if(RReminder.isPortrait(this)){
-						swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
-					} else {
-						swipeArea.setText(swipeRestLand);
-					}
-					break;
-				case 2:
-					activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
-					rootLayout.setBackgroundColor(colorRest);
-					infoButton.setTextColor(colorRest);
-					if(RReminder.isPortrait(this)){
-						swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
-					} else {
-						swipeArea.setText(swipeWorkLand);
-					}
+				Log.d(debug, "activityTitle: "+activityTitle.toString());
+				activityTitle.setTextColor(colorBlack);
+				toolBar.setTitleTextColor(colorBlack);
+				if(displayTurnOffHint()){
+					description.setText(R.string.description_turn_off);
+				}
 
-					break;
-				case 3:
-					if (extendCount > 3) {
-						rootLayout.setBackgroundColor(colorRed);
-						infoButton.setTextColor(colorRed);
-					} else {
+				switch (periodType) {
+					case 1:
+						activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
 						rootLayout.setBackgroundColor(colorWork);
 						infoButton.setTextColor(colorWork);
-					}
-					activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
-					if(RReminder.isPortrait(this)){
-						swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
-					} else {
-						swipeArea.setText(swipeRestLand);
-					}
-					if (extendCount <= 1) {
-							description.setText(getString(R.string.description_extended_one_time));
-					} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-					}
-
-					break;
-				case 4:
-					if (extendCount > 3) {
-						rootLayout.setBackgroundColor(colorRed);
-						infoButton.setTextColor(colorRed);
-					} else {
+						if(RReminder.isPortrait(this)){
+							swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
+						} else {
+							swipeArea.setText(swipeRestLand);
+						}
+						break;
+					case 2:
+						activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
 						rootLayout.setBackgroundColor(colorRest);
 						infoButton.setTextColor(colorRest);
-					}
-					activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
-					if(RReminder.isPortrait(this)){
-						swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
-					} else {
-						swipeArea.setText(swipeWorkLand);
-					}
-					if (extendCount <= 1) {
-							description.setText(getString(R.string.description_extended_one_time));
-					} else {
-							description.setText(String.format(getString(R.string.description_extended),extendCount));
-					}
-					break;
-				default:
-					rootLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.blue));
-					break;
-
-			}
-
-			if(displayTurnOffHint() && extendCount>0){
-				descriptionAnimTimer = new CountDownTimer((periodEndTimeValue-Calendar.getInstance().getTimeInMillis()), 10000) {
-					int ticks = 0;
-					public void onTick(long millisUntilFinished) {
-						if(ticks>0){
-							animateDescription(ticks % 2 != 0);
+						if(RReminder.isPortrait(this)){
+							swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
+						} else {
+							swipeArea.setText(swipeWorkLand);
 						}
-						ticks++;
+
+						break;
+					case 3:
+						if (extendCount > 3) {
+							rootLayout.setBackgroundColor(colorRed);
+							infoButton.setTextColor(colorRed);
+						} else {
+							rootLayout.setBackgroundColor(colorWork);
+							infoButton.setTextColor(colorWork);
+						}
+						activityTitle.setText(getString(R.string.on_work_period).toUpperCase(Locale.ENGLISH));
+						if(RReminder.isPortrait(this)){
+							swipeArea.setText(getString(R.string.swipe_area_text,swipeRest));
+						} else {
+							swipeArea.setText(swipeRestLand);
+						}
+						if (extendCount <= 1) {
+							description.setText(getString(R.string.description_extended_one_time));
+						} else {
+							description.setText(String.format(getString(R.string.description_extended),extendCount));
+						}
+
+						break;
+					case 4:
+						if (extendCount > 3) {
+							rootLayout.setBackgroundColor(colorRed);
+							infoButton.setTextColor(colorRed);
+						} else {
+							rootLayout.setBackgroundColor(colorRest);
+							infoButton.setTextColor(colorRest);
+						}
+						activityTitle.setText(getString(R.string.on_rest_period).toUpperCase(Locale.ENGLISH));
+						if(RReminder.isPortrait(this)){
+							swipeArea.setText(getString(R.string.swipe_area_text,swipeWork));
+						} else {
+							swipeArea.setText(swipeWorkLand);
+						}
+						if (extendCount <= 1) {
+							description.setText(getString(R.string.description_extended_one_time));
+						} else {
+							description.setText(String.format(getString(R.string.description_extended),extendCount));
+						}
+						break;
+					default:
+						rootLayout.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.blue));
+						break;
+
+				}
+
+				if(displayTurnOffHint() && extendCount>0){
+					descriptionAnimTimer = new CountDownTimer((periodEndTimeValue-Calendar.getInstance().getTimeInMillis()), 10000) {
+						int ticks = 0;
+						public void onTick(long millisUntilFinished) {
+							if(ticks>0){
+								animateDescription(ticks % 2 != 0);
+							}
+							ticks++;
+						}
+
+						public void onFinish() {
+						}
+					}.start();
+				}
+
+				//show turnoff hint for new users
+				titleSequence = activityTitle.getText();
+				activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
+
+
+				if (RReminder.isExtendEnabled(MainActivity.this)) {
+					extendPeriodEnd.setVisibility(View.VISIBLE);
+					if(RReminder.getExtendOptionsCount(MainActivity.this)==1){
+						int extendBaseLength = RReminder.getExtendBaseLength(MainActivity.this);
+						extendPeriodEnd.setText(getString(R.string.extend_period_one_option,extendBaseLength));
+					} else {
+						extendPeriodEnd.setText(getString(R.string.extend_current_period));
 					}
-
-					public void onFinish() {
-					}
-				}.start();
-			}
-
-			//show turnoff hint for new users
-			titleSequence = activityTitle.getText();
-			activityTitle.setTextSize(RReminder.adjustTitleSize(MainActivity.this, titleSequence.length(), smallTitle));
-
-
-			if (RReminder.isExtendEnabled(MainActivity.this)) {
-				extendPeriodEnd.setVisibility(View.VISIBLE);
-				if(RReminder.getExtendOptionsCount(MainActivity.this)==1){
-					int extendBaseLength = RReminder.getExtendBaseLength(MainActivity.this);
-					extendPeriodEnd.setText(getString(R.string.extend_period_one_option,extendBaseLength));
 				} else {
-					extendPeriodEnd.setText(getString(R.string.extend_current_period));
-				}
-			} else {
-				extendPeriodEnd.setVisibility(View.INVISIBLE);
-			}
-
-			if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
-				if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
-					if (isTablet()) {
-						swipeArea.setBackgroundResource(R.drawable.swipe_idle_tablet);
-					} else {
-						swipeArea.setBackgroundResource(R.drawable.swipe_idle);
-					}
-
-				} else if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-					if (isTablet()) {
-						swipeArea.setBackgroundResource(R.drawable.swipe_idle_land_tablet);
-					} else {
-						swipeArea.setBackgroundResource(R.drawable.swipe_idle_land);
-					}
-
+					extendPeriodEnd.setVisibility(View.INVISIBLE);
 				}
 
-				swipeArea.setVisibility(View.VISIBLE);
+				if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
+					if (screenOrientation == Configuration.ORIENTATION_PORTRAIT) {
+						if (isTablet()) {
+							swipeArea.setBackgroundResource(R.drawable.swipe_idle_tablet);
+						} else {
+							swipeArea.setBackgroundResource(R.drawable.swipe_idle);
+						}
+
+					} else if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+						if (isTablet()) {
+							swipeArea.setBackgroundResource(R.drawable.swipe_idle_land_tablet);
+						} else {
+							swipeArea.setBackgroundResource(R.drawable.swipe_idle_land);
+						}
+
+					}
+
+					swipeArea.setVisibility(View.VISIBLE);
 				/*
 				if (buildNumber >= Build.VERSION_CODES.HONEYCOMB) {
 					if(screenOrientation == Configuration.ORIENTATION_PORTRAIT){
@@ -856,7 +927,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			                	requiredSwipeDistance = rootLayout.getMeasuredWidth();
 			                	fullSwipeLength = requiredSwipeDistance * 6 / 10;
 			                }
-			            }, 200);						
+			            }, 200);
 					} else {
 			            rootLayout.postDelayed(new Runnable() {
 			                @Override
@@ -864,16 +935,18 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			                	requiredSwipeDistance = rootLayout.getMeasuredHeight();
 			                	fullSwipeLength = requiredSwipeDistance * 6 / 10;
 			                }
-			            }, 200);						
+			            }, 200);
 					}
 				}*/
 
 
-				swipeArea.setOnTouchListener(new SwipeTouchListener());
+					swipeArea.setOnTouchListener(new SwipeTouchListener());
 
-			} else {
-				swipeArea.setVisibility(View.GONE);
-			}
+				} else {
+					swipeArea.setVisibility(View.GONE);
+				}
+
+
 
 
 		} else {
@@ -891,8 +964,42 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			manageTimer(false);
 
 		}
+		if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.N){
+			manageMultiWindow(isOn);
+		}
 	}
-	
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public void manageMultiWindow(Boolean isOn){
+		ImageView shadow = findViewById(R.id.shadow);
+		if(isInMultiWindowMode()){
+			infoButton.setVisibility(View.GONE);
+			toolBar.setVisibility(View.GONE);
+			extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(getResources().getDimensionPixelSize(R.dimen.button_multiple_width),getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_height)));
+			extendPeriodEnd.setText(getString(R.string.extend));
+			if(!RReminder.isPortrait(this)){
+				shadow.setVisibility(View.INVISIBLE);
+			}
+
+			if(isOn){
+				swipeArea.setVisibility(View.GONE);
+				if(periodType ==1 || periodType ==3){
+					endPeriodMultipleWindow.setText(getString(R.string.rest));
+				} else {
+					endPeriodMultipleWindow.setText(getString(R.string.work));
+				}
+				endPeriodMultipleWindow.setVisibility(View.VISIBLE);
+
+			}
+		} else {
+			//extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(R.dimen.button_period_end_extend_width,R.dimen.button_period_end_extend_height));
+			shadow.setVisibility(View.VISIBLE);
+			extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_width),getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_height)));
+			infoButton.setVisibility(View.VISIBLE);
+			toolBar.setVisibility(View.VISIBLE);
+			extendPeriodEnd.setGravity(Gravity.CENTER);
+		}
+	}
 	/*
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -1213,7 +1320,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 		functionCalendar = RReminder.getTimeAfterExtend(getApplicationContext(), 1, timeRemaining);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
-		RReminderMobile.startCounterService(getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		RReminderMobile.startCounterService(getApplicationContext(), functionType, extendCount, functionCalendar, false, false);
 
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1430,6 +1537,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		return (Math.min(dpHeight,dpWidth) > 600.0f);
 	}
 
+	public void endPeriod(View v) {swipeEndPeriod();}
+
+
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
@@ -1462,7 +1572,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, functionCalendar, extendCount);
 
 
-		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
+		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false, false);
 		cancelNotification(functionCalendar,false);
 		Intent intent = new Intent(this, CounterService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1554,19 +1664,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					turnOffIntent = true;
 					break;
 				}
-				//intent after calling next period start from notification activity
-				case RReminder.ACTION_MANUAL_START_NEXT_PERIOD: {
-					int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
-					long currentTime = Calendar.getInstance().getTimeInMillis();
-					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, RReminder.getNextType(type), currentTime, 1, 0L);
-					new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
-					RReminderMobile.startCounterService(MainActivity.this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
-					manageUI(true);
-					if (!dialogOnScreen) {
-						manageTimer(true);
-					}
-					break;
-				}
 				case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
 					//dismissing notification after selecting to extend last ended period
 					//mgr.cancel(1);
@@ -1644,6 +1741,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		@Override
 		public boolean onTouch(View v, MotionEvent ev) {
 			final int action = MotionEventCompat.getActionMasked(ev);
+			Log.d(debug, "onTouch");
 
 
 			switch (action) {

@@ -236,7 +236,7 @@ public class NotificationActivity extends FragmentActivity implements OnDialogCl
 			long currentTime = Calendar.getInstance().getTimeInMillis();
 			nextPeriodEnd = RReminder.getNextPeriodEndTime(this, RReminder.getNextType(type), currentTime, 1, 0L);
 			new MobilePeriodManager(getApplicationContext()).setPeriod(RReminder.getNextType(type), nextPeriodEnd, extendCount);
-			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false);
+			RReminderMobile.startCounterService(this, RReminder.getNextType(type), 0, nextPeriodEnd, false, true);
 
 		}
 		

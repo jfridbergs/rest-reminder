@@ -4,6 +4,9 @@ package com.colormindapps.rest_reminder_alarm;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.drawable.ColorDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +87,8 @@ public class PeriodListAdapter extends RecyclerView.Adapter<PeriodListAdapter.Pe
                     break;
 
             }
+
+            Log.d("PERIOD_ADAPTER", "position: "+position+ ", color id: "+ ((ColorDrawable) holder.periodLayout.getBackground()).getColor());
             String endTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getEndTime()).toString();
 
             String time = endTime;

@@ -21,6 +21,11 @@
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/Theme.WorkRestTheme">
+            <layout android:defaultHeight="600dp"
+                android:defaultWidth="500dp"
+                android:gravity="top|end"
+                android:minHeight="340dp"
+                android:minWidth="320dp" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,6 +37,7 @@
             android:name=".PreferenceXActivity"
             android:label="@string/app_name"
             android:parentActivityName=".MainActivity"
+            android:resizeableActivity="false"
             android:theme="@style/PreferencesNoOverlayActionbar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -54,11 +60,13 @@
             android:name=".NotificationActivity"
             android:excludeFromRecents="true"
             android:label="@string/title_activity_notification"
+            android:resizeableActivity="false"
             android:taskAffinity=""
             android:theme="@style/NotificationActivity" />
         <activity
             android:name=".ManualActivity"
             android:label="@string/manual_activity_title"
+            android:resizeableActivity="false"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

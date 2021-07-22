@@ -12,10 +12,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -47,8 +51,15 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
     int REQUEST_CODE_ALERT_WORK_RINGTONE = 1;
     int REQUEST_CODE_ALERT_REST_RINGTONE = 2;
 
+    private PeriodViewModel mPeriodViewModel;
+    private LiveData<Period> currentLDPeriod;
+    private Observer<Period> periodObserver;
+    private Period mPeriod;
+
     public static final String PAGE_ID = "page_id";
     private PreferenceActivityLinkedService parentActivity;
+
+    private String debug = "PERFERENCE_SUBSCREEN";
 
     public static PreferenceXSubScreenFragment newInstance(String pageId) {
         PreferenceXSubScreenFragment f = new PreferenceXSubScreenFragment();
@@ -83,6 +94,8 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         startNextEnabledKey = getString(R.string.pref_end_period_key);
         enableShortPeriodsKey = getString(R.string.pref_enable_short_periods_key);
         disableBatteryOptKey = getString(R.string.pref_disable_battery_optimization_key);
+
+        mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
 
         if (getArguments() == null || !getArguments().containsKey(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT)) {
             throw new RuntimeException("You must provide a pluginKey by calling setArguments(@NonNull String pluginKey)");
@@ -299,6 +312,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         //starting counterservice and setting new alarms
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+                        getAndUpdatePeriodDb(periodEndTimeValue, newPeriodEndValue,periodType,extendCount);
 
                         parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         workPeriodLength = updatedWorkPeriodLength;
@@ -320,6 +334,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         //setting alarm via alarmmanager if period length is >=10 mins
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+                        getAndUpdatePeriodDb(periodEndTimeValue, newPeriodEndValue,periodType,extendCount);
 
                         parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         restPeriodLength = updatedRestPeriodLength;
@@ -552,6 +567,24 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         super.onDestroy();
         sendEspressoBroadcast();
 
+    }
+
+    public void getAndUpdatePeriodDb(long endTime, long newEndTime, int type, int extendCount){
+        currentLDPeriod = mPeriodViewModel.getPeriod(endTime);
+        periodObserver = new Observer<Period>() {
+            @Override
+            public void onChanged(Period period) {
+                mPeriod = period;
+                mPeriod.setType(type);
+                mPeriod.setExtendCount(extendCount);
+                mPeriod.setEndTime(newEndTime);
+                Log.d(debug, "getPeriod observer onChanged");
+                mPeriodViewModel.update(mPeriod);
+                currentLDPeriod.removeObserver(periodObserver);
+            }
+        };
+
+        currentLDPeriod.observe(this, periodObserver);
     }
 
     private void sendEspressoBroadcast(){

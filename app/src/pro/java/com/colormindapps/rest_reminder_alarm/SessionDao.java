@@ -26,6 +26,7 @@ public interface SessionDao {
     @Query("SELECT * FROM session_table ORDER BY session_start DESC")
     LiveData<List<Session>> getAllSessions();
 
+
     @Query("SELECT * FROM session_table WHERE session_start = :sessionStart")
     LiveData<Session> getSessionByStart(long sessionStart);
 

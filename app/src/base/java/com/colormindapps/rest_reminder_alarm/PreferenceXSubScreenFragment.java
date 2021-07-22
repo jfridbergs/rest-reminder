@@ -284,7 +284,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
                         //starting counterservice and setting new alarms
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
-                        RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+                        RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false, false);
 
                         workPeriodLength = updatedWorkPeriodLength;
                     }
@@ -304,7 +304,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         //starting counterservice and setting new alarms
                         //setting alarm via alarmmanager if period length is >=10 mins
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
-                        RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
+                        RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false, false);
 
                         restPeriodLength = updatedRestPeriodLength;
                     }

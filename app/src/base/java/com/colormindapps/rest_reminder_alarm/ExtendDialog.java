@@ -148,7 +148,7 @@ public class ExtendDialog extends DialogFragment{
 		extendCount+=1;
 		functionCalendar = RReminder.getTimeAfterExtend(context.getApplicationContext(), multiplier, timeRemaining);
 		new MobilePeriodManager(context.getApplicationContext()).setPeriod(functionType, functionCalendar, extendCount);
-		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
+		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false, false);
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){
 		case 0:

@@ -42,6 +42,7 @@ public class RReminder {
 	public static final String COUNTER_TIME_VALUE = "counter_time_value";
 	public static final String ACTIVITY_TYPE = "activity_type";
 	public static final String EXCLUDE_ONGOING = "exclude_ongoing";
+	public static final String PERIOD_COMPLETED = "period_completed";
 	public static final String PLAY_SOUND = "play_sound";
 	public static final String ANIMATE_INFO = "animate_info";
 	public static final String PERIOD_END_REDIRECT = "period_end_redirect";
@@ -64,6 +65,7 @@ public class RReminder {
 	public static final String DEFAULT_REST_PERIOD_STRING = "00:15";
 	public static final String DEFAULT_APPROX_TIME_STRING = "01:00";
 	public static final String ACTION_TURN_OFF = "com.colormindapps.rest_reminder_alarm.ACTION_TURN_OFF_SCHEDULER";
+	public static final String ACTION_UPDATE_MAIN_UI = "com.colormindapps.rest_reminder_alarm.ACTION_UPDATE_MAIN_UI";
 	public static final String ACTION_MANUAL_START_NEXT_PERIOD = "com.colormindapps.rest_reminder_alarm.ACTION_MANUAL_START_NEXT_PERIOD";
 	public static final String ACTION_VIEW_NOTIFICATION_ACTIVITY = "com.colormindapps.rest_reminder_alarm.ACTION_VIEW_PERIOD_END_NOTIFICATION";
 	public static final String ACTION_CLEAR_NOTIFICATION = "com.colormindapps.rest_reminder_alarm.ACTION_CLEAR_NOTIFICATION";
@@ -565,6 +567,13 @@ public class RReminder {
 		return smallestWidth>=500.0;
 	}
 
+	public static boolean isMultiSmall(Context context){
+		DisplayMetrics dm = context.getResources().getDisplayMetrics();
+		float scaleFactor = dm.density;
+		float smallestWidth = Math.min(dm.widthPixels/scaleFactor, dm.heightPixels/scaleFactor);
+		return smallestWidth<350.0;
+	}
+
 	public static boolean isPortrait(Context context){
 		DisplayMetrics dm = context.getResources().getDisplayMetrics();
 		return dm.heightPixels > dm.widthPixels;
@@ -601,7 +610,7 @@ public class RReminder {
 			}
 			return size;
 		} else {
-			if(isPortrait(context)){
+			if(isPortrait(context) && !isMultiSmall(context)){
 				size=70;
 			} else {
 				size = 50;

@@ -10,9 +10,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -35,6 +37,7 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.core.app.NotificationManagerCompat;
@@ -42,8 +45,10 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.MotionEventCompat;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -54,6 +59,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -126,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements
 	private static boolean isOnVisible;
 	private boolean smallTitle = false;
 	private boolean stopTimerInServiceConnectedAfterPause = false;
+	private boolean isMultiWindow = false;
 	private String swipeWork, swipeRest, swipeWorkLand, swipeRestLand;
 	private RelativeLayout rootLayout;
 	private Resources resources;
@@ -155,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements
 	private Typeface swipeFont;
 	private Typeface timerFont;
 	private RelativeLayout timerButtonLayout;
-	private Button extendPeriodEnd, sessions;
+	private Button extendPeriodEnd, sessions, endPeriodMultipleWindow;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
 	private int turnOffValue=0;
 	private boolean turnOffFirstIntent;
@@ -341,6 +348,10 @@ public class MainActivity extends AppCompatActivity implements
 
 		setUpNotificationChannels();
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			isMultiWindow = isInMultiWindow();
+		}
+
 
 
 		//Setting the period lenght lower than min value for development
@@ -378,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-
+		Log.d(debug, "onStart");
 
 		if (!mResolvingError) {
 			mGoogleApiClient.connect();
@@ -413,26 +424,25 @@ public class MainActivity extends AppCompatActivity implements
 		timerFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
 		Typeface infoFont = Typeface.createFromAsset(getAssets(), "fonts/Blenda Script.otf");
 
-		activityTitle = (TextView) findViewById(R.id.period_title);
+		activityTitle = findViewById(R.id.period_title);
 
 		if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE && buildNumber <= Build.VERSION_CODES.HONEYCOMB) {
 			smallTitle = true;
 		}
 
-		description = (TextView) findViewById(R.id.description_text);
-		extendPeriodEnd = (Button) findViewById(R.id.button_period_end_extend);
+		description =  findViewById(R.id.description_text);
+		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
+		endPeriodMultipleWindow = findViewById(R.id.button_end_period);
 		sessions = findViewById(R.id.button_open_sessions);
-		swipeArea = (TextView) findViewById(R.id.swipe_area_text);
+		swipeArea =  findViewById(R.id.swipe_area_text);
 		swipeAreaListenerUsed = false;
-		infoButton = (Button) findViewById(R.id.info_button);
+		infoButton =  findViewById(R.id.info_button);
 		
 		/*
 		if(buildNumber >= Build.VERSION_CODES.HONEYCOMB){
 			rootLayout.setPadding(0,actionBar.getHeight(),0,0);
 		}
 		*/
-
-
 		extendPeriodEnd.setTypeface(font);
 		swipeArea.setTypeface(swipeFont);
 		activityTitle.setTypeface(titleFont);
@@ -522,10 +532,13 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Log.d(debug, "onResume");
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
 		manageUiOnResume();
+		IntentFilter iff= new IntentFilter(RReminder.ACTION_UPDATE_MAIN_UI);
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, iff);
 
 
 		if (RReminder.dismissDialogs(MainActivity.this)) {
@@ -555,12 +568,18 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.d(debug, "onPause");
 		//setting up a flag for special case in manual mode, when onPause, onStop is immediately called after onStart, onResume
-		stopTimerInServiceConnectedAfterPause = true;
-		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
-			stopCountDownTimer();
-			if(descriptionAnimTimer!=null){
-				descriptionAnimTimer.cancel();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+		if(!isMultiWindow){
+			stopTimerInServiceConnectedAfterPause = true;
+
+			if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
+				Log.d(debug, "onPause stopCountdownTimer");
+				stopCountDownTimer();
+				if(descriptionAnimTimer!=null){
+					descriptionAnimTimer.cancel();
+				}
 			}
 		}
 	}
@@ -568,7 +587,7 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-
+		Log.d(debug, "onStop");
 		if (!mResolvingError && (mGoogleApiClient != null) && (mGoogleApiClient.isConnected())) {
 
 			Wearable.DataApi.removeListener(mGoogleApiClient, this);
@@ -583,6 +602,11 @@ public class MainActivity extends AppCompatActivity implements
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
+		}
+
+		if(descriptionAnimTimer!=null){
+			stopCountDownTimer();
+			descriptionAnimTimer.cancel();
 		}
 
 		//releasing UI elements
@@ -634,6 +658,22 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(debug, "update UI broadcast received");
+			//add an extra check for multi-window mode only?
+			if(mBound){
+				Bundle data = getDataFromService();
+				periodType = data.getInt(RReminder.PERIOD_TYPE);
+				extendCount = data.getInt(RReminder.EXTEND_COUNT);
+				counterTimeValue = data.getLong(RReminder.COUNTER_TIME_VALUE);
+				periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
+				manageUI(true);
+				manageTimer(true);
+			}
+		}
+	};
 
 	@Override
 	public void onUserInteraction() {
@@ -668,6 +708,7 @@ public class MainActivity extends AppCompatActivity implements
 					Intent intent = new Intent(this, CounterService.class);
 					bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 				} else {
+					if(!isMultiWindow)
 					resumeCounter(false);
 				}
 			}
@@ -740,6 +781,10 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public boolean isInMultiWindow(){
+		return isInMultiWindowMode();
+	}
 
 	private void setReminderOn() {
 		Log.d(debug, "setReminderOn");
@@ -753,16 +798,6 @@ public class MainActivity extends AppCompatActivity implements
 
 		currentSession = new Session(0,sessionStartTime,0L);
 		mSessionsViewModel.insert(currentSession);
-		/*
-		new Timer().schedule(new TimerTask() {
-			@Override
-			public void run() {
-				getCurrentSessionId(sessionStartTime);
-			}
-		}, 2000);
-		*/
-
-		//add first session period in DB with the just obtained session id
 
 		mPeriod = new Period(0,1,firstPeriodEndTime,0,0);
 		Log.d(debug, "insert period value: "+firstPeriodEndTime);
@@ -878,10 +913,7 @@ public class MainActivity extends AppCompatActivity implements
 		Log.d(debug, "setReminderOff");
 		setReminderOffCounter++;
 		stopCountDownTimer();
-		if (mBound) {
-			unbindService(mConnection);
-			mBound = false;
-		}
+
 		Log.d(debug, "SET_REMINDER_OFF period values: type: "+ periodType + ", endtime: "+ periodEndTime);
 		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime);
 		long currentTime = Calendar.getInstance().getTimeInMillis();
@@ -1133,6 +1165,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	public void manageUI(Boolean isOn) {
+		Log.d(debug, "manageUi");
 		//swipeArea.setOnFocusChangeListener(swipeFocus);
 
 		/*
@@ -1147,6 +1180,7 @@ public class MainActivity extends AppCompatActivity implements
 		if(descriptionAnimTimer!=null){
 			descriptionAnimTimer.cancel();
 		}
+		endPeriodMultipleWindow.setVisibility(View.GONE);
 		if (isOn) {
 			sessions.setVisibility(View.GONE);
 			activityTitle.setTextColor(colorBlack);
@@ -1324,10 +1358,43 @@ public class MainActivity extends AppCompatActivity implements
 			swipeArea.setVisibility(View.GONE);
 			sessions.setVisibility(View.VISIBLE);
 			manageTimer(false);
-
+		}
+		if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.N){
+			manageMultiWindow(isOn);
 		}
 	}
-	
+
+	@RequiresApi(api = Build.VERSION_CODES.N)
+	public void manageMultiWindow(Boolean isOn){
+		ImageView shadow = findViewById(R.id.shadow);
+		if(isInMultiWindowMode()){
+			infoButton.setVisibility(View.GONE);
+			toolBar.setVisibility(View.GONE);
+			extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(getResources().getDimensionPixelSize(R.dimen.button_multiple_width),getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_height)));
+			extendPeriodEnd.setText(getString(R.string.extend));
+			if(!RReminder.isPortrait(this)){
+				shadow.setVisibility(View.INVISIBLE);
+			}
+
+			if(isOn){
+				swipeArea.setVisibility(View.GONE);
+				if(periodType ==1 || periodType ==3){
+					endPeriodMultipleWindow.setText(getString(R.string.rest));
+				} else {
+					endPeriodMultipleWindow.setText(getString(R.string.work));
+				}
+				endPeriodMultipleWindow.setVisibility(View.VISIBLE);
+
+			}
+		} else {
+			//extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(R.dimen.button_period_end_extend_width,R.dimen.button_period_end_extend_height));
+			shadow.setVisibility(View.VISIBLE);
+			extendPeriodEnd.setLayoutParams(new RelativeLayout.LayoutParams(getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_width),getResources().getDimensionPixelSize(R.dimen.button_period_end_extend_height)));
+			infoButton.setVisibility(View.VISIBLE);
+			toolBar.setVisibility(View.VISIBLE);
+			extendPeriodEnd.setGravity(Gravity.CENTER);
+		}
+	}
 	/*
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -1873,6 +1940,8 @@ public class MainActivity extends AppCompatActivity implements
 		return (Math.min(dpHeight,dpWidth) > 600.0f);
 	}
 
+	public void endPeriod(View v) {swipeEndPeriod();}
+
 	public void swipeEndPeriod() {
 		description.setText("");
 		stopCountDownTimer();
@@ -2007,23 +2076,6 @@ public class MainActivity extends AppCompatActivity implements
 
 					}
 					turnOffIntent = true;
-					break;
-				}
-				//intent after calling next period start from notification activity
-				case RReminder.ACTION_MANUAL_START_NEXT_PERIOD: {
-					@RReminder.PeriodType int type = data.getInt(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE);
-					long currentTime = Calendar.getInstance().getTimeInMillis();
-					int nextType = RReminder.getNextPeriodType(type);
-					long nextPeriodEnd = RReminder.getNextPeriodEndTime(MainActivity.this, nextType, currentTime, 1, 0L);
-
-					new MobilePeriodManager(getApplicationContext()).setPeriod(nextType,  nextPeriodEnd, extendCount);
-					RReminderMobile.startCounterService(MainActivity.this, nextType, 0, nextPeriodEnd, false);
-					Period manualPeriod = new Period(0,nextType,nextPeriodEnd,0,0);
-					mPeriodViewModel.insert(manualPeriod);
-					manageUI(true);
-					if (!dialogOnScreen) {
-						manageTimer(true);
-					}
 					break;
 				}
 				case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
