@@ -77,9 +77,9 @@ public class PeriodListAdapter extends RecyclerView.Adapter<PeriodListAdapter.Pe
                 }
                 case 4:{
                     if(extendCount>=3){
-                        holder.periodLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.rest));
+                        holder.periodLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.red));
                     } else {
-                        holder.periodLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.work));
+                        holder.periodLayout.setBackgroundColor(ContextCompat.getColor(mContext,R.color.rest));
                     }
                     break;
                 }
