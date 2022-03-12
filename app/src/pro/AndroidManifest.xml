@@ -3,14 +3,18 @@
 
     <application>
         <activity
+            android:name="com.colormindapps.rest_reminder_alarm.CalendarActivity"
+            android:label="@string/title_activity_calendar"
+            android:theme="@style/Theme.WorkRestTheme.NoActionBar"></activity>
+        <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionDetailsActivity"
             android:label="@string/title_activity_session_details"
             android:resizeableActivity="false"
-            android:theme="@style/Theme.WorkRestTheme.NoActionBar"></activity>
+            android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
         <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionsListActivity"
-            android:resizeableActivity="false"
-            android:label="@string/title_activity_sessions" />
+            android:label="@string/title_activity_sessions"
+            android:resizeableActivity="false" />
     </application>
 
 </manifest>

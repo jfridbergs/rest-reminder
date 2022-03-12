@@ -27,8 +27,12 @@ public class RReminderRepository {
     LiveData<List<Session>> getAllSessions(){
         return mAllSessions;
     }
+    LiveData<List<Session>> getSessionsInPeriod(long from, long to){
+        return mSessionDao.getSessionsInPeriod(from, to);
+    }
     LiveData<Session> getSessionByStart(long sessionStartTime) {return mSessionDao.getSessionByStart(sessionStartTime);}
     LiveData<Session> getSessionById(int sessionId) {return mSessionDao.getSessionById(sessionId);}
+    LiveData<Session> getFirstSession() {return mSessionDao.getFirstSession();}
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
     LiveData<Period> getPeriod(long endTime) {return mPeriodDao.getPeriod(endTime);}
 

@@ -1606,7 +1606,13 @@ public class MainActivity extends AppCompatActivity implements
 				Intent i = new Intent(this, PreferenceXActivity.class);
 				startActivity(i);
 			return true;
-		} else if (item.getItemId() == R.id.menu_feedback){
+		}
+		else if (item.getItemId() == R.id.menu_session_list){
+				Intent i = new Intent(this, SessionsListActivity.class);
+				startActivity(i);
+			return true;
+		}
+		else if (item.getItemId() == R.id.menu_feedback){
 				Intent Email = new Intent(Intent.ACTION_SEND);
 				Email.setType("text/email");
 				Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
@@ -1672,7 +1678,7 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	public void openSessions(View v){
-		Intent intent  = new Intent(this, SessionsListActivity.class);
+		Intent intent  = new Intent(this, CalendarActivity.class);
 		startActivity(intent);
 	}
 

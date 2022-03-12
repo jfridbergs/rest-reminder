@@ -1,8 +1,9 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
+
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,7 +11,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
@@ -18,34 +21,24 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.util.List;
 
 
-public class SessionDetailsActivity extends AppCompatActivity {
+public class SessionDetailsActivity extends AppCompatActivity implements OnFlipCardListener{
     private TextView sessionTitle;
     private int sessionId;
     private long sessionStart, sessionEnd;
+    boolean showingBack = false;
     private PeriodViewModel mPeriodViewModel;
+    private List<Period> mPeriods;
+
 
     private String debug = "SESSION_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_session_details);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
+        setContentView(R.layout.session_details_activity);
         sessionId = getIntent().getIntExtra(RReminder.DB_SESSION_ID,0);
         sessionStart = getIntent().getLongExtra(RReminder.DB_SESSION_START,0l);
         sessionEnd = getIntent().getLongExtra(RReminder.DB_SESSION_END,0l);
-
-
-        sessionTitle = findViewById(R.id.session_Id);
-
-        sessionTitle.setText("Session ID: "+sessionId+ ". Started: "+RReminder.getTimeString(this, sessionStart).toString());
-
-        RecyclerView recyclerView = findViewById(R.id.recyclerview_periods);
-        final PeriodListAdapter adapter = new PeriodListAdapter(this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
         Log.d(debug, "session start: "+ sessionStart);
@@ -53,9 +46,75 @@ public class SessionDetailsActivity extends AppCompatActivity {
         mPeriodViewModel.getSessionPeriods(sessionStart, sessionEnd).observe(this, new Observer<List<Period>>(){
             @Override
             public void onChanged(@Nullable final List<Period> periods){
-                adapter.setPeriods(periods);
+                mPeriods = periods;
+                if (savedInstanceState == null) {
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .add(R.id.container, CardFrontFragment.newInstance(sessionId, sessionStart,sessionEnd))
+                            .commit();
+                }
             }
         });
+
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+
+
+
+
+
+
     }
+
+    public List<Period> getPeriods(){
+        return mPeriods;
+    }
+
+    public void flipCard() {
+        if (showingBack) {
+            getSupportFragmentManager().popBackStack();
+            showingBack=false;
+            return;
+        }
+
+        // Flip to the back.
+
+        showingBack = true;
+
+        // Create and commit a new fragment transaction that adds the fragment for
+        // the back of the card, uses custom animations, and is part of the fragment
+        // manager's back stack.
+
+        getSupportFragmentManager()
+                .beginTransaction()
+
+                // Replace the default fragment animations with animator resources
+                // representing rotations when switching to the back of the card, as
+                // well as animator resources representing rotations when flipping
+                // back to the front (e.g. when the system Back button is pressed).
+                .setCustomAnimations(
+                        R.animator.card_flip_right_in,
+                        R.animator.card_flip_right_out,
+                        R.animator.card_flip_left_in,
+                        R.animator.card_flip_left_out)
+
+                // Replace any fragments currently in the container view with a
+                // fragment representing the next page (indicated by the
+                // just-incremented currentPage variable).
+                .replace(R.id.container, CardBackFragment.newInstance(sessionStart,sessionEnd))
+
+                // Add this transaction to the back stack, allowing users to press
+                // Back to get to the front of the card.
+                .addToBackStack(null)
+
+                // Commit the transaction.
+                .commit();
+    }
+
+
+
+
 
 }

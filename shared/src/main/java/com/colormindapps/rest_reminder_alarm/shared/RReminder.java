@@ -56,6 +56,10 @@ public class RReminder {
 	public static final int DEFAULT_EXTEND_BASE_LENGTH = 5;
 	public static final int NOTIFICATION_ID = 1;
 
+	public static final String YEAR="date_year";
+	public static final String MONTH="date_month";
+	public static final String DAY="calendar_day";
+
 	public static final String CHANNEL_ONGOING_ID = "notification_channel_ongoing";
 	public static final String CHANNEL_PERIOD_END_ID = "notification_channel_period_end";
 	public static final int NOTIFICATION_CHANNEL_ONGOING = 1;
@@ -310,6 +314,23 @@ public class RReminder {
 
 
 	}
+
+	public static long getMillisFromDate(int year, int month, int day, boolean start){
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month, day);
+		if(start){
+			calendar.set(Calendar.HOUR_OF_DAY, 0);
+			calendar.set(Calendar.MINUTE,0);
+			calendar.set(Calendar.SECOND,0);
+		} else {
+			calendar.set(Calendar.HOUR_OF_DAY, 23);
+			calendar.set(Calendar.MINUTE,59);
+			calendar.set(Calendar.SECOND,59);
+		}
+
+		return calendar.getTimeInMillis();
+	}
+
 	
 	public static boolean isExtendEnabled(Context context){
 		String key = context.getString(R.string.pref_enable_extend_key);
@@ -634,7 +655,7 @@ public class RReminder {
 		int minute = getMinuteFromString(value);
 		switch (type){
 			case RReminder.PREFERENCE_SUMMARY_HHMM:
-				if (hour > 0){;
+				if (hour > 0){
 					if(hour==1){
 						firstPart=context.getString(R.string.pref_hour_single);
 					} else {
@@ -668,6 +689,29 @@ public class RReminder {
 		return firstPart + secondPart;
 	}
 
+	public static String getDurationFromMillis(Context context,long millis){
+		String firstPart = "", secondPart = " ";
+		int timeInSeconds =  Math.round(millis / 1000);
+		int timeInMinutes  = timeInSeconds / 60;
+		int minutes = timeInMinutes % 60;
+		int hours = timeInMinutes / 60;
+
+		if (hours > 0){
+			if(hours==1){
+				firstPart=context.getString(R.string.pref_hour_single);
+			} else {
+				firstPart=context.getString(R.string.pref_hour_multiple, hours);
+			}
+			firstPart+=" "+context.getString(R.string.pref_summary_and)+ " ";
+		}
+		if(minutes==1){
+			secondPart=context.getString(R.string.pref_minute_single);
+		} else {
+			secondPart=context.getString(R.string.pref_minute_multiple, minutes);
+		}
+		return firstPart + secondPart;
+	}
+
 	public static int getHourFromString(String time){
 		String[] pieces = time.split(":");
 		return (Integer.parseInt(pieces[0]));
@@ -676,6 +720,24 @@ public class RReminder {
 	public static int getMinuteFromString(String time){
 		String[] pieces = time.split(":");
 		return (Integer.parseInt(pieces[1]));
+	}
+
+
+	public static int dip2px(Context context, float dipValue){
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int)(dipValue * scale + 0.5f);
+	}
+
+	public static int px2dip(Context context, float pxValue){
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int)(pxValue / scale + 0.5f);
+	}
+
+
+
+	public static int sp2px(Context context, float spValue) {
+		final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
+		return (int) (spValue * fontScale + 0.5f);
 	}
 
 	public static PutDataRequest createStatusData(int source, int type, long periodEndValue, int extendCount, boolean mobileOn, boolean wearOn){

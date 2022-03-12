@@ -2,6 +2,7 @@ package com.colormindapps.rest_reminder_alarm;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
@@ -36,9 +37,15 @@ public class SessionsListActivity extends AppCompatActivity implements OnSession
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        mSessionsViewModel = ViewModelProviders.of(this).get(SessionsViewModel.class);
+        int dateYear = getIntent().getIntExtra(RReminder.YEAR,0);
+        int dateMonth = getIntent().getIntExtra(RReminder.MONTH,0);
+        int dateDay = getIntent().getIntExtra(RReminder.DAY,0);
+        long periodFrom = RReminder.getMillisFromDate(dateYear,dateMonth,dateDay,true);
+        long periodTo = RReminder.getMillisFromDate(dateYear,dateMonth,dateDay,false);
 
-        mSessionsViewModel.getAllSessions().observe(this, new Observer<List<Session>>(){
+        mSessionsViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
+
+        mSessionsViewModel.getSessionsInPeriod(periodFrom, periodTo).observe(this, new Observer<List<Session>>(){
             @Override
             public void onChanged(@Nullable final List<Session> sessions){
                 adapter.setSessions(sessions);
