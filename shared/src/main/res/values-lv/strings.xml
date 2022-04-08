@@ -195,4 +195,10 @@
     <string name="extend_period_one_option">pagarināt par %1$d min</string>
     <string name="notify_extend">Pagarināt</string>
 
+    <!-- PieView -->
+    <string name="period">periods</string>
+    <string name="periods">periodi</string>
+    <string name="extension">extension</string>
+    <string name="extensions">extensions</string>
+
 </resources>

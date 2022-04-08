@@ -133,6 +133,10 @@ public class CardFrontFragment extends Fragment {
         long nextPeriodStart = 0;
         long totalWork = 0;
         long totalRest = 0;
+        int workCount = 0;
+        int restCount = 0;
+        int workExtendCount = 0;
+        int restExtendCount = 0;
         Log.d(debug, "Period count: "+mPeriods.size());
         for (int i=0; i<=periodCount;i++){
             long periodLength;
@@ -154,11 +158,15 @@ public class CardFrontFragment extends Fragment {
                 case 1: case 3:{
                     color = getResources().getColor(R.color.work_chart);
                     totalWork+=periodLength;
+                    workCount++;
+                    workExtendCount+=mPeriods.get(i).getExtendCount();
                     break;
                 }
                 case 2: case 4: {
                     color = getResources().getColor(R.color.rest_chart);
                     totalRest+=periodLength;
+                    restCount++;
+                    restExtendCount+=mPeriods.get(i).getExtendCount();
                     break;
                 }
                 default: color = Color.BLACK;break;
@@ -168,7 +176,7 @@ public class CardFrontFragment extends Fragment {
                 percentInt+=1;
             }
             Log.d(debug, "Percent sum: "+percentSum);
-            pieHelperArrayList.add(new PieHelper(percentInt,color));
+            pieHelperArrayList.add(new PieHelper(percentInt, mPeriods.get(i)));
 
         }
         /*
@@ -187,8 +195,8 @@ public class CardFrontFragment extends Fragment {
         int restPercentInt = 100-workPercentInt;
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
-        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart)));
-        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart)));
+        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), workCount, totalWork, workExtendCount));
+        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), restCount, totalRest, restExtendCount));
         pieView.setColumnData(columnHelperList);
         pieView.setOnPieClickListener(new PieView.OnPieClickListener() {
             @Override

@@ -6,6 +6,9 @@ public class ColumnHelper {
     private float height;
     private float targetHeight;
     private int color;
+    private int count;
+    private int extendCount;
+    private long totalLength;
     private boolean isAnimated = false;
     private String debug="PIE_HELPER";
 
@@ -13,12 +16,15 @@ public class ColumnHelper {
 
 
     public ColumnHelper(float percent){
-        this(percent, 0);
+        this(percent, 0, 0, 0l,0);
     }
 
-    public ColumnHelper(float percent,  int color){
-        this.targetHeight = percent * 500 / 100;
+    public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount){
+        this.targetHeight = percent * 1000 / 100;
         this.color = color;
+        this.count = count;
+        this.extendCount = extendCount;
+        this.totalLength = totalLength;
     }
 
 
@@ -26,6 +32,9 @@ public class ColumnHelper {
         this.height = endHeight;
         this.targetHeight = targetColumn.getEndHeight();
         this.color = targetColumn.getColor();
+        this.count = targetColumn.count;
+        this.extendCount = targetColumn.extendCount;
+        this.totalLength = targetColumn.totalLength;
     }
 
     ColumnHelper setTarget(ColumnHelper targetColumn){
@@ -75,6 +84,15 @@ public class ColumnHelper {
     }
 
     public int getColor(){ return color; }
+
+    public int getCount(){
+        return count;
+    }
+
+    public long getTotalLength(){ return totalLength;}
+
+    public int getExtendCount(){return extendCount;
+    }
 
     public float getEndHeight(){
         return height;

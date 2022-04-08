@@ -9,6 +9,7 @@
 	<color name="rest_chart">#FF9CD4EC</color>
    	<color name="off">#FF575757</color>
    	<color name="black">#FF000000</color>
+	<color name="black_transparent">#99000000</color>
    	<color name="red">#FFFF1919</color>
 	<color name="toolbar">#ca454545</color>
 	<color name="showcase_button">#00d9ff</color>

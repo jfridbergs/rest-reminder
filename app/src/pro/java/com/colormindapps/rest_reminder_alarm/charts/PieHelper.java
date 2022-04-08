@@ -1,40 +1,38 @@
 package com.colormindapps.rest_reminder_alarm.charts;
 
+import android.graphics.Color;
 import android.util.Log;
+
+import com.colormindapps.rest_reminder_alarm.Period;
+import com.colormindapps.rest_reminder_alarm.R;
 
 public class PieHelper {
     private float startDegree;
     private float endDegree;
     private float targetStartDegree;
     private float targetEndDegree;
+    private float middleDegree;
     private String title;
-    private int color;
     private float sweepDegree;
     private boolean isAnimated = false;
     private boolean drawAll = false;
     private String debug="PIE_HELPER";
+    private Period period;
 
     int velocity = 5;
 
-
-    public PieHelper(float percent){
-        this(percent, null, 0);
+    public PieHelper (float percent){
+        this(percent, null, null);
+    }
+    public PieHelper(float percent, Period period){
+        this(percent, period, null);
     }
 
-    public PieHelper(float percent, int color){
-        this(percent, null, color);
-    }
-
-
-    PieHelper(float percent, String title){
-        this(percent, title, 0);
-    }
-
-
-    PieHelper(float percent, String title, int color){
+    PieHelper(float percent, Period period, String title){
         this.sweepDegree = percent * 300 / 100;
+        this.period = period;
         this.title = title;
-        this.color = color;
+        Log.d(debug, "period type: "+period.getType());
     }
 
 
@@ -43,16 +41,16 @@ public class PieHelper {
         this.endDegree = endDegree;
         targetStartDegree = targetPie.getStartDegree();
         targetEndDegree = targetPie.getEndDegree();
+        this.middleDegree = (targetEndDegree - startDegree)/2 + startDegree;
         this.sweepDegree = targetPie.getSweep();
         this.title = targetPie.getTitle();
-        this.color = targetPie.getColor();
+        this.period = targetPie.getPeriod();
     }
 
     PieHelper setTarget(PieHelper targetPie){
         this.targetStartDegree = targetPie.getStartDegree();
         this.targetEndDegree = targetPie.getEndDegree();
         this.title = targetPie.getTitle();
-        this.color = targetPie.getColor();
         this.sweepDegree = targetPie.getSweep();
         return this;
     }
@@ -78,7 +76,6 @@ public class PieHelper {
         return this.drawAll;
     }
 
-    boolean isColorSetted(){return color != 0;}
 
     boolean isAtRest(){
         return (startDegree==targetStartDegree)&&(endDegree==targetEndDegree);
@@ -108,10 +105,26 @@ public class PieHelper {
         return String.valueOf((int)percent) + "%";
     }
 
-    public int getColor(){ return color; }
+    public Period getPeriod(){
+        return period;
+    }
+
+    public int getPeriodType(){
+        return period.getType();
+    }
+
+    public long getPeriodEndTime(){
+        return period.getEndTime();
+    }
+
+    public int getPeriodExtendCount(){return period.getExtendCount();}
 
     public String getTitle(){
         return title;
+    }
+
+    public float getMiddleDegree(){
+        return middleDegree;
     }
 
     public float getSweep(){

@@ -72,13 +72,16 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         mSessionsViewModel.getFirstSession().observe(this, new Observer<Session>(){
             @Override
             public void onChanged(Session session) {
-                Calendar firstSessionData = Calendar.getInstance();
-                firstSessionData.setTimeInMillis(session.getSessionStart());
-                firstSessionData.set(Calendar.DAY_OF_MONTH,1);
-                Calendar maxDate = Calendar.getInstance();
-                maxDate.set(Calendar.DAY_OF_MONTH,daysInMonth);
-                calendarView.state().edit().setMinimumDate(firstSessionData).setMaximumDate(maxDate).commit();
-                mSessionsViewModel.getFirstSession().removeObserver(this);
+                if(session!=null){
+                    Calendar firstSessionData = Calendar.getInstance();
+                    firstSessionData.setTimeInMillis(session.getSessionStart());
+                    firstSessionData.set(Calendar.DAY_OF_MONTH,1);
+                    Calendar maxDate = Calendar.getInstance();
+                    maxDate.set(Calendar.DAY_OF_MONTH,daysInMonth);
+                    calendarView.state().edit().setMinimumDate(firstSessionData).setMaximumDate(maxDate).commit();
+                    mSessionsViewModel.getFirstSession().removeObserver(this);
+                }
+
             }
         });
 
