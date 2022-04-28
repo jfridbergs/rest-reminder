@@ -53,6 +53,10 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
         new insertPeriodAsyncTask(INSTANCE.periodDao()).execute(period);
     }
 
+    public void populateDatabase(){
+        new PopulateSessionDbAsync(INSTANCE).execute();
+    }
+
     private static class insertPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
         private PeriodDao mAsyncTaskDao;
         insertPeriodAsyncTask(PeriodDao dao){
@@ -75,10 +79,57 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             mPeriodDao = db.periodDao();
         }
 
+        public void insertSession(long from, int rounds, int work, int rest){
+            Session session;
+            long endTime = from;
+            for (int i=0;i<rounds;i++){
+                endTime = insertDefaultWorkPeriod(endTime, work);
+                endTime = insertDefaultRestPeriod(endTime, rest);
+            }
+            session = new Session(0,from, endTime);
+            Log.d("RR_DB", "session start: "+from);
+            Log.d("RR_DB", "session end: "+endTime);
+            mDao.insertSession(session);
+
+        }
+
+        public long insertDefaultWorkPeriod( long startTime, int length){
+            long workLength = length*60*1000;
+            Period period = new Period(0,1, startTime,workLength,0,0l,0);
+            mPeriodDao.insertPeriod(period);
+            return startTime+workLength;
+        }
+
+        public long insertDefaultRestPeriod( long startTime, int length){
+            long restLength = length*60*1000;
+            Period period = new Period(0,2, startTime,restLength,0, 0l,0);
+            mPeriodDao.insertPeriod(period);
+            return startTime+restLength;
+        }
+
         @Override
         protected Void doInBackground(final Void... params){
-            mDao.deleteAll();
-            mPeriodDao.deleteAll();
+            //mDao.deleteAll();
+            //mPeriodDao.deleteAll();
+            Calendar date = Calendar.getInstance();
+            date.set(2022,3,16,8,0);
+            long time = date.getTimeInMillis();
+            mDao.deleteOlder(time);
+            mPeriodDao.deleteOlder(time);
+            date.set(Calendar.DAY_OF_MONTH,15);
+            time = date.getTimeInMillis();
+            insertSession(time,6,45,10);
+            for (int i = 0;i<2;i++){
+                date.set(Calendar.YEAR,2021+i);
+                for (int j=0;j<12;j++){
+                    date.set(Calendar.MONTH,j);
+                    for (int k=0;k<25;k=k+5){
+                        date.set(Calendar.DAY_OF_MONTH,k);
+                        insertSession(date.getTimeInMillis(),5+i,15+k,10+j);
+                    }
+                }
+            }
+            /*
             long time = Calendar.getInstance().getTimeInMillis();
             //first record is a day old session
             long time1 = time - 86400000L;
@@ -115,6 +166,8 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             session = new Session(0,time4,endTime4);
             mDao.insertSession(session);
 
+
+             */
 
             return null;
         }

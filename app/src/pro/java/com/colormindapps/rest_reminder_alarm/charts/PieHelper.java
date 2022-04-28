@@ -29,7 +29,7 @@ public class PieHelper {
     }
 
     PieHelper(float percent, Period period, String title){
-        this.sweepDegree = percent * 300 / 100;
+        this.sweepDegree = percent * 300;
         this.period = period;
         this.title = title;
         Log.d(debug, "period type: "+period.getType());

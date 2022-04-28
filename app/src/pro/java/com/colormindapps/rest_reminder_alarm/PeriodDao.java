@@ -20,18 +20,21 @@ public interface PeriodDao {
     @Query("DELETE FROM period_table")
     void deleteAll();
 
-    @Query("DELETE FROM period_table WHERE end_time = :endTime")
-    void deletePeriod(long endTime);
+    @Query("DELETE FROM period_table WHERE start_time = :startTime")
+    void deletePeriod(long startTime);
 
-    @Query("DELETE FROM period_table WHERE :currentTime - end_time > 2592000000")
+    @Query("DELETE FROM period_table WHERE start_time + duration < :currentTime")
     void deleteOlder(long currentTime);
 
 
-    @Query("SELECT * FROM period_table WHERE end_time > :sessionStart AND end_time<=:sessionEnd ORDER BY end_time ASC")
+    @Query("SELECT * FROM period_table WHERE start_time >= :sessionStart AND start_time<=:sessionEnd ORDER BY start_time ASC")
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd);
 
-    @Query("SELECT * FROM period_table WHERE end_time=:endTime")
-    LiveData<Period> getPeriod(long endTime);
+    @Query("SELECT * FROM period_table WHERE start_time=:startTime")
+    LiveData<Period> getPeriod(long startTime);
+
+    @Query("SELECT COUNT(*) FROM period_table WHERE period_type = :type AND start_time >= :sessionStart AND start_time < :sessionEnd")
+    LiveData<Integer> getPeriodCount(int type, long sessionStart, long sessionEnd);
 
 
 

@@ -154,7 +154,7 @@ public class RReminder {
     public static final String TIME_FORMAT_24H = "kk:mm";
     public static final String TIME_FORMAT_12H = "hh:mm aa";
     public static final String DATE_FORMAT = "dd/MM/yyyy kk:mm.ss";
-    public static final String SESSION_DATE_FORMAT = "EEE, dd/MM/yyyy";
+    public static final String SESSION_DATE_FORMAT = "EEEE, dd/MM/yyyy";
 
 	public static final int WORK = 1;
 	public static final int REST = 2;
@@ -710,6 +710,23 @@ public class RReminder {
 			secondPart=context.getString(R.string.pref_minute_multiple, minutes);
 		}
 		return firstPart + secondPart;
+	}
+
+	public static String getShortDurationFromMillis(Context context, long millis){
+		String firstPart = "", secondPart = " ";
+		int timeInSeconds =  Math.round(millis / 1000);
+		int timeInMinutes  = timeInSeconds / 60;
+		int minutes = timeInMinutes % 60;
+		int hours = timeInMinutes / 60;
+		if(hours > 0){
+			return String.format(context.getString(R.string.duration_short),hours, minutes);
+		} else {
+			if(minutes==1){
+				return context.getString(R.string.pref_minute_single);
+			} else {
+				return context.getString(R.string.pref_minute_multiple, minutes);
+			}
+		}
 	}
 
 	public static int getHourFromString(String time){

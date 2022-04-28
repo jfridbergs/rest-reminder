@@ -153,10 +153,20 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         Log.d(debug, "day value: "+day);
         Log.d(debug, "hashset size: "+hSetNumbers.size());
             Log.d(debug, "day value is in hashset");
-            Intent intent = new Intent(this,SessionsListActivity.class);
-            intent.putExtra(RReminder.YEAR, date.getYear());
-            intent.putExtra(RReminder.MONTH, date.getMonth());
-            intent.putExtra(RReminder.DAY, day);
-            startActivity(intent);
+
+
+        long periodFrom = RReminder.getMillisFromDate( date.getYear(),date.getMonth(),day,true);
+        long periodTo = RReminder.getMillisFromDate(date.getYear(),date.getMonth(),day,false);
+
+        mSessionsViewModel.getSessionsInPeriodASC(periodFrom, periodTo).observe(this, new Observer<List<Session>>(){
+            @Override
+            public void onChanged(@Nullable final List<Session> sessions){
+                Intent intent = new Intent(getApplicationContext(), SessionDetailsViewActivity.class);
+                intent.putExtra(RReminder. DB_SESSION_START, sessions.get(0).getSessionStart());
+                intent.putExtra(RReminder. DB_SESSION_END, sessions.get(0).getSessionEnd());
+                startActivity(intent);
+
+            }
+        });
     }
 }

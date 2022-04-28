@@ -8,11 +8,29 @@
     tools:context="com.colormindapps.rest_reminder_alarm.SessionsListActivity">
 
     <TextView
-        android:id="@+id/session_title"
+        android:id="@+id/session_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_margin="15dp"
+        android:gravity="center" />
+    <TextView
+        android:id="@+id/session_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/session_date"
+        android:layout_centerHorizontal="true"
+        android:textSize="20sp"
+        android:gravity="center" />
+    <TextView
+        android:id="@+id/session_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/session_clock"
+        android:layout_centerHorizontal="true"
+        android:textSize="20sp"
         android:gravity="center" />
 
     <Button
@@ -31,29 +49,5 @@
         android:layout_centerInParent="true"
         android:layout_margin="10dp" />
 
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Donut"
-        android:id="@+id/pie_button"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Columns"
-        android:id="@+id/button_hide"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@id/pie_button" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:id="@+id/textView"
-        android:layout_above="@+id/pie_button"
-        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

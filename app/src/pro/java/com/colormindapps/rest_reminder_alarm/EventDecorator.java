@@ -28,6 +28,6 @@ public class EventDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.launch_icon));
+        view.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.icon_transparent));
     }
 }

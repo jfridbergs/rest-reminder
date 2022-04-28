@@ -12,7 +12,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.colormindapps.rest_reminder_alarm.charts.ColumnHelper;
 import com.colormindapps.rest_reminder_alarm.charts.PieHelper;
@@ -22,31 +25,26 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CardFrontFragment extends Fragment {
+public class CardFrontViewFragment extends Fragment {
 
     TextView sessionDate, sessionClock, sessionDuration;
     PieView pieView;
     Typeface titleFont;
     long sessionStart, sessionEnd, sessionLength;
-    int sessionId;
+    private PeriodViewModel mPeriodViewModel;
     List<Period> mPeriods;
-    OnFlipCardListener parentActivity;
     private String debug = "RR_CARD_FRONT";
 
-    public static CardFrontFragment newInstance(int sessionId,long sessionStart, long sessionEnd) {
+    public static CardFrontViewFragment newInstance( long sessionStart, long sessionEnd) {
 
-        CardFrontFragment fragment = new CardFrontFragment();
+        CardFrontViewFragment fragment = new CardFrontViewFragment();
         Bundle args = new Bundle();
-        args.putInt("session_id", sessionId);
         args.putLong("session_start", sessionStart);
         args.putLong("session_end", sessionEnd);
         fragment.setArguments(args);
         return fragment;
     }
 
-    private void setParentActivity(OnFlipCardListener activity){
-        parentActivity = activity;
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,12 +52,10 @@ public class CardFrontFragment extends Fragment {
 
         Bundle data = getArguments();
         if(data!=null){
-            sessionId = data.getInt("session_id");
             sessionStart = data.getLong("session_start");
             sessionEnd = data.getLong("session_end");
             sessionLength = sessionEnd - sessionStart;
         }
-        mPeriods = parentActivity.getPeriods();
         View view = inflater.inflate(R.layout.session_details_front, container, false);
 
         titleFont = Typeface.createFromAsset(getContext().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
@@ -73,37 +69,48 @@ public class CardFrontFragment extends Fragment {
         sessionDuration.setTypeface(titleFont);
 
         sessionDate.setText(RReminder.getSessionDateString(sessionStart));
-        long lastPeriodLength = mPeriods.get(mPeriods.size()-1).getDuration();
-        long sessionEndTitle = sessionEnd;
-        long sessionLengthTitle = 0l;
-        if(lastPeriodLength<60*1000){
-            sessionEndTitle-=lastPeriodLength;
-            sessionLengthTitle = sessionEndTitle-sessionStart;
-        } else {
-            sessionLengthTitle = sessionEnd-sessionStart;
-        }
 
-        sessionClock.setText(String.format(getString(R.string.time_from_to),RReminder.getTimeString(getContext(), sessionStart).toString(),RReminder.getTimeString(getContext(), sessionEndTitle).toString()));
-        sessionDuration.setText(RReminder.getDurationFromMillis(getContext(),sessionLengthTitle));
-
-        Button button = view.findViewById(R.id.flip_to_list);
-        button.setOnClickListener(v -> parentActivity.flipCard());
-
+        mPeriodViewModel = new ViewModelProvider(requireActivity()).get(PeriodViewModel.class);
         pieView = view.findViewById(R.id.pie_view);
-        set(pieView);
+        Log.d(debug, "sessionStart: "+sessionStart);
+        Log.d(debug, "sessionEnd: "+sessionEnd);
+
+        mPeriodViewModel.getSessionPeriods(sessionStart, sessionEnd).observe(getViewLifecycleOwner(), new Observer<List<Period>>(){
+            @Override
+            public void onChanged(@Nullable final List<Period> periods){
+                mPeriods = periods;
+                long lastPeriodLength = sessionEnd - mPeriods.get(mPeriods.size()-2).getEndTime();
+                long sessionEndTitle = sessionEnd;
+                long sessionLengthTitle = 0l;
+                if(lastPeriodLength<60*1000){
+                    sessionEndTitle-=lastPeriodLength;
+                    sessionLengthTitle = sessionEndTitle-sessionStart;
+                } else {
+                    sessionLengthTitle = sessionEnd-sessionStart;
+                }
+
+                sessionClock.setText(String.format(getString(R.string.time_from_to),RReminder.getTimeString(getContext(), sessionStart).toString(),RReminder.getTimeString(getContext(), sessionEndTitle).toString()));
+                sessionDuration.setText(RReminder.getDurationFromMillis(getContext(),sessionLengthTitle));
+                set(pieView);
+            }
+        });
+
+        mPeriodViewModel.getPeriodCount(2, sessionStart, sessionEnd).observe(getViewLifecycleOwner(), new Observer<Integer>(){
+            @Override
+            public void onChanged(@Nullable final Integer count){
+                Log.d("PERIOD_COUNT", "amount of rest periods: "+count);
+            }
+        });
+
+
+
+
+
+
 
         return view;
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        try {
-            setParentActivity((OnFlipCardListener) getActivity());
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnFlipCardListener");
-        }
-    }
 
     private void randomSet(PieView pieView){
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<PieHelper>();
@@ -152,13 +159,11 @@ public class CardFrontFragment extends Fragment {
             } else {
                 periodLength = mPeriods.get(i).getEndTime() - nextPeriodStart;
             }
-            float percent = ((float)periodLength / sessionLength)*100;
+            float fraction = (float)periodLength / sessionLength;
             Log.d(debug, "session length: "+sessionLength);
             Log.d(debug, "period length: "+periodLength);
-            Log.d(debug, "percent: "+percent);
+            Log.d(debug, "percent: "+fraction);
             nextPeriodStart = mPeriods.get(i).getEndTime();
-            int percentInt = Math.round(percent);
-            Log.d(debug, "round percent: "+percentInt);
             int periodType = mPeriods.get(i).getType();
             int color;
             switch(periodType){
@@ -178,12 +183,15 @@ public class CardFrontFragment extends Fragment {
                 }
                 default: color = Color.BLACK;break;
             }
+            /*
             percentSum+=percentInt;
             if(percentSum==99){
                 percentInt+=1;
             }
+
+             */
             Log.d(debug, "Percent sum: "+percentSum);
-            pieHelperArrayList.add(new PieHelper(percentInt, mPeriods.get(i)));
+            pieHelperArrayList.add(new PieHelper(fraction, mPeriods.get(i)));
 
         }
         /*

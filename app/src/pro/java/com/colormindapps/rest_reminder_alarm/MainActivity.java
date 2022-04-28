@@ -1612,6 +1612,12 @@ public class MainActivity extends AppCompatActivity implements
 				startActivity(i);
 			return true;
 		}
+		else if (item.getItemId() == R.id.menu_populate_db){
+			mSessionsViewModel.populateDatabase();
+			Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
+
+			return true;
+		}
 		else if (item.getItemId() == R.id.menu_feedback){
 				Intent Email = new Intent(Intent.ACTION_SEND);
 				Email.setType("text/email");

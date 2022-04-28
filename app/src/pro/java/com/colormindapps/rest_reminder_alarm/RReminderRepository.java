@@ -4,22 +4,25 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import android.os.AsyncTask;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class RReminderRepository {
 
     private PeriodDao mPeriodDao;
     private SessionDao mSessionDao;
-    private LiveData<List<Session>> mAllSessions;
+    private LiveData<List<Session>> mAllSessions, mAllSessionPieView;
     private LiveData<Session> mSession;
     private LiveData<List<Period>> mPeriods;
     private LiveData<Period> mPeriod;
+    private RReminderRoomDatabase db;
 
     RReminderRepository(Application application){
-        RReminderRoomDatabase db = RReminderRoomDatabase.getDatabase(application);
+        db = RReminderRoomDatabase.getDatabase(application);
         mPeriodDao = db.periodDao();
         mSessionDao = db.sessionDao();
         mAllSessions = mSessionDao.getAllSessions();
+        mAllSessionPieView = mSessionDao.getAllSessionsPieView();
     }
 
 
@@ -27,20 +30,32 @@ public class RReminderRepository {
     LiveData<List<Session>> getAllSessions(){
         return mAllSessions;
     }
+    LiveData<List<Session>> getAllSessionsPieData(){
+        return mAllSessionPieView;
+    }
     LiveData<List<Session>> getSessionsInPeriod(long from, long to){
         return mSessionDao.getSessionsInPeriod(from, to);
+    }
+
+    LiveData<List<Session>> getSessionsInPeriodASC(long from, long to){
+        return mSessionDao.getSessionsInPeriodASC(from, to);
     }
     LiveData<Session> getSessionByStart(long sessionStartTime) {return mSessionDao.getSessionByStart(sessionStartTime);}
     LiveData<Session> getSessionById(int sessionId) {return mSessionDao.getSessionById(sessionId);}
     LiveData<Session> getFirstSession() {return mSessionDao.getFirstSession();}
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
-    LiveData<Period> getPeriod(long endTime) {return mPeriodDao.getPeriod(endTime);}
+    LiveData<Period> getPeriod(long startTime) {return mPeriodDao.getPeriod(startTime);}
+    LiveData<Integer> getPeriodCount(int type, long start,long end){return mPeriodDao.getPeriodCount(type, start, end);}
 
 
 
 
     public void insertPeriod (Period period){
         new insertPeriodAsyncTask(mPeriodDao).execute(period);
+    }
+
+    public void populateDatabase(){
+        db.populateDatabase();
     }
 
     private static class insertPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
@@ -149,4 +164,6 @@ public class RReminderRepository {
             return null;
         }
     }
+
+
 }

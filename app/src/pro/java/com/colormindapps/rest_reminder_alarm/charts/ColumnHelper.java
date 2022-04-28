@@ -5,7 +5,9 @@ import android.util.Log;
 public class ColumnHelper {
     private float height;
     private float targetHeight;
+    private float multiplier;
     private int color;
+    private float percent;
     private int count;
     private int extendCount;
     private long totalLength;
@@ -20,7 +22,8 @@ public class ColumnHelper {
     }
 
     public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount){
-        this.targetHeight = percent * 1000 / 100;
+        this.percent = percent;
+        this.targetHeight = percent * 500 / 100;
         this.color = color;
         this.count = count;
         this.extendCount = extendCount;
@@ -30,6 +33,7 @@ public class ColumnHelper {
 
     ColumnHelper(float endHeight, ColumnHelper targetColumn){
         this.height = endHeight;
+        this.percent = targetColumn.getPercent();
         this.targetHeight = targetColumn.getEndHeight();
         this.color = targetColumn.getColor();
         this.count = targetColumn.count;
@@ -87,6 +91,10 @@ public class ColumnHelper {
 
     public int getCount(){
         return count;
+    }
+
+    public float getPercent(){
+        return percent;
     }
 
     public long getTotalLength(){ return totalLength;}

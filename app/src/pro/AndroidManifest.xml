@@ -12,6 +12,11 @@
             android:resizeableActivity="false"
             android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
         <activity
+            android:name="com.colormindapps.rest_reminder_alarm.SessionDetailsViewActivity"
+            android:label="@string/title_activity_session_details"
+            android:resizeableActivity="false"
+            android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
+        <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionsListActivity"
             android:label="@string/title_activity_sessions"
             android:resizeableActivity="false" />

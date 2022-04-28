@@ -27,7 +27,7 @@ public class PeriodViewModel extends AndroidViewModel {
         return mPeriod;
     }
 
-    public void deletePeriod(long endTime){mRepository.deletePeriod(endTime);}
+    public void deletePeriod(long startTime){mRepository.deletePeriod(startTime);}
 
 
     public void insert(Period period){
@@ -37,5 +37,9 @@ public class PeriodViewModel extends AndroidViewModel {
 
     public void update(Period period){
         mRepository.updatePeriod(period);
+    }
+
+    LiveData<Integer> getPeriodCount(int type, long start, long end){
+        return mRepository.getPeriodCount(type, start, end);
     }
 }

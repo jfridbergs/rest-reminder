@@ -20,14 +20,20 @@ public interface SessionDao {
     @Query("DELETE FROM session_table")
     void deleteAll();
 
-    @Query("DELETE FROM session_table WHERE :currentTime - session_end > 2592000000")
+    @Query("DELETE FROM session_table WHERE session_end < :currentTime")
     void deleteOlder(long currentTime);
 
     @Query("SELECT * FROM session_table ORDER BY session_start DESC")
     LiveData<List<Session>> getAllSessions();
 
+    @Query("SELECT * FROM session_table ORDER BY session_start ASC")
+    LiveData<List<Session>> getAllSessionsPieView();
+
     @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to ORDER BY session_start DESC")
     LiveData<List<Session>> getSessionsInPeriod(long from, long to);
+
+    @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to ORDER BY session_start ASC")
+    LiveData<List<Session>> getSessionsInPeriodASC(long from, long to);
 
 
     @Query("SELECT * FROM session_table WHERE session_start = :sessionStart")
