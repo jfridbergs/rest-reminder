@@ -10,10 +10,14 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -23,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -68,10 +73,12 @@ public class NotificationActivity extends FragmentActivity implements
 	NotificationManagerCompat mgr;
 	String work,rest;
 	boolean wearOn = false;
+	private PeriodViewModel mPeriodViewModel;
 
 	private GoogleApiClient mGoogleApiClient;
 	private Node connectedNode;
 	private boolean mResolvingError = false;
+	private long currentPeriodStartTime = 0;
 
 	private String debug = "NOTIFICATION_ACTIVITY";
 
@@ -87,6 +94,15 @@ public class NotificationActivity extends FragmentActivity implements
 		titleFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
 		descriptionFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
 		buttonFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Roman.otf");
+
+		mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
+
+		mPeriodViewModel.getLastPeriod().observe(this, new Observer<Period>(){
+			@Override
+			public void onChanged(@Nullable final Period period){
+				currentPeriodStartTime = period.getStartTime();
+			}
+		});
 
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 				.addApi(Wearable.API)
@@ -306,7 +322,7 @@ public class NotificationActivity extends FragmentActivity implements
 
 			new MobilePeriodManager(getApplicationContext()).setPeriod(nextType, nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, nextType, 0, nextPeriodEnd, false);
-			Period nextPeriod = new Period(0,nextType,nextPeriodEnd,0,0);
+			Period nextPeriod = new Period(0,nextType,currentTime,nextPeriodEnd,0,0,0);
 			RReminderRoomDatabase.getDatabase(this)
 					.insertPeriod(nextPeriod);
 
@@ -535,8 +551,11 @@ public class NotificationActivity extends FragmentActivity implements
 	
 	
 	public void showExtendDialog(){
-		DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, mCalendar, 1,previousPeriodEnd);
-		newFragment.show(getSupportFragmentManager(), "extendDialog");
+		if(currentPeriodStartTime!=0){
+			DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, currentPeriodStartTime,mCalendar, 1,previousPeriodEnd);
+			newFragment.show(getSupportFragmentManager(), "extendDialog");
+		}
+
 	}
 	
 	public void setVisibleState(boolean state){

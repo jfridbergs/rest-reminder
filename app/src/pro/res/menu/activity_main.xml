@@ -32,6 +32,12 @@
         android:orderInCategory="104"
         android:title="Populate DB"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_open_stats"
+        android:icon="@android:drawable/ic_menu_help"
+        android:orderInCategory="104"
+        android:title="Stats"
+        app:showAsAction="never"/>
 
 
 </menu>

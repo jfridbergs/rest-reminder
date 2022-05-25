@@ -33,6 +33,7 @@ public class RReminder {
 	public static final String TURN_OFF = "turn_off";
 	public static final String MANUAL_MODE_NEXT_PERIOD_TYPE = "manual_mode_next_period_type";
 	public static final String PERIOD_END_TIME = "period_end";
+	public static final String PERIOD_START_TIME = "period_start";
 	public static final String PREVIOUS_PERIOD_END_TIME = "previous_period_end";
 	public static final String IS_SHORT_PERIOD = "is_short_period";
 	public static final String NEXT_PERIOD_END_TIME = "next_period_end";
@@ -154,7 +155,9 @@ public class RReminder {
     public static final String TIME_FORMAT_24H = "kk:mm";
     public static final String TIME_FORMAT_12H = "hh:mm aa";
     public static final String DATE_FORMAT = "dd/MM/yyyy kk:mm.ss";
-    public static final String SESSION_DATE_FORMAT = "EEEE, dd/MM/yyyy";
+    public static final String SESSION_DATE_FORMAT_FULL = "EEEE, dd/MM/yyyy";
+    public static final String SESSION_DATE_FORMAT_MONTH = "MMMM, yyyy";
+    public static final String SESSION_DATE_FORMAT_YEAR = "yyyy";
 
 	public static final int WORK = 1;
 	public static final int REST = 2;
@@ -219,9 +222,15 @@ public class RReminder {
 		return periodEndTime.toString();
 	}
 
-	public static String getSessionDateString(long time){
+	public static String getSessionDateString(int type, long time){
 		CharSequence periodEndTime, timeFormatString;
-		timeFormatString = SESSION_DATE_FORMAT;
+		switch(type){
+			case 0: timeFormatString = SESSION_DATE_FORMAT_FULL; break;
+			case 1: timeFormatString = SESSION_DATE_FORMAT_MONTH; break;
+			case 2: timeFormatString = SESSION_DATE_FORMAT_YEAR; break;
+			default: timeFormatString = SESSION_DATE_FORMAT_FULL; break;
+		}
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(time);
 		periodEndTime = DateFormat.format(timeFormatString,calendar.getTime());
@@ -714,8 +723,9 @@ public class RReminder {
 
 	public static String getShortDurationFromMillis(Context context, long millis){
 		String firstPart = "", secondPart = " ";
-		int timeInSeconds =  Math.round(millis / 1000);
+		int timeInSeconds =  Math.round(millis / 1000f);
 		int timeInMinutes  = timeInSeconds / 60;
+		if(timeInSeconds % 60>=30) timeInMinutes+=1;
 		int minutes = timeInMinutes % 60;
 		int hours = timeInMinutes / 60;
 		if(hours > 0){

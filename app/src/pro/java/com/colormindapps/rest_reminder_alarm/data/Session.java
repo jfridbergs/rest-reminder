@@ -1,4 +1,4 @@
-package com.colormindapps.rest_reminder_alarm;
+package com.colormindapps.rest_reminder_alarm.data;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

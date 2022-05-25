@@ -3,12 +3,11 @@ package com.colormindapps.rest_reminder_alarm;
 import android.content.Context;
 import android.content.Intent;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
+import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.OnAlarmReceiver;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+
+import java.util.Calendar;
 
 
 public class MobileOnAlarmReceiver extends OnAlarmReceiver {
@@ -36,12 +35,13 @@ public class MobileOnAlarmReceiver extends OnAlarmReceiver {
 	}
 
 	@Override
-	public void startNextPeriod(Context context, int nextType, long calendar){
+	public void startNextPeriod(Context context, int nextType,  long calendar){
 
 
-		new MobilePeriodManager(context.getApplicationContext()).setPeriod(nextType, calendar, 0);
+		new MobilePeriodManager(context.getApplicationContext()).setPeriod(nextType,  calendar, 0);
 		RReminderMobile.startCounterService(context.getApplicationContext(), nextType, 0, calendar, true);
-		Period nextPeriod = new Period(0,nextType,calendar,0,0);
+		long start = Calendar.getInstance().getTimeInMillis();
+		Period nextPeriod = new Period(0,nextType,start,calendar-start,0,0,0);
 		RReminderRoomDatabase.getDatabase(context)
 				.insertPeriod(nextPeriod);
 

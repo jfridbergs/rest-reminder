@@ -10,10 +10,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.List;
@@ -89,7 +89,7 @@ public class PeriodListAdapter extends RecyclerView.Adapter<PeriodListAdapter.Pe
             }
 
             Log.d("PERIOD_ADAPTER", "position: "+position+ ", color id: "+ ((ColorDrawable) holder.periodLayout.getBackground()).getColor());
-            String endTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getEndTime()).toString();
+            String endTime = RReminder.getTimeString(mContext.getApplicationContext(), current.getStartTime()+current.getDuration()).toString();
 
             String time = endTime;
             holder.periodTimeView.setText(time);

@@ -1,10 +1,8 @@
 package com.colormindapps.rest_reminder_alarm.charts;
 
-import android.graphics.Color;
 import android.util.Log;
 
-import com.colormindapps.rest_reminder_alarm.Period;
-import com.colormindapps.rest_reminder_alarm.R;
+import com.colormindapps.rest_reminder_alarm.data.Period;
 
 public class PieHelper {
     private float startDegree;
@@ -14,8 +12,11 @@ public class PieHelper {
     private float middleDegree;
     private String title;
     private float sweepDegree;
+    private float extendStartDegree= 0;
     private boolean isAnimated = false;
+    private boolean extended = false;
     private boolean drawAll = false;
+    private boolean drawExtended = false;
     private String debug="PIE_HELPER";
     private Period period;
 
@@ -45,6 +46,16 @@ public class PieHelper {
         this.sweepDegree = targetPie.getSweep();
         this.title = targetPie.getTitle();
         this.period = targetPie.getPeriod();
+        if(this.period.getType()==3 || this.period.getType()==4){
+            this.extended = true;
+            long actualDuration = this.period.getDuration();
+            long initialDuration = this.period.getInitialDuration();
+            float extendFraction = (float)initialDuration /actualDuration;
+            this.extendStartDegree = this.startDegree + (this.endDegree - this.startDegree)*extendFraction;
+        }
+        Log.d(debug, "extendStartDegree: "+this.extendStartDegree+", startDegree: "+startDegree+", endDegree: "+endDegree);
+
+
     }
 
     PieHelper setTarget(PieHelper targetPie){
@@ -64,6 +75,10 @@ public class PieHelper {
         this.isAnimated = status;
     }
 
+    void setDrawExtended(boolean status){
+        this.drawExtended = status;
+    }
+
     void setDrawAllStatus(boolean status){
         this.drawAll = status;
     }
@@ -76,6 +91,10 @@ public class PieHelper {
         return this.drawAll;
     }
 
+    boolean isExtended(){return this.extended;}
+
+    boolean drawExtended(){return drawExtended;}
+
 
     boolean isAtRest(){
         return (startDegree==targetStartDegree)&&(endDegree==targetEndDegree);
@@ -84,11 +103,17 @@ public class PieHelper {
     boolean isHidden(){return endDegree==startDegree;}
 
     void update(){
-        //Log.d(debug, "BEFORE Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
+        Log.d(debug, "BEFORE Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
         this.startDegree = updateSelf(startDegree, targetStartDegree, velocity);
         this.endDegree = updateSelf(endDegree, targetEndDegree, velocity);
         this.sweepDegree = endDegree - startDegree;
-        // Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
+        Log.d(debug, "UPDATE endDegree: "+this.endDegree);
+        Log.d(debug, "UPDATE extendStartDegree: "+this.extendStartDegree);
+        if(this.extended && this.endDegree>this.extendStartDegree){
+            Log.d(debug, "START_DRAWING_EXT");
+            drawExtended = true;
+        }
+         Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
 
     }
 
@@ -113,11 +138,17 @@ public class PieHelper {
         return period.getType();
     }
 
-    public long getPeriodEndTime(){
-        return period.getEndTime();
+    public long getPeriodDuration(){
+        return period.getDuration();
+    }
+
+    public long getPeriodStart(){
+        return period.getStartTime();
     }
 
     public int getPeriodExtendCount(){return period.getExtendCount();}
+
+    public float getExtendStartDegree(){return this.extendStartDegree;}
 
     public String getTitle(){
         return title;

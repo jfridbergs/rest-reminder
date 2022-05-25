@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -65,6 +66,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
@@ -117,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements
 	boolean turnOffIntent = false;
 	public MyCountDownTimer countdown;
 	public long periodEndTimeValue;
+	public long periodStartTime;
 	public long sessionStartTime;
 	private long firstPeriodEndTime;
 	private long counterTimeValue;
@@ -491,6 +495,12 @@ public class MainActivity extends AppCompatActivity implements
 		//dismissExtendDialog();
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			turnedOff = false;
+			mPeriodViewModel.getLastPeriod().observe(this, new Observer<Period>(){
+				@Override
+				public void onChanged(@Nullable final Period period){
+					periodStartTime = period.getStartTime();
+				}
+			});
 		}
 
 
@@ -798,8 +808,8 @@ public class MainActivity extends AppCompatActivity implements
 
 		currentSession = new Session(0,sessionStartTime,0L);
 		mSessionsViewModel.insert(currentSession);
-
-		mPeriod = new Period(0,1,firstPeriodEndTime,0,0);
+		periodStartTime = sessionStartTime;
+		mPeriod = new Period(0,1,sessionStartTime,firstPeriodEndTime-sessionStartTime,0,0l,0);
 		Log.d(debug, "insert period value: "+firstPeriodEndTime);
 		mPeriodViewModel.insert(mPeriod);
 
@@ -849,15 +859,19 @@ public class MainActivity extends AppCompatActivity implements
 		currentLDSession.observe(this, sessionObserver);
 	}
 
-	public void getAndUpdatePeriodDb(long endTime, long newEndTime, boolean swipe){
-		currentLDPeriod = mPeriodViewModel.getPeriod(endTime);
+	public void getAndUpdatePeriodDb(long startTime, long duration, boolean swipe){
+		currentLDPeriod = mPeriodViewModel.getPeriod(startTime);
 		periodObserver = new Observer<Period>() {
 			@Override
 			public void onChanged(Period period) {
-				mPeriod = period;
-				if(swipe) mPeriod.setEnded(1);
 				Log.d(debug, "getPeriod observer onChanged");
-				updateCurrentPeriod(newEndTime);
+				mPeriod = period;
+				if(swipe){
+					mPeriod.setInitialDuration(period.getDuration());
+					mPeriod.setEnded(1);
+				}
+				mPeriod.setDuration(duration);
+				updateCurrentPeriod();
 			}
 		};
 
@@ -865,15 +879,18 @@ public class MainActivity extends AppCompatActivity implements
 		currentLDPeriod.observe(this, periodObserver);
 	}
 
-	public void getAndUpdatePeriodExtend(long endTime, long newEndTime, int type, int extendCount){
-		currentLDPeriod = mPeriodViewModel.getPeriod(endTime);
+	public void getAndUpdatePeriodExtend(long startTime, long newEndTime, int type, int extendCount){
+		currentLDPeriod = mPeriodViewModel.getPeriod(startTime);
 		periodObserver = new Observer<Period>() {
 			@Override
 			public void onChanged(Period period) {
 				mPeriod = period;
 				mPeriod.setType(type);
 				mPeriod.setExtendCount(extendCount);
-				mPeriod.setEndTime(newEndTime);
+				if(extendCount==1){
+					mPeriod.setInitialDuration(period.getDuration());
+				}
+				mPeriod.setDuration(newEndTime-startTime);
 				Log.d(debug, "getPeriod observer onChanged");
 				mPeriodViewModel.update(mPeriod);
 				currentLDPeriod.removeObserver(periodObserver);
@@ -898,9 +915,8 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
-	public void updateCurrentPeriod(long endTime){
+	public void updateCurrentPeriod(){
 		if(mPeriod!=null){
-			mPeriod.setEndTime(endTime);
 			Log.d(debug, mPeriod.toString());
 			mPeriodViewModel.update(mPeriod);
 		}
@@ -935,7 +951,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		Log.d(debug, "period original end time:"+periodEndTime);
 		Log.d(debug, "period actual end time:"+ currentTime);
-		getAndUpdatePeriodDb(periodEndTime,currentTime,false);
+		getAndUpdatePeriodDb(periodStartTime,currentTime-periodStartTime,false);
 
 
 
@@ -1091,7 +1107,7 @@ public class MainActivity extends AppCompatActivity implements
 			}
 			new MobilePeriodManager(getApplicationContext()).setPeriod(updatedType,updatedPeriodEndTime, updatedExtendCount);
 			RReminderMobile.startCounterService(getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
-			getAndUpdatePeriodExtend(periodEndTimeValue,updatedPeriodEndTime,updatedType,updatedExtendCount);
+			getAndUpdatePeriodExtend(periodStartTime,updatedPeriodEndTime,updatedType,updatedExtendCount);
 
 			Intent intent = new Intent(this, CounterService.class);
 			bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1618,6 +1634,12 @@ public class MainActivity extends AppCompatActivity implements
 
 			return true;
 		}
+		else if (item.getItemId() == R.id.menu_open_stats){
+			Intent i = new Intent(this, StatsActivity.class);
+			startActivity(i);
+
+			return true;
+		}
 		else if (item.getItemId() == R.id.menu_feedback){
 				Intent Email = new Intent(Intent.ACTION_SEND);
 				Email.setType("text/email");
@@ -1691,7 +1713,7 @@ public class MainActivity extends AppCompatActivity implements
 	public void showExtendDialog(View v) {
 		if(RReminder.getExtendOptionsCount(MainActivity.this)>1){
 			stopCountDownTimer();
-			extendFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, periodType, extendCount, periodEndTimeValue, 0, 0l);
+			extendFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, periodType, extendCount, periodStartTime,periodEndTimeValue, 0, 0l);
 			extendFragment.show(getSupportFragmentManager(), "extendDialog");
 			dialogOnScreen = true;
 		} else {
@@ -1733,7 +1755,7 @@ public class MainActivity extends AppCompatActivity implements
 		functionCalendar = RReminder.getTimeAfterExtend(getApplicationContext(), 1, timeRemaining);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(functionType,functionCalendar, extendCount);
 		RReminderMobile.startCounterService(getApplicationContext(), functionType, extendCount, functionCalendar, false);
-		getAndUpdatePeriodExtend(periodEndTimeValue, functionCalendar, functionType, extendCount);
+		getAndUpdatePeriodExtend(periodStartTime, functionCalendar, functionType, extendCount);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
 
@@ -1980,7 +2002,7 @@ public class MainActivity extends AppCompatActivity implements
 		long currentTime = Calendar.getInstance().getTimeInMillis();
 		functionCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, currentTime, 1, 0L);
 		//update previously running period with end values
-		getAndUpdatePeriodDb(periodEndTimeValue, currentTime, true);
+		getAndUpdatePeriodDb(periodStartTime, currentTime-periodStartTime, true);
 
 
 
@@ -1993,7 +2015,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		RReminderMobile.startCounterService(MainActivity.this, periodType, 0, functionCalendar, false);
 		//insert new period
-		Period swipePeriod = new Period(0,periodType, functionCalendar, 0,0);
+		Period swipePeriod = new Period(0,periodType, currentTime, functionCalendar-currentTime, 0,0,0);
 		mPeriodViewModel.insert(swipePeriod);
 		cancelNotification(functionCalendar,false);
 		Intent intent = new Intent(this, CounterService.class);
@@ -2077,6 +2099,7 @@ public class MainActivity extends AppCompatActivity implements
 								periodType = serviceData.getInt(RReminder.PERIOD_TYPE);
 								extendCount = serviceData.getInt(RReminder.EXTEND_COUNT);
 								counterTimeValue = serviceData.getLong(RReminder.COUNTER_TIME_VALUE);
+								periodStartTime = serviceData.getLong(RReminder.PERIOD_START_TIME);
 								periodEndTimeValue = serviceData.getLong(RReminder.PERIOD_END_TIME);
 								setReminderOff(periodEndTimeValue);
 								finish();

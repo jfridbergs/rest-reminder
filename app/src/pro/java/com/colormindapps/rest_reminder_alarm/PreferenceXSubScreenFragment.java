@@ -25,6 +25,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
@@ -312,7 +313,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         //starting counterservice and setting new alarms
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
-                        getAndUpdatePeriodDb(periodEndTimeValue, newPeriodEndValue,periodType,extendCount);
+                        getAndUpdatePeriodDb(newPeriodEndValue,periodType,extendCount);
 
                         parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         workPeriodLength = updatedWorkPeriodLength;
@@ -334,7 +335,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         //setting alarm via alarmmanager if period length is >=10 mins
                         new MobilePeriodManager(context.getApplicationContext()).setPeriod(periodType, newPeriodEndValue, extendCount);
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
-                        getAndUpdatePeriodDb(periodEndTimeValue, newPeriodEndValue,periodType,extendCount);
+                        getAndUpdatePeriodDb(newPeriodEndValue,periodType,extendCount);
 
                         parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         restPeriodLength = updatedRestPeriodLength;
@@ -569,15 +570,15 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
     }
 
-    public void getAndUpdatePeriodDb(long endTime, long newEndTime, int type, int extendCount){
-        currentLDPeriod = mPeriodViewModel.getPeriod(endTime);
+    public void getAndUpdatePeriodDb(long newEndTime, int type, int extendCount){
+        currentLDPeriod = mPeriodViewModel.getLastPeriod();
         periodObserver = new Observer<Period>() {
             @Override
             public void onChanged(Period period) {
                 mPeriod = period;
                 mPeriod.setType(type);
                 mPeriod.setExtendCount(extendCount);
-                mPeriod.setEndTime(newEndTime);
+                mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
                 Log.d(debug, "getPeriod observer onChanged");
                 mPeriodViewModel.update(mPeriod);
                 currentLDPeriod.removeObserver(periodObserver);

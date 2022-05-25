@@ -10,6 +10,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.PeriodDao;
+import com.colormindapps.rest_reminder_alarm.data.Session;
+import com.colormindapps.rest_reminder_alarm.data.SessionDao;
+
 import java.util.Calendar;
 
 @Database(entities = {Period.class, Session.class}, version = 1)

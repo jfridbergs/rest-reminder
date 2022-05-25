@@ -1,4 +1,4 @@
-package com.colormindapps.rest_reminder_alarm;
+package com.colormindapps.rest_reminder_alarm.data;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -27,21 +27,21 @@ public class Period {
     @ColumnInfo(name = "extend_count")
     private int extendCount;
 
-    @ColumnInfo(name = "extend_start_time")
-    private long extendStartTime;
+    @ColumnInfo(name = "initial_duration")
+    private long initialDuration;
 
     //boolean field with a value 1, if the period has been ended with swipe_to_end_period
     @ColumnInfo(name = "is_ended")
     private int ended;
 
-    public Period(@NonNull int periodId,  @NonNull int type, long startTime, long duration, int extendCount, long extendStartTime, int ended){
+    public Period(@NonNull int periodId,  @NonNull int type, long startTime, long duration, int extendCount, long initialDuration, int ended){
 
         this.periodId = periodId;
         this.type = type;
         this.startTime = startTime;
         this.duration = duration;
         this.extendCount = extendCount;
-        this.extendStartTime = extendStartTime;
+        this.initialDuration = initialDuration;
         this.ended = ended;
     }
 
@@ -55,7 +55,7 @@ public class Period {
 
     public int getExtendCount(){return this.extendCount;}
 
-    public long getExtendStartTime(){return this.extendStartTime;}
+    public long getInitialDuration(){return this.initialDuration;}
 
     public int getEnded(){return this.ended;}
 
@@ -69,7 +69,7 @@ public class Period {
 
     public void setExtendCount(int extendCount){this.extendCount = extendCount;}
 
-    public void setExtendStartTime(long extendStartTime){this.extendStartTime = extendStartTime;}
+    public void setInitialDuration(long initialDuration){this.initialDuration = initialDuration;}
 
 
 

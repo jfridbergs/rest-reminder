@@ -2,18 +2,15 @@ package com.colormindapps.rest_reminder_alarm.DB;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.room.Room;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.colormindapps.rest_reminder_alarm.RReminderRoomDatabase;
-import com.colormindapps.rest_reminder_alarm.Session;
-import com.colormindapps.rest_reminder_alarm.SessionDao;
+import com.colormindapps.rest_reminder_alarm.data.Session;
+import com.colormindapps.rest_reminder_alarm.data.SessionDao;
 
 import org.junit.After;
 import org.junit.Before;

@@ -6,6 +6,9 @@ import android.util.Log;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.colormindapps.rest_reminder_alarm.data.Session;
+import com.colormindapps.rest_reminder_alarm.data.SessionTotals;
+
 import java.util.List;
 
 public class SessionsViewModel extends AndroidViewModel {
@@ -34,6 +37,7 @@ public class SessionsViewModel extends AndroidViewModel {
     LiveData<Session> getSessionByStart(long sessionStartTime){return mRepository.getSessionByStart(sessionStartTime);}
     LiveData<Session> getFirstSession(){return mRepository.getFirstSession();}
     LiveData<Session> getSessionById(int sessionId){return mRepository.getSessionById(sessionId);}
+    LiveData<SessionTotals> getSessionTotals(long start, long end){return mRepository.getSessionTotals(start, end);}
 
 
     public void insert(Session session){

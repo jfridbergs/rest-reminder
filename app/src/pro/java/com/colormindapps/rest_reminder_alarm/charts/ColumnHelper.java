@@ -10,7 +10,7 @@ public class ColumnHelper {
     private float percent;
     private int count;
     private int extendCount;
-    private long totalLength;
+    private long totalLength, totalExtendDuration;
     private boolean isAnimated = false;
     private String debug="PIE_HELPER";
 
@@ -18,16 +18,17 @@ public class ColumnHelper {
 
 
     public ColumnHelper(float percent){
-        this(percent, 0, 0, 0l,0);
+        this(percent, 0, 0, 0l,0,0l);
     }
 
-    public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount){
+    public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount, long totalExtendDuration){
         this.percent = percent;
         this.targetHeight = percent * 500 / 100;
         this.color = color;
         this.count = count;
         this.extendCount = extendCount;
         this.totalLength = totalLength;
+        this.totalExtendDuration = totalExtendDuration;
     }
 
 
@@ -38,6 +39,7 @@ public class ColumnHelper {
         this.color = targetColumn.getColor();
         this.count = targetColumn.count;
         this.extendCount = targetColumn.extendCount;
+        this.totalExtendDuration = targetColumn.totalExtendDuration;
         this.totalLength = targetColumn.totalLength;
     }
 
@@ -99,12 +101,16 @@ public class ColumnHelper {
 
     public long getTotalLength(){ return totalLength;}
 
+    public long getTotalExtendDuration(){ return totalExtendDuration;}
+
     public int getExtendCount(){return extendCount;
     }
 
     public float getEndHeight(){
         return height;
     }
+
+    public float getTargetHeight(){return this.targetHeight;}
 
 
     private float updateSelf(float origin, float target, int velocity){

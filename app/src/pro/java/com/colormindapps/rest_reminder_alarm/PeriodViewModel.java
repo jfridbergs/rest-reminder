@@ -4,6 +4,9 @@ import android.app.Application;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
+
 import java.util.List;
 
 public class PeriodViewModel extends AndroidViewModel {
@@ -27,6 +30,8 @@ public class PeriodViewModel extends AndroidViewModel {
         return mPeriod;
     }
 
+    LiveData<Period> getLastPeriod(){return mRepository.getLastPeriod();}
+
     public void deletePeriod(long startTime){mRepository.deletePeriod(startTime);}
 
 
@@ -39,7 +44,12 @@ public class PeriodViewModel extends AndroidViewModel {
         mRepository.updatePeriod(period);
     }
 
-    LiveData<Integer> getPeriodCount(int type, long start, long end){
+    LiveData<Integer> getPeriodCount(int type, long start, long end) {
         return mRepository.getPeriodCount(type, start, end);
     }
+
+    LiveData<List<PeriodTotals>> getPeriodTotals(long start, long end){
+        return mRepository.getPeriodTotals(start, end);
+    }
+
 }

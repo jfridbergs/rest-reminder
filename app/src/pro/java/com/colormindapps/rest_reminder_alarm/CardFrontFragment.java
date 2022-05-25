@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.colormindapps.rest_reminder_alarm.charts.ColumnHelper;
 import com.colormindapps.rest_reminder_alarm.charts.PieHelper;
 import com.colormindapps.rest_reminder_alarm.charts.PieView;
+import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class CardFrontFragment extends Fragment {
         sessionClock.setTypeface(titleFont);
         sessionDuration.setTypeface(titleFont);
 
-        sessionDate.setText(RReminder.getSessionDateString(sessionStart));
+        sessionDate.setText(RReminder.getSessionDateString(0,sessionStart));
         long lastPeriodLength = mPeriods.get(mPeriods.size()-1).getDuration();
         long sessionEndTitle = sessionEnd;
         long sessionLengthTitle = 0l;
@@ -127,7 +128,7 @@ public class CardFrontFragment extends Fragment {
 
     private void set(PieView pieView){
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<>();
-        long lastPeriodLength = sessionEnd - mPeriods.get(mPeriods.size()-2).getEndTime();
+        long lastPeriodLength = mPeriods.get(mPeriods.size()-1).getDuration();
         int periodCount;
         if(lastPeriodLength<60*1000){
             sessionLength-=lastPeriodLength;
@@ -146,17 +147,11 @@ public class CardFrontFragment extends Fragment {
         int restExtendCount = 0;
         Log.d(debug, "Period count: "+mPeriods.size());
         for (int i=0; i<=periodCount;i++){
-            long periodLength;
-            if(i==0){
-                periodLength = mPeriods.get(i).getEndTime() - sessionStart;
-            } else {
-                periodLength = mPeriods.get(i).getEndTime() - nextPeriodStart;
-            }
+            long periodLength = mPeriods.get(i).getDuration();
             float percent = ((float)periodLength / sessionLength)*100;
             Log.d(debug, "session length: "+sessionLength);
             Log.d(debug, "period length: "+periodLength);
             Log.d(debug, "percent: "+percent);
-            nextPeriodStart = mPeriods.get(i).getEndTime();
             int percentInt = Math.round(percent);
             Log.d(debug, "round percent: "+percentInt);
             int periodType = mPeriods.get(i).getType();
@@ -202,8 +197,8 @@ public class CardFrontFragment extends Fragment {
         int restPercentInt = 100-workPercentInt;
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
-        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), workCount, totalWork, workExtendCount));
-        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), restCount, totalRest, restExtendCount));
+        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), workCount, totalWork, workExtendCount,0));
+        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), restCount, totalRest, restExtendCount,0));
         pieView.setColumnData(columnHelperList);
         pieView.setOnPieClickListener(new PieView.OnPieClickListener() {
             @Override

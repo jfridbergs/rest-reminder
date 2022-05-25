@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,11 +9,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.List;

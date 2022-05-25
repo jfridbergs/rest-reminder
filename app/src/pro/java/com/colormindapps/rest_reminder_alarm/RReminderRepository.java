@@ -4,7 +4,13 @@ import android.app.Application;
 import androidx.lifecycle.LiveData;
 import android.os.AsyncTask;
 
-import java.util.Calendar;
+import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.PeriodDao;
+import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
+import com.colormindapps.rest_reminder_alarm.data.Session;
+import com.colormindapps.rest_reminder_alarm.data.SessionDao;
+import com.colormindapps.rest_reminder_alarm.data.SessionTotals;
+
 import java.util.List;
 
 public class RReminderRepository {
@@ -45,7 +51,10 @@ public class RReminderRepository {
     LiveData<Session> getFirstSession() {return mSessionDao.getFirstSession();}
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
     LiveData<Period> getPeriod(long startTime) {return mPeriodDao.getPeriod(startTime);}
+    LiveData<Period> getLastPeriod(){return mPeriodDao.getLastPeriod();}
     LiveData<Integer> getPeriodCount(int type, long start,long end){return mPeriodDao.getPeriodCount(type, start, end);}
+    LiveData<List<PeriodTotals>> getPeriodTotals(long start, long end){return mPeriodDao.getPeriodTotals(start, end);}
+    LiveData<SessionTotals> getSessionTotals(long start, long end){return mSessionDao.getSessionTotals(start, end);}
 
 
 
