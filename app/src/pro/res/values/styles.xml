@@ -141,7 +141,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.WorkRestTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="Theme.WorkRestTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" >
+        <item name="android:background">#00161616</item>
+    </style>
+
 
     <style name="Theme.WorkRestTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

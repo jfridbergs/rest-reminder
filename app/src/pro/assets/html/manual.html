@@ -1,0 +1,216 @@
+<html>
+
+	<head>
+		<style>
+		a
+		{
+		}
+		li
+		{
+		margin-top: 5px;
+		margin-bottom: 5px;
+		font-size:24px;
+		}
+		body 
+		{
+		padding-bottom:50px;
+		}
+		img
+		{
+		max-width: 50%;
+		height:initial;
+		display: block;
+		margin-left: auto;
+  		margin-right: auto;
+  		}
+  		p
+  		{
+  		display:block;
+  		margin-bottom:20px;
+  		}
+
+		</style>
+</head>
+	<body>
+		<h2>Rest reminder + (version: 0.9)</h2>
+		<ol>
+			<li>
+				<a href="#introduction"> Introduction</a>
+			</li>
+				
+			<li>
+				<a href="#basic_principles"> Basic principles </a>
+				<br>
+				<ul>
+					<li>
+						<a href="#automatic_mode">Automatic mode</a>
+					</li>
+					<li>
+						<a href="#manual_mode">Manual mode</a>
+					</li>
+				</ul>	
+			</li>
+			<li>
+				<a href="#setting_up_the_app"> Setting up the app </a>
+			</li>
+			<li>
+				<a href="#additional_features"> Additional features</a>
+				<br>
+				<ul>
+					<li>
+						<a href="#delay_period">Extend period</a>
+					</li>
+					<li>
+						<a href="#sessions">End current period</a>
+					</li>
+					<li>
+						<a href="#delay_period">Past sessions</a>
+					</li>
+					<li>
+						<a href="#statistics">Statistics</a>
+					</li>
+
+				</ul>
+			</li>
+		</ol>
+		<br>
+		<br>
+		
+		<a name="introduction"></a>
+		<h2> Introduction</h2>
+		<img src="file:///android_asset/img/reminder_on.png" alt="reminder on"/>
+		<p>
+			Rest Reminder + is a service tool to help its users to achieve and maintain a healthy and productive work sessions by reminding them to take frequent breaks from work.
+			<br>
+			Very often people, while working, tend to lose sense of time, which sometimes may result lead to fatigue and lower productivity in short time, and may cause health problems over a longer period of time.
+			<br>
+			Having short but regular breaks might be beneficial and has a good chance to increase the overall productivity.
+		</p>
+		<p>
+			The app was initially intended for office workers, who do a"sitting" work and who's work routine is restricted to certain habits and loads on their body.
+			<br>
+			But during the development process, the app showed a premise, that it can be used for every kind of action, that requires a longer time for it to be completed.
+			<br>
+			Rest Reminder + was built with an emphasis in reliability and flexibility. A lot of work was put in to ensure, that the Rest Reminder is sturdy and functions as reliable as possible.
+			<br>
+			And a great deal of work was put in to make the Rest Reminder as flexible app as possible. As a result user can change almost every aspect of the app, how it appears and how it behaves.
+		</p>
+		<p>
+			Rest Reminder + is an upgraded version of Rest Reminder: a version of this app, that is available on Play Store for free.
+			<br>
+			On top of all features available in Rest Reminder base app, in Rest Reminder + all actions (work sessions) are stored in a database, allowing users to check on their past experiences with the app: access and inspect all previous work-and-rest sessions.
+			<br>
+			Also statistics about the usage over time are available in Rest Reminder +. For more details check out "Functionality" section of the user manual.
+			<br>
+		</p>
+		
+		<a name="basic_principles"></a>
+		<h2> Basic principles </h2>
+		
+		<p>
+			Rest Reminder + works in a simple and straight forward manner: it serves as a countdown timer for the end of either work or rest period (when user can have a rest time and when to resume working).
+		</p>
+		<p>
+			Turn on Rest Reminder by pressing the button-timer in the middle of the screen. To turn off Rest Reminder and stop the countdown press and hold the timer button.
+		</p>
+		<p>
+			Each type of period (work and rest) has a fixed length, that can be changed in preferences.  When the countdown for active period reaches 0, the app will sound the alarm and/or create a notification.
+		</p>
+		<img src="file:///android_asset/img/period_end_automatic.png" alt="period end notification"/>
+		<p>
+			Additional features and customization options are described in following sections.
+		</p>
+		
+		<a name="automatic_mode"></a>
+		<h3> Automatic mode </h3>
+		
+		<p>
+			If Rest Reminder + is set to automatic mode, it will start the next period right after the previous one has ended.
+			<br>
+			This mode is more autonomous and requires minimum amount of user interaction (minimal required actions are to turn on and off the Rest Reminder +).
+			<br>
+		</p>
+		
+		<a name="manual_mode"></a>
+		<h3> Manual mode </h3>
+		
+		<p>
+			If manual mode is selected, Rest Reminder requires the user to start the next period.
+		</p>
+		<img src="file:///android_asset/img/manual_mode.png" alt="Manual mode"/>
+		<p>
+			This mode gives users more control on how the work session is divided, but it requires more interaction.
+		</p>
+		
+		<a name="setting_up_the_app"></a>
+		<h2> Setting up the app</h2>
+		
+		<p>
+			Rest Reminder + is ready to work right after installation with the default values: 45 minutes for work period and 15 minutes for rest period.
+			<br>
+			The period length can be changed in preferences (Period settings subsection). Both periods are set in hours and minutes.
+		</p>
+		<p>
+			In "Period settings" subsection you can also change the notification sound  for each period type.
+		</p>
+		<p>
+			<b>Note:</b> Android has been focusing on  improving battery usage by limiting, how (and how often) user applications can access device resources. This also affects, how often alarms can be launched on an device (the use of frequent alarms is discouraged).
+			<br>
+			This affects Rest Reminder + as well and a result for a reliable behaviour of Rest Reminder + the minimum length of either work or rest period is set to 10 minutes. However, Rest Reminder has an option to enable shorter periods, but that might lead to unreliable (delayed) sound notification for ending periods.
+			<br>
+			One possible but not a guaranteed solution with shorter periods is to "whitelist" Rest Reminder + by turning off battery optimization for this app in the device settings.
+		</p>
+		
+		<a name="additional_features"></a>
+		<h2> Additional features</h2>
+		
+		<a name="delay_period"></a>
+		<h3> Extend period </h3>
+		<img src="file:///android_asset/img/extend.png" alt="Extend"/>
+		<p>
+			The amount of available extend options shown on screen and smallest extend option duration can be changed in preferences.
+		</p>
+		<p>
+			A period can be delayed multiple times, but after the 3rd delay the background color will turn to red in order to signal that the current period has been extended too many times.
+		</p>
+		<a name="end_current_period"></a>
+		<h3> End current period </h3>
+		
+		<p>
+			End current period allows to end the current period before it has run out.
+			<br>
+			To end current period touch and swipe the area at the bottom of the screen (right side of the screen, if the device is in landscape orientation).
+			<br>
+			Continue the swipe gesture until a message to release the screen appears.
+			<br>
+		</p>
+		<a name="sessions"></a>
+		<h3> Past sessions </h3>
+
+		<p>
+			In Rest Reminder + user can access and inspect all the previous work-rest sessions.
+			<br>
+			In calendar screen, the days, that have recorded work-rest sessions will appear with a marking. By clicking on a day with marking, information about individual session will appear on screen (If multiple sessions have been recorded on same day, then the earliest session will appear on screen).
+		</p>
+		<img src="file:///android_asset/img/session_donut.png" alt="Session donut graph"/>
+		<p>
+			In addition to general information of session (the day the session was recorded, how long it was, when it started and when it ended). A donut-type chart is shown on screen as a representation of the work-rest session with each section of the donut chart representing each period in that session. Information of each period can be seen by tapping it.
+		</p>
+		<img src="file:///android_asset/img/session_column.png" alt="Session column graph"/>
+		<p>
+			By tapping the middle of the donut chart, a column chart will show up in place of the donut chart, showing overall information about each period type.
+		</p>
+		<p>
+			For user convenience, previous and next sessions can be accessed by swiping to left and to right respectively.
+		</p>
+		<a name="statistics"></a>
+		<h3> Statistics </h3>
+		<img src="file:///android_asset/img/stats.png" alt="Statistics"/>
+		<p>
+			Another feature of Rest Reminder + is the Statistics section, where user can see the overall and average stats, how the Rest Reminder was used in a set time interval.
+			<br>
+			User can choose from different time interval lengths (week, month, year) and then access each time interval with swiping gestures.
+		</p>
+	</body>
+</html>
+

@@ -55,7 +55,12 @@ public class CardFrontViewFragment extends Fragment {
             sessionEnd = data.getLong("session_end");
             sessionLength = sessionEnd - sessionStart;
         }
-        View view = inflater.inflate(R.layout.session_details_front, container, false);
+
+        Log.d(debug, "date: "+RReminder.getSessionDateString(0,sessionStart));
+        Log.d(debug, "session start:"+sessionStart);
+        Log.d(debug, "session end: "+sessionEnd);
+
+        View view = inflater.inflate(R.layout.session_details_fragment, container, false);
 
         titleFont = Typeface.createFromAsset(getContext().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
 
@@ -71,8 +76,8 @@ public class CardFrontViewFragment extends Fragment {
 
         mPeriodViewModel = new ViewModelProvider(requireActivity()).get(PeriodViewModel.class);
         pieView = view.findViewById(R.id.pie_view);
-        Log.d(debug, "sessionStart: "+sessionStart);
-        Log.d(debug, "sessionEnd: "+sessionEnd);
+       // Log.d(debug, "sessionStart: "+sessionStart);
+       // Log.d(debug, "sessionEnd: "+sessionEnd);
 
         mPeriodViewModel.getPeriodTotals(sessionStart, sessionEnd).observe(getViewLifecycleOwner(), new Observer<List<PeriodTotals>>(){
             @Override
@@ -80,7 +85,7 @@ public class CardFrontViewFragment extends Fragment {
                 mPeriodTotals = periodTotals;
                 int periodCount = mPeriodTotals.get(0).getPeriodCount();
                 long totalDuration = mPeriodTotals.get(0).getTotalDuration();
-                Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
+               // Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
                 launchPeriodsQuery();
             }
         });
@@ -93,7 +98,7 @@ public class CardFrontViewFragment extends Fragment {
         mPeriodViewModel.getPeriodCount(2, sessionStart, sessionEnd).observe(getViewLifecycleOwner(), new Observer<Integer>(){
             @Override
             public void onChanged(@Nullable final Integer count){
-                Log.d("PERIOD_COUNT", "amount of rest periods: "+count);
+                //Log.d("PERIOD_COUNT", "amount of rest periods: "+count);
             }
         });
 
@@ -167,13 +172,13 @@ public class CardFrontViewFragment extends Fragment {
         int restCount = 0;
         int workExtendCount = 0;
         int restExtendCount = 0;
-        Log.d(debug, "Period count: "+mPeriods.size());
+        //Log.d(debug, "Period count: "+mPeriods.size());
         for (int i=0; i<=periodCount;i++){
             long periodLength = mPeriods.get(i).getDuration();
             float fraction = (float)periodLength / sessionLength;
-            Log.d(debug, "session length: "+sessionLength);
-            Log.d(debug, "period length: "+periodLength);
-            Log.d(debug, "percent: "+fraction);
+            //Log.d(debug, "session length: "+sessionLength);
+            //Log.d(debug, "period length: "+periodLength);
+           // Log.d(debug, "percent: "+fraction);
             int periodType = mPeriods.get(i).getType();
             switch(periodType){
                 case 1: case 3:{
@@ -191,7 +196,7 @@ public class CardFrontViewFragment extends Fragment {
                 default: break;
             }
 
-            Log.d(debug, "Percent sum: "+percentSum);
+           // Log.d(debug, "Percent sum: "+percentSum);
             pieHelperArrayList.add(new PieHelper(fraction, mPeriods.get(i)));
 
         }
@@ -219,6 +224,7 @@ public class CardFrontViewFragment extends Fragment {
             public void onPieClick(int index) {
                 if(index == PieView.NO_SELECTED_INDEX) {
                     if (pieView.isDonutOnScreen()){
+                        Log.d(debug, "TO_COLUMN");
                         pieView.toColumn();
                     } else {
                         pieView.toDonut();

@@ -1,0 +1,68 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/timer"
+            android:title="@string/navigation_timer"
+            app:showAsAction="never"/>
+
+        <item
+            android:id="@+id/menu_settings_x"
+            android:title="@string/menu_settings"
+            app:showAsAction="never"/>
+    </group>
+    <group android:checkableBehavior="single">
+        <item android:title="@string/navigation_history">
+            <menu>
+                <item
+                    android:id="@+id/menu_session_list"
+                    android:title="@string/sessions_title"
+                    app:showAsAction="never"/>
+                <item
+                    android:id="@+id/menu_open_stats"
+                    android:title="@string/stats_activity_title"
+                    app:showAsAction="never"/>
+            </menu>
+        </item>
+    </group>
+    <group android:checkableBehavior="single">
+        <item android:title="@string/navigation_help">
+            <menu>
+                <item
+                    android:id="@+id/menu_help"
+                    android:title="@string/manual_activity_title"
+                    app:showAsAction="never"/>
+                <item
+                android:id="@+id/menu_feedback"
+                android:title="@string/menu_feedback"
+                app:showAsAction="never"/>
+            </menu>
+
+
+        </item>
+    </group>
+
+
+
+    <item android:title="For testing">
+        <menu>
+            <item
+                android:id="@+id/menu_populate_db"
+                android:title="Fill database"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/menu_delete_db"
+                android:title="Delete database"
+                app:showAsAction="never"/></menu>
+
+    </item>
+
+
+
+
+
+</menu>

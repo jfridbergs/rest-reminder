@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,7 +22,7 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CardFrontFragment extends Fragment {
+public class SessionDetailsFragment extends Fragment {
 
     TextView sessionDate, sessionClock, sessionDuration;
     PieView pieView;
@@ -34,9 +33,9 @@ public class CardFrontFragment extends Fragment {
     OnFlipCardListener parentActivity;
     private String debug = "RR_CARD_FRONT";
 
-    public static CardFrontFragment newInstance(int sessionId,long sessionStart, long sessionEnd) {
+    public static SessionDetailsFragment newInstance(int sessionId, long sessionStart, long sessionEnd) {
 
-        CardFrontFragment fragment = new CardFrontFragment();
+        SessionDetailsFragment fragment = new SessionDetailsFragment();
         Bundle args = new Bundle();
         args.putInt("session_id", sessionId);
         args.putLong("session_start", sessionStart);
@@ -60,8 +59,10 @@ public class CardFrontFragment extends Fragment {
             sessionEnd = data.getLong("session_end");
             sessionLength = sessionEnd - sessionStart;
         }
+
+
         mPeriods = parentActivity.getPeriods();
-        View view = inflater.inflate(R.layout.session_details_front, container, false);
+        View view = inflater.inflate(R.layout.session_details_fragment, container, false);
 
         titleFont = Typeface.createFromAsset(getContext().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
 
@@ -87,8 +88,8 @@ public class CardFrontFragment extends Fragment {
         sessionClock.setText(String.format(getString(R.string.time_from_to),RReminder.getTimeString(getContext(), sessionStart).toString(),RReminder.getTimeString(getContext(), sessionEndTitle).toString()));
         sessionDuration.setText(RReminder.getDurationFromMillis(getContext(),sessionLengthTitle));
 
-        Button button = view.findViewById(R.id.flip_to_list);
-        button.setOnClickListener(v -> parentActivity.flipCard());
+       // Button button = view.findViewById(R.id.flip_to_list);
+       // button.setOnClickListener(v -> parentActivity.flipCard());
 
         pieView = view.findViewById(R.id.pie_view);
         set(pieView);
@@ -105,6 +106,7 @@ public class CardFrontFragment extends Fragment {
             throw new ClassCastException(context.toString() + " must implement OnFlipCardListener");
         }
     }
+
 
     private void randomSet(PieView pieView){
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<PieHelper>();

@@ -2,7 +2,14 @@
 <resources>
     <string name="app_name">Atpūtu atgādinātājs Pro Pro</string>
     <string name="appIndexUrl">android-app://com.colormindapps.rest_reminder_alarm.pro/http/host/path</string>
-
+    <string name="title_activity_sessions">Sesijas</string>
+    <string name="next">Nākamais</string>
+    <string name="previous">Iepriekšējais</string>
+    <string name="navigation_timer">Taimeris</string>
+    <string name="sessions_title">Sesijas</string>
+    <string name="manual_activity_title">Manuālis</string>
+    <string name="navigation_history">Vēsture</string>
+    <string name="stats_activity_title">Statistika</string>
 
 
 </resources>

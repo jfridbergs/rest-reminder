@@ -33,7 +33,7 @@ public class ColumnGraphView extends View {
     private Point pieCenterPoint;
     private Paint textPaint;
     private Paint whitePaint;
-    private Paint columnTextPaint;
+    private Paint columnTextPaint, columnTextExtendPaint;
     private RectF cirRect, cirExtRect;
     private RectF cirSelectedRect;
     private Paint paintGradientBlack, paintGradientWork, paintGradientRest;
@@ -102,6 +102,14 @@ public class ColumnGraphView extends View {
         columnTextPaint.setStrokeWidth(5);
         columnTextPaint.setTextAlign(Paint.Align.CENTER);
         columnTextPaint.setTypeface(font);
+
+        columnTextExtendPaint = new Paint();
+        columnTextExtendPaint.setAntiAlias(true);
+        columnTextExtendPaint.setColor(ContextCompat.getColor(getContext(), R.color.black));
+        columnTextExtendPaint.setTextSize(RReminder.sp2px(getContext(), 15));
+        columnTextExtendPaint.setStrokeWidth(7);
+        columnTextExtendPaint.setTextAlign(Paint.Align.CENTER);
+        columnTextExtendPaint.setTypeface(font);
 
 
 
@@ -190,22 +198,22 @@ public class ColumnGraphView extends View {
                     periodCount = ((cHelper.getCount())>1 ? cHelper.getCount()+ " "+getContext().getString(R.string.periods) : cHelper.getCount()+ " "+getContext().getString(R.string.period));
                     totalLength = RReminder.getShortDurationFromMillis(getContext(),cHelper.getTotalLength());
                     extendCount = ((cHelper.getExtendCount())>1 ? cHelper.getExtendCount()+" "+getContext().getString(R.string.extensions) : cHelper.getExtendCount()+" "+getContext().getString(R.string.extension));
-                    extendTotalDuration = RReminder.getShortDurationFromMillis(getContext(),cHelper.getTotalExtendDuration());
+                    extendTotalDuration = RReminder.getExtendMinsFromMillis(getContext(),cHelper.getTotalExtendDuration());
 
                     if(cHelper.getPercent()<30){
                         if(cHelper.getExtendCount()>0){
-                            canvas.drawText(extendCount,imgX0+toPx(24), y0-toPx(40), columnTextPaint);
-                            canvas.drawText(extendTotalDuration,imgX0+toPx(24), y0-toPx(20), columnTextPaint);
+                            canvas.drawText(extendCount,imgX0+toPx(30), y0-toPx(40), columnTextExtendPaint);
+                            canvas.drawText(extendTotalDuration,imgX0+toPx(30), y0-toPx(25), columnTextExtendPaint);
                         }
-                        canvas.drawText(periodCount,imgX0+toPx(24), y0-toPx(80), columnTextPaint);
-                        canvas.drawText(totalLength,imgX0+toPx(24), y0-toPx(60), columnTextPaint);
+                        canvas.drawText(periodCount,imgX0+toPx(30), y0-toPx(80), columnTextPaint);
+                        canvas.drawText(totalLength,imgX0+toPx(30), y0-toPx(60), columnTextPaint);
 
                     } else {
-                        canvas.drawText(periodCount,imgX0+toPx(24), y0+toPx(88), columnTextPaint);
-                        canvas.drawText(totalLength,imgX0+toPx(24), y0+toPx(108), columnTextPaint);
+                        canvas.drawText(periodCount,imgX0+toPx(30), y0+toPx(88), columnTextPaint);
+                        canvas.drawText(totalLength,imgX0+toPx(30), y0+toPx(108), columnTextPaint);
                         if(cHelper.getExtendCount()>0){
-                            canvas.drawText(extendCount,imgX0+toPx(24), y0+toPx(128), columnTextPaint);
-                            canvas.drawText(extendTotalDuration,imgX0+toPx(24), y0+toPx(148), columnTextPaint);
+                            canvas.drawText(extendCount,imgX0+toPx(30), y0+toPx(128), columnTextExtendPaint);
+                            canvas.drawText(extendTotalDuration,imgX0+toPx(30), y0+toPx(143), columnTextExtendPaint);
                         }
                     }
 

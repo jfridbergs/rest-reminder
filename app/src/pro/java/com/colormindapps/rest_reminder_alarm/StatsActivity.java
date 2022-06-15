@@ -1,15 +1,23 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -20,15 +28,14 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.data.TimeInterval;
-import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+import com.google.android.material.navigation.NavigationView;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 
-public class StatsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class StatsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener {
     private long sessionStart, sessionEnd;
     boolean showingBack = false;
     private PeriodViewModel mPeriodViewModel;
@@ -37,9 +44,15 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
     private List<Session> mSessions;
     private Session firstSession;
     private Spinner spinner;
+    private Typeface titleFont;
     private List<TimeInterval> yearly, monthly, weekly;
 
+    private ImageView previous, next;
+
+    private int currentIntervalType = 0;
+
     private ViewPager2 viewPager;
+    private ViewPager2.OnPageChangeCallback weeklyOnPageChangeCallback, monthlyOnPageChangeCallback, yearlyOnPageChangeCallback;
 
     private FragmentStateAdapter pagerWeeklyAdapter, pagerMonthlyAdapter, pagerYearlyAdapter, pagerOverallAdapter;
 
@@ -51,8 +64,64 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stats_activity);
 
+        titleFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
+
         mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
         mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
+        previous = findViewById(R.id.previous);
+        next = findViewById(R.id.next);
+
+        weeklyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(position ==0){
+                    previous.setVisibility(View.GONE);
+                } else {
+                    previous.setVisibility(View.VISIBLE);
+                }
+                if(position ==weekly.size()-1){
+                    next.setVisibility(View.GONE);
+                } else {
+                    next.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+
+        monthlyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(position ==0){
+                    previous.setVisibility(View.GONE);
+                } else {
+                    previous.setVisibility(View.VISIBLE);
+                }
+                if(position ==monthly.size()-1){
+                    next.setVisibility(View.GONE);
+                } else {
+                    next.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+
+        yearlyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(position ==0){
+                    previous.setVisibility(View.GONE);
+                } else {
+                    previous.setVisibility(View.VISIBLE);
+                }
+                if(position ==yearly.size()-1){
+                    next.setVisibility(View.GONE);
+                } else {
+                    next.setVisibility(View.VISIBLE);
+                }
+            }
+
+        };
 
         viewPager = findViewById(R.id.pager);
 
@@ -74,8 +143,18 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             }
         });
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(getString(R.string.stats_activity_title));
         setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
 
 
@@ -85,19 +164,36 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 
     }
 
+
+
+
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         // An item was selected. You can retrieve the selected item using
         String selection = (String)parent.getItemAtPosition(pos);
         switch(selection){
             case "overall":
-                launchPagerAdapter(0); break;
-            case "weekly":
-                launchPagerAdapter(1); break;
-            case "monthly":
-                launchPagerAdapter(2); break;
-            case "yearly":
-                launchPagerAdapter(3); break;
+                next.setVisibility(View.GONE);
+                previous.setVisibility(View.GONE);
+                unregisterCallback(currentIntervalType);
+                launchPagerAdapter(0);
+                currentIntervalType = 0;
+                break;
+            case "week":
+                unregisterCallback(currentIntervalType);
+                launchPagerAdapter(1);
+                currentIntervalType = 1;
+                break;
+            case "month":
+                unregisterCallback(currentIntervalType);
+                launchPagerAdapter(2);
+                currentIntervalType = 2;
+                break;
+            case "year":
+                unregisterCallback(currentIntervalType);
+                launchPagerAdapter(3);
+                currentIntervalType = 3;
+                break;
 
         }
     }
@@ -180,23 +276,70 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             case 1: {
                 if(pagerWeeklyAdapter==null) pagerWeeklyAdapter = new ScreenSlidePagerWeeklyAdapter(this);
                 viewPager.setAdapter(pagerWeeklyAdapter);
+                viewPager.registerOnPageChangeCallback(weeklyOnPageChangeCallback);
             } break;
             case 2: {
                 if(pagerMonthlyAdapter==null) pagerMonthlyAdapter = new ScreenSlidePagerMonthlyAdapter(this);
                 viewPager.setAdapter(pagerMonthlyAdapter);
+                viewPager.registerOnPageChangeCallback(monthlyOnPageChangeCallback);
             } break;
             case 3: {
                 if(pagerYearlyAdapter==null) pagerYearlyAdapter = new ScreenSlidePagerYearlyAdapter(this);
                 viewPager.setAdapter(pagerYearlyAdapter);
+                viewPager.registerOnPageChangeCallback(yearlyOnPageChangeCallback);
             } break;
             default: break;
         }
+
         int limit = Math.min(yearly.size(), 5);
         viewPager.setOffscreenPageLimit(limit);
         viewPager.setCurrentItem(weekly.size(), false);
         //Log.d(debug, "session position: "+getSessionPosition(sessionStart));
         //viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
 
+    }
+
+    public void unregisterCallback(int type){
+        switch(type){
+            case 1: viewPager.unregisterOnPageChangeCallback(weeklyOnPageChangeCallback); break;
+            case 2: viewPager.unregisterOnPageChangeCallback(monthlyOnPageChangeCallback); break;
+            case 3: viewPager.unregisterOnPageChangeCallback(yearlyOnPageChangeCallback); break;
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.timer) {
+            Intent ih = new Intent(this, MainActivity.class);
+            startActivity(ih);
+        }
+        else if (item.getItemId() == R.id.menu_help) {
+            Intent ih = new Intent(this, ManualActivity.class);
+            startActivity(ih);
+        } else if (item.getItemId() == R.id.menu_settings_x) {
+            Intent i = new Intent(this, PreferenceXActivity.class);
+            startActivity(i);
+        }
+        else if (item.getItemId() == R.id.menu_session_list){
+            Intent i = new Intent(this, CalendarActivity.class);
+            startActivity(i);
+        }
+        else if (item.getItemId() == R.id.menu_feedback){
+            Intent Email = new Intent(Intent.ACTION_SEND);
+            Email.setType("text/email");
+            Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
+            Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
+            startActivity(Intent.createChooser(Email, "Send Feedback:"));
+        }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    protected void onDestroy(){
+        unregisterCallback(currentIntervalType);
+        super.onDestroy();
     }
 
     private class ScreenSlidePagerWeeklyAdapter extends FragmentStateAdapter {

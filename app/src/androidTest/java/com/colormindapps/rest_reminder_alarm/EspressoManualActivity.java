@@ -1,16 +1,13 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.content.pm.ActivityInfo;
-import android.util.Log;
 
-import androidx.test.espresso.action.GeneralLocation;
 import androidx.test.espresso.intent.rule.IntentsTestRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;

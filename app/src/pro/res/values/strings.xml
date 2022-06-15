@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rest reminder Pro</string>
+    <string name="app_name">Rest Reminder +</string>
     <string name="appIndexUrl">android-app://com.colormindapps.rest_reminder_alarm.pro/http/host/path</string>
     <string name="title_activity_sessions">Sessions</string>
-    <string name="title_activity_session_details">SessionDetailsActivity</string>
-    <string name="title_activity_calendar">CalendarActivity</string>
+    <string name="title_activity_session_details" translatable="false">SessionDetailsActivity</string>
+    <string name="title_activity_calendar" translatable="false">CalendarActivity</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="first_fragment_label" translatable="false">First Fragment</string>
+    <string name="second_fragment_label" translatable="false">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="hello_first_fragment" translatable="false">Hello first fragment</string>
+    <string name="hello_second_fragment" translatable="false">Hello second fragment. Arg: %1$s</string>
+
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+    <string name="navigation_timer">Timer</string>
+
+    <string name="navigation_history">History</string>
+    <string name="navigation_help" translatable="false">Misc</string>
+
+    <string name="sessions_title">Sessions</string>
+    <string name="pie_view_description" translatable="false">tap for \n more details</string>
+
+    <string name="manual_activity_title">User Manual</string>
+    <string name="stats_activity_title">Stats</string>
+
+
 
 
 </resources>

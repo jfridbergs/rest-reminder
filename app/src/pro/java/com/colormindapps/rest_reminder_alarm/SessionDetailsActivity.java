@@ -45,7 +45,7 @@ public class SessionDetailsActivity extends AppCompatActivity implements OnFlipC
                 if (savedInstanceState == null) {
                     getSupportFragmentManager()
                             .beginTransaction()
-                            .add(R.id.container, CardFrontFragment.newInstance(sessionId, sessionStart,sessionEnd))
+                            .add(R.id.container, SessionDetailsFragment.newInstance(sessionId, sessionStart,sessionEnd))
                             .commit();
                 }
             }

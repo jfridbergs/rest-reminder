@@ -28,13 +28,13 @@ public interface SessionDao {
     @Query("SELECT * FROM session_table ORDER BY session_start DESC")
     LiveData<List<Session>> getAllSessions();
 
-    @Query("SELECT * FROM session_table ORDER BY session_start ASC")
+    @Query("SELECT * FROM session_table WHERE session_end - session_start >1000*60 ORDER BY session_start ASC")
     LiveData<List<Session>> getAllSessionsPieView();
 
-    @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to ORDER BY session_start DESC")
+    @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to AND session_end - session_start > 60*1000 ORDER BY session_start DESC")
     LiveData<List<Session>> getSessionsInPeriod(long from, long to);
 
-    @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to ORDER BY session_start ASC")
+    @Query("SELECT * FROM session_table WHERE session_start>=:from AND session_start<:to AND session_end - session_start > 60*1000 ORDER BY session_start ASC")
     LiveData<List<Session>> getSessionsInPeriodASC(long from, long to);
 
 

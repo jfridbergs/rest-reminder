@@ -16,6 +16,7 @@ import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.data.SessionDao;
 
 import java.util.Calendar;
+import java.util.Random;
 
 @Database(entities = {Period.class, Session.class}, version = 1)
 public abstract class RReminderRoomDatabase extends RoomDatabase {
@@ -87,27 +88,55 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
         public void insertSession(long from, int rounds, int work, int rest){
             Session session;
             long endTime = from;
+            Random rand = new Random();
             for (int i=0;i<rounds;i++){
-                endTime = insertDefaultWorkPeriod(endTime, work);
-                endTime = insertDefaultRestPeriod(endTime, rest);
+
+                int randomNum = rand.nextInt((5 - 1) + 1) + 1;
+                if(randomNum==1){
+                    endTime = insertExtendedWorkPeriod(endTime, work, rand.nextInt(3)+1);
+                } else {
+                    endTime = insertDefaultWorkPeriod(endTime, work);
+                }
+                randomNum = rand.nextInt((4 - 1) + 1) + 1;
+                if(randomNum==1){
+                    endTime = insertExtendedRestPeriod(endTime, rest, rand.nextInt(3)+1);
+                } else {
+                    endTime = insertDefaultRestPeriod(endTime, rest);
+                }
             }
             session = new Session(0,from, endTime);
-            Log.d("RR_DB", "session start: "+from);
-            Log.d("RR_DB", "session end: "+endTime);
             mDao.insertSession(session);
 
         }
 
+
+
         public long insertDefaultWorkPeriod( long startTime, int length){
-            long workLength = length*60*1000;
+            long workLength = (long) length *60*1000;
             Period period = new Period(0,1, startTime,workLength,0,0l,0);
             mPeriodDao.insertPeriod(period);
             return startTime+workLength;
         }
 
         public long insertDefaultRestPeriod( long startTime, int length){
-            long restLength = length*60*1000;
+            long restLength = (long) length *60*1000;
             Period period = new Period(0,2, startTime,restLength,0, 0l,0);
+            mPeriodDao.insertPeriod(period);
+            return startTime+restLength;
+        }
+
+        public long insertExtendedWorkPeriod( long startTime, int length, int count){
+            long initWorkLength = (long) length *60*1000;
+            long workLength = initWorkLength + (long) count*5*60*1000;
+            Period period = new Period(0,3, startTime,workLength,count,initWorkLength,0);
+            mPeriodDao.insertPeriod(period);
+            return startTime+workLength;
+        }
+
+        public long insertExtendedRestPeriod( long startTime, int length, int count){
+            long initRestLength = (long) length *60*1000;
+            long restLength = initRestLength + (long) count *3*60*1000;
+            Period period = new Period(0,4, startTime,restLength,count, initRestLength,0);
             mPeriodDao.insertPeriod(period);
             return startTime+restLength;
         }
@@ -123,16 +152,36 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             mPeriodDao.deleteOlder(time);
             date.set(Calendar.DAY_OF_MONTH,15);
             time = date.getTimeInMillis();
-            insertSession(time,6,45,10);
-            for (int i = 0;i<2;i++){
-                date.set(Calendar.YEAR,2021+i);
+
+                date.set(Calendar.YEAR,2021);
                 for (int j=0;j<12;j++){
                     date.set(Calendar.MONTH,j);
-                    for (int k=0;k<25;k=k+5){
+                    for (int k=1;k<26;k=k+5){
                         date.set(Calendar.DAY_OF_MONTH,k);
-                        insertSession(date.getTimeInMillis(),5+i,15+k,10+j);
+                        insertSession(date.getTimeInMillis(),5,15+k,10+j);
                     }
                 }
+
+
+
+            Calendar current = Calendar.getInstance();
+            date.set(Calendar.YEAR,current.get(Calendar.YEAR));
+
+            for(int i=0; i<current.get(Calendar.MONTH);i++){
+                date.set(Calendar.MONTH,i);
+                for (int k=1;k<25;k=k+5){
+                    date.set(Calendar.DAY_OF_MONTH,k);
+                    Log.d("DATABASE", "year (month): "+date.get(Calendar.YEAR));
+                    insertSession(date.getTimeInMillis(),5+i,15+k,10+i);
+                }
+            }
+            date.set(Calendar.MONTH,current.get(Calendar.MONTH));
+            Log.d("RR_DB", "CURRENT_DAY_OF_MONTH: "+current.get(Calendar.DAY_OF_MONTH));
+            Log.d("RR_DB", "CURRENT_MONTH: "+current.get(Calendar.MONTH));
+            for(int i = 1; i<current.get(Calendar.DAY_OF_MONTH);i=i+2){
+                date.set(Calendar.DAY_OF_MONTH,i);
+                Log.d("DATABASE", "year (day): "+date.get(Calendar.YEAR));
+                insertSession(date.getTimeInMillis(),5+i,15+i,10+i);
             }
             /*
             long time = Calendar.getInstance().getTimeInMillis();

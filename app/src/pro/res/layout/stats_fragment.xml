@@ -16,25 +16,16 @@
         android:textStyle="bold"
         android:layout_margin="15dp"
         android:gravity="center" />
-    <TextView
-        android:id="@+id/session_date_to"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/session_date_from"
-        android:layout_centerHorizontal="true"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_margin="15dp"
-        android:gravity="center" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/totals"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/session_date_to"
+        android:layout_below="@id/session_date_from"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="38dp">
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp">
 
 
         <TextView

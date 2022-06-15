@@ -6,7 +6,11 @@ import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -50,7 +54,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -93,6 +96,7 @@ import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
@@ -110,7 +114,8 @@ public class MainActivity extends AppCompatActivity implements
 		MessageApi.MessageListener,
 		CapabilityApi.CapabilityListener,
 		GoogleApiClient.OnConnectionFailedListener,
-		GoogleApiClient.ConnectionCallbacks {
+		GoogleApiClient.ConnectionCallbacks,
+		NavigationView.OnNavigationItemSelectedListener{
 
 
 	public int periodType = 0;
@@ -138,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements
 	private boolean stopTimerInServiceConnectedAfterPause = false;
 	private boolean isMultiWindow = false;
 	private String swipeWork, swipeRest, swipeWorkLand, swipeRestLand;
-	private RelativeLayout rootLayout;
+	private DrawerLayout rootLayout;
 	private Resources resources;
 	private TextView activityTitle;
 	private TextView description;
@@ -166,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements
 	private Typeface swipeFont;
 	private Typeface timerFont;
 	private RelativeLayout timerButtonLayout;
-	private Button extendPeriodEnd, sessions, endPeriodMultipleWindow;
+	private Button extendPeriodEnd,  endPeriodMultipleWindow;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
 	private int turnOffValue=0;
 	private boolean turnOffFirstIntent;
@@ -201,6 +206,57 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	DialogFragment introFragment, extendFragment, patchNotesFragment;
+
+	@Override
+	public boolean onNavigationItemSelected(@NonNull MenuItem item) {      if (item.getItemId() == R.id.timer) {
+		//Intent ih = new Intent(this, MainActivity.class);
+		//startActivity(ih);
+	}
+	else if (item.getItemId() == R.id.menu_help) {
+		Intent ih = new Intent(this, ManualActivity.class);
+		startActivity(ih);
+
+	} else if (item.getItemId() == R.id.menu_settings_x) {
+		Intent i = new Intent(this, PreferenceXActivity.class);
+		startActivity(i);
+
+	}
+	else if (item.getItemId() == R.id.menu_session_list){
+		Intent intent  = new Intent(this, CalendarActivity.class);
+		startActivity(intent);
+
+	}
+	else if (item.getItemId() == R.id.menu_populate_db){
+		mSessionsViewModel.populateDatabase();
+		Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
+
+
+	}
+
+	else if (item.getItemId() == R.id.menu_delete_db){
+		mSessionsViewModel.deleteOlder(0);
+		Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
+
+
+	}
+	else if (item.getItemId() == R.id.menu_open_stats){
+		Intent i = new Intent(this, StatsActivity.class);
+		startActivity(i);
+
+
+	}
+	else if (item.getItemId() == R.id.menu_feedback){
+		Intent Email = new Intent(Intent.ACTION_SEND);
+		Email.setType("text/email");
+		Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
+		Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
+		startActivity(Intent.createChooser(Email, "Send Feedback:"));
+
+	}
+		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		drawer.closeDrawer(GravityCompat.START);
+		return true;
+	}
 
 	private static class MyHandler extends Handler {
 		private final WeakReference<MainActivity> mActivity;
@@ -338,8 +394,17 @@ public class MainActivity extends AppCompatActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		String intentAction = getIntent().getAction();
-		toolBar = (Toolbar) findViewById(R.id.toolbar);
+		NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+		navigationView.setNavigationItemSelectedListener(this);
+
+		toolBar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolBar);
+
+		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+				this, drawer, toolBar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+		drawer.addDrawerListener(toggle);
+		toggle.syncState();
 		buildNumber = Build.VERSION.SDK_INT;
 		swipeWork = getString(R.string.swipe_area_work);
 		swipeRest = getString(R.string.swipe_area_rest);
@@ -404,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 		resources = getResources();
-		rootLayout = (RelativeLayout) findViewById(R.id.mainActivityLayout);
+		rootLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
 		colorWork = ContextCompat.getColor(MainActivity.this,R.color.work);
 		colorRest = ContextCompat.getColor(MainActivity.this,R.color.rest);
@@ -437,7 +502,6 @@ public class MainActivity extends AppCompatActivity implements
 		description =  findViewById(R.id.description_text);
 		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
 		endPeriodMultipleWindow = findViewById(R.id.button_end_period);
-		sessions = findViewById(R.id.button_open_sessions);
 		swipeArea =  findViewById(R.id.swipe_area_text);
 		swipeAreaListenerUsed = false;
 		infoButton =  findViewById(R.id.info_button);
@@ -806,7 +870,7 @@ public class MainActivity extends AppCompatActivity implements
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, firstPeriodEndTime, false);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(periodType, firstPeriodEndTime, 0);
 
-		currentSession = new Session(0,sessionStartTime,0L);
+		currentSession = new Session(0,sessionStartTime,sessionStartTime);
 		mSessionsViewModel.insert(currentSession);
 		periodStartTime = sessionStartTime;
 		mPeriod = new Period(0,1,sessionStartTime,firstPeriodEndTime-sessionStartTime,0,0l,0);
@@ -1198,9 +1262,8 @@ public class MainActivity extends AppCompatActivity implements
 		}
 		endPeriodMultipleWindow.setVisibility(View.GONE);
 		if (isOn) {
-			sessions.setVisibility(View.GONE);
 			activityTitle.setTextColor(colorBlack);
-			toolBar.setTitleTextColor(colorBlack);
+			//toolBar.setTitleTextColor(colorBlack);
 			if(displayTurnOffHint()){
 				description.setText(R.string.description_turn_off);
 			}
@@ -1372,7 +1435,6 @@ public class MainActivity extends AppCompatActivity implements
 			extendPeriodEnd.setVisibility(View.INVISIBLE);
 			rootLayout.setBackgroundColor(colorBlack);
 			swipeArea.setVisibility(View.GONE);
-			sessions.setVisibility(View.VISIBLE);
 			manageTimer(false);
 		}
 		if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.N){
@@ -1604,52 +1666,7 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		if (item.getItemId() == R.id.menu_help) {
-			Intent ih = new Intent(this, ManualActivity.class);
-			startActivity(ih);
-			return true;
-		} else if (item.getItemId() == R.id.menu_settings_x) {
-				Intent i = new Intent(this, PreferenceXActivity.class);
-				startActivity(i);
-			return true;
-		}
-		else if (item.getItemId() == R.id.menu_session_list){
-				Intent i = new Intent(this, SessionsListActivity.class);
-				startActivity(i);
-			return true;
-		}
-		else if (item.getItemId() == R.id.menu_populate_db){
-			mSessionsViewModel.populateDatabase();
-			Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
-
-			return true;
-		}
-		else if (item.getItemId() == R.id.menu_open_stats){
-			Intent i = new Intent(this, StatsActivity.class);
-			startActivity(i);
-
-			return true;
-		}
-		else if (item.getItemId() == R.id.menu_feedback){
-				Intent Email = new Intent(Intent.ACTION_SEND);
-				Email.setType("text/email");
-				Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
-				Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
-				startActivity(Intent.createChooser(Email, "Send Feedback:"));
-				return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
 
 	public void exitApplication(){
 		finish();
@@ -1703,11 +1720,6 @@ public class MainActivity extends AppCompatActivity implements
 			countdown.cancel();
 			countdown.isRunning = false;
 		}
-	}
-
-	public void openSessions(View v){
-		Intent intent  = new Intent(this, CalendarActivity.class);
-		startActivity(intent);
 	}
 
 	public void showExtendDialog(View v) {

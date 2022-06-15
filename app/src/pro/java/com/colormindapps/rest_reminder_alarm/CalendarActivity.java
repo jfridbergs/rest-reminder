@@ -8,14 +8,20 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.navigation.NavigationView;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
@@ -27,7 +33,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
-public class CalendarActivity extends AppCompatActivity implements OnMonthChangedListener, OnDateSelectedListener {
+public class CalendarActivity extends AppCompatActivity implements OnMonthChangedListener, OnDateSelectedListener, NavigationView.OnNavigationItemSelectedListener {
     MaterialCalendarView calendarView;
 
     private EventDecorator eventDecorator;
@@ -42,8 +48,6 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_calendar);
-        Toolbar toolbar = findViewById(R.id.calendar_toolbar);
-        setSupportActionBar(toolbar);
         if(getSupportActionBar()!=null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -81,6 +85,19 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         calendarView.setOnDateChangedListener(this);
 
         decorateMonth(yearValue, monthValue);
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Sessions");
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer =  findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
 
     }
 
@@ -153,11 +170,43 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
             @Override
             public void onChanged(@Nullable final List<Session> sessions){
                 Intent intent = new Intent(getApplicationContext(), SessionDetailsViewActivity.class);
-                intent.putExtra(RReminder. DB_SESSION_START, sessions.get(0).getSessionStart());
-                intent.putExtra(RReminder. DB_SESSION_END, sessions.get(0).getSessionEnd());
-                startActivity(intent);
+                if(sessions.size()>0){
+                    intent.putExtra(RReminder. DB_SESSION_START, sessions.get(0).getSessionStart());
+                    intent.putExtra(RReminder. DB_SESSION_END, sessions.get(0).getSessionEnd());
+                    startActivity(intent);
+                }
+
 
             }
         });
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.timer) {
+            Intent ih = new Intent(this, MainActivity.class);
+            startActivity(ih);
+        }
+        else if (item.getItemId() == R.id.menu_help) {
+            Intent ih = new Intent(this, ManualActivity.class);
+            startActivity(ih);
+        } else if (item.getItemId() == R.id.menu_settings_x) {
+            Intent i = new Intent(this, PreferenceXActivity.class);
+            startActivity(i);
+        }
+        else if (item.getItemId() == R.id.menu_open_stats){
+            Intent i = new Intent(this, StatsActivity.class);
+            startActivity(i);
+        }
+        else if (item.getItemId() == R.id.menu_feedback){
+            Intent Email = new Intent(Intent.ACTION_SEND);
+            Email.setType("text/email");
+            Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
+            Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
+            startActivity(Intent.createChooser(Email, "Send Feedback:"));
+        }
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

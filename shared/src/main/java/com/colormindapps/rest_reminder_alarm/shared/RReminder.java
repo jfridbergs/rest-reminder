@@ -158,6 +158,8 @@ public class RReminder {
     public static final String SESSION_DATE_FORMAT_FULL = "EEEE, dd/MM/yyyy";
     public static final String SESSION_DATE_FORMAT_MONTH = "MMMM, yyyy";
     public static final String SESSION_DATE_FORMAT_YEAR = "yyyy";
+	public static final String SESSION_DATE_FORMAT_MONTH_DAY = "d. MMMM";
+	public static final String SESSION_DATE_FORMAT_SHORT= "d/MM/yyyy";
 
 	public static final int WORK = 1;
 	public static final int REST = 2;
@@ -233,8 +235,27 @@ public class RReminder {
 
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(time);
-		periodEndTime = DateFormat.format(timeFormatString,calendar.getTime());
+		periodEndTime = DateFormat.format(timeFormatString,calendar.getTimeInMillis());
 		return periodEndTime.toString();
+	}
+
+	public static String getSessionDateWeekString(long from, long to){
+		Calendar fromDate = Calendar.getInstance();
+		Calendar toDate = Calendar.getInstance();
+		String output = "";
+		fromDate.setTimeInMillis(from);
+		toDate.setTimeInMillis(to);
+		if(fromDate.get(Calendar.MONTH)==toDate.get(Calendar.MONTH)){
+			output = fromDate.get(Calendar.DAY_OF_MONTH)+". - "+toDate.get(Calendar.DAY_OF_MONTH)+ ". "+DateFormat.format(SESSION_DATE_FORMAT_MONTH, from).toString();
+		} else {
+			if(fromDate.get(Calendar.YEAR)==toDate.get(Calendar.YEAR)){
+				output = DateFormat.format(SESSION_DATE_FORMAT_MONTH_DAY, from).toString() + " - "+DateFormat.format(SESSION_DATE_FORMAT_MONTH_DAY, to).toString()+", "+toDate.get(Calendar.YEAR);
+			} else {
+				output = DateFormat.format(SESSION_DATE_FORMAT_SHORT, from).toString()+ " - "+ DateFormat.format(SESSION_DATE_FORMAT_SHORT, to).toString();
+			}
+		}
+
+		return output;
 	}
 	
 	public static int getMode(Context context){
@@ -737,6 +758,13 @@ public class RReminder {
 				return context.getString(R.string.pref_minute_multiple, minutes);
 			}
 		}
+	}
+
+	public static String getExtendMinsFromMillis(Context context, long millis){
+		int timeInSeconds =  Math.round(millis / 1000f);
+		int timeInMinutes  = timeInSeconds / 60;
+		if(timeInSeconds % 60>=30) timeInMinutes+=1;
+		return context.getString(R.string.sessions_extend_mins, timeInMinutes);
 	}
 
 	public static int getHourFromString(String time){

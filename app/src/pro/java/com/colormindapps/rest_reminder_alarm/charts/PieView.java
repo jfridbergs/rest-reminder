@@ -22,6 +22,7 @@ import com.colormindapps.rest_reminder_alarm.R;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class PieView extends View {
 
@@ -36,7 +37,7 @@ public class PieView extends View {
     private Point pieCenterPoint;
     private Paint textPaint;
     private Paint whitePaint;
-    private Paint columnTextPaint;
+    private Paint columnTextPaint, columnTextExtendPaint;
     private RectF cirRect, cirExtRect;
     private RectF cirSelectedRect;
     private Paint paintGradientBlack, paintGradientWork, paintGradientRest;
@@ -84,7 +85,7 @@ public class PieView extends View {
             for(int i=0;i<size;i++){
                 if(pieHelperList.get(i).isAnimated()){
                     PieHelper pie = pieHelperList.get(i);
-                    Log.d(debug, "Animate sector nr. "+i);
+                    //Log.d(debug, "Animate sector nr. "+i);
                     pie.update();
                     if (!pie.isAtRest()) {
                         needNewFrame = true;
@@ -94,6 +95,8 @@ public class PieView extends View {
                         if(i<size-1){
                             pieHelperList.get(i+1).setAnimateStatus(true);
                             needNewFrame = true;
+                        } else {
+                            needNewFrame = false;
                         }
 
                     }
@@ -101,6 +104,9 @@ public class PieView extends View {
                         postDelayed(this, 10);
                     } else {
                         pieHelperList.get(size-1).setDrawAllStatus(true);
+                        //Log.d(debug, "SELECT_RANDOM");
+                        Random random = new Random();
+                        selectedIndex = random.nextInt(size);
                     }
                 }
             }
@@ -113,6 +119,7 @@ public class PieView extends View {
     private Runnable drawBaseLane = new Runnable(){
         @Override
         public void run() {
+            Log.d(debug, "draw baseline");
             boolean needNewFrame = false;
             baseLaneLength+=50;
             if(baseLaneLength<baseLaneTargetLength){
@@ -188,7 +195,7 @@ public class PieView extends View {
             for(int i=pieHelperList.size()-1;i>=0;i--){
                 if(pieHelperList.get(i).isAnimated()){
                     PieHelper pie = pieHelperList.get(i);
-                    Log.d(debug, " HIDE Animate sector nr. "+i);
+                    //Log.d(debug, " HIDE Animate sector nr. "+i);
                     pie.updateHide();
                     if (!pie.isHidden()) {
                         needNewFrame = true;
@@ -262,6 +269,15 @@ public class PieView extends View {
         columnTextPaint.setTextAlign(Paint.Align.CENTER);
         columnTextPaint.setTypeface(font);
 
+        columnTextExtendPaint = new Paint();
+        columnTextExtendPaint.setAntiAlias(true);
+        columnTextExtendPaint.setColor(ContextCompat.getColor(getContext(), R.color.black));
+        columnTextExtendPaint.setTextSize(RReminder.sp2px(getContext(), 15));
+        columnTextExtendPaint.setStrokeWidth(7);
+        columnTextExtendPaint.setTextAlign(Paint.Align.CENTER);
+        columnTextExtendPaint.setTypeface(font);
+
+
 
 
         pieCenterPoint = new Point();
@@ -286,6 +302,7 @@ public class PieView extends View {
         showPercentLabel = show;
         postInvalidate();
     }
+
 
     public boolean isDonutOnScreen(){
         return booleanDrawDonut;
@@ -335,7 +352,7 @@ public class PieView extends View {
     public void toColumn(){
         removeCallbacks(donutHide);
         selectedIndex = NO_SELECTED_INDEX;
-        Log.d(debug, "startHideAnimate");
+        Log.d(debug, "startDonutHideAnimate");
         pieHelperList.get(pieHelperList.size()-1).setAnimateStatus(true);
         post(donutHide);
     }
@@ -378,6 +395,7 @@ public class PieView extends View {
         long selectedLength = 0;
         long selectedFrom, selectedTo;
         if (pieHelperList.isEmpty()) {
+            Log.d(debug, "piehelperlist EMPTY?");
             return;
         }
         if(booleanDrawDonut){
@@ -391,44 +409,44 @@ public class PieView extends View {
 
             for(int i=0;i<pieHelperSize;i++){
                 if(pieHelperList.get(i).isAnimated() || pieHelperList.get(i).isDrawAll() ){
-                    Log.d(debug, "sector nr: "+i+ ", isDrawAll status: "+pieHelperList.get(i).isDrawAll());
+                    //Log.d(debug, "sector nr: "+i+ ", isDrawAll status: "+pieHelperList.get(i).isDrawAll());
                     PieHelper pieHelper = pieHelperList.get(i);
                     boolean selected = (selectedIndex == i);
                     //RectF rect = selected ? cirSelectedRect : cirRect;
                     RectF rect = cirRect;
                     if(selected && selectedColor==0){
-                        Log.d(debug, "selected sector: "+i);
+                        //Log.d(debug, "selected sector: "+i);
                         selectedColor = getColorByType(pieHelper.getPeriodType());
-                        Log.d(debug, "selected color id:"+getColorByType(pieHelper.getPeriodType()));
-                        Log.d(debug, "work color id:"+colorWork);
+                        //Log.d(debug, "selected color id:"+getColorByType(pieHelper.getPeriodType()));
+                        //Log.d(debug, "work color id:"+colorWork);
                         selectedMiddleDegree = pieHelper.getMiddleDegree();
                     }
-                    Log.d(debug, "onDraw period type: "+pieHelper.getPeriodType());
+                    //Log.d(debug, "onDraw period type: "+pieHelper.getPeriodType());
                     cirPaint.setColor(getColorByType(pieHelper.getPeriodType()));
                     if(i==0){
                         Point startEdge = getCircleEdgeCenter(120,false);
                         canvas.drawCircle((float)startEdge.x, (float)startEdge.y, (int)edgeCircleRadius, cirPaint);
                     }
                     if(i==pieHelperSize-1){
-                        Log.d(debug, "endDegree: "+pieHelper.getEndDegree());
+                        //Log.d(debug, "endDegree: "+pieHelper.getEndDegree());
                         endEdgePaint = cirPaint;
                     }
                     canvas.drawArc(rect, pieHelper.getStartDegree(), pieHelper.getSweep(), true, cirPaint);
                     drawPercentText(canvas, pieHelper);
                     if(pieHelper.drawExtended()){
-                        Log.d(debug, "DRAW EXTENDED");
+                        //Log.d(debug, "DRAW EXTENDED");
                         //canvas.drawArc(cirExtRect, pieHelper.getExtendStartDegree(), pieHelper.getSweep()-(pieHelper.getExtendStartDegree()-pieHelper.getStartDegree()), true, cirExtPaint);
                     }
                 }
             }
-            Log.d(debug, "last sector id: "+(pieHelperSize-1));
+           // Log.d(debug, "last sector id: "+(pieHelperSize-1));
             if(pieHelperList.get(pieHelperSize-1).isDrawAll()){
                 Point endEdge = getCircleEdgeCenter(420,false);
                 canvas.drawCircle((float)endEdge.x, (float)endEdge.y, (int)edgeCircleRadius, endEdgePaint);
             }
 
             if(selectedIndex!=NO_SELECTED_INDEX && pieHelperList.get(selectedIndex).isExtended()){
-                canvas.drawArc(cirExtRect, pieHelperList.get(selectedIndex).getExtendStartDegree(), pieHelperList.get(selectedIndex).getSweep()-(pieHelperList.get(selectedIndex).getExtendStartDegree()-pieHelperList.get(selectedIndex).getStartDegree()), true, cirExtPaint);
+                //canvas.drawArc(cirExtRect, pieHelperList.get(selectedIndex).getExtendStartDegree(), pieHelperList.get(selectedIndex).getSweep()-(pieHelperList.get(selectedIndex).getExtendStartDegree()-pieHelperList.get(selectedIndex).getStartDegree()), true, cirExtPaint);
             }
 
 
@@ -438,12 +456,12 @@ public class PieView extends View {
 
             if(selectedIndex!=NO_SELECTED_INDEX){
                 if(selectedColor == colorWork){
-                    Log.d(debug, "draw middle lane work, degree: "+selectedMiddleDegree);
+                    //Log.d(debug, "draw middle lane work, degree: "+selectedMiddleDegree);
                     drawSelectedPointer(canvas, selectedMiddleDegree, colorWorkHighlight);
 
                 } else {
                     drawSelectedPointer(canvas, selectedMiddleDegree, colorRestHighlight);
-                    Log.d(debug, "draw middle lane rest, degree: "+selectedMiddleDegree);
+                    //Log.d(debug, "draw middle lane rest, degree: "+selectedMiddleDegree);
 
                 }
             }
@@ -463,9 +481,8 @@ public class PieView extends View {
             canvas.drawCircle(pieCenterPoint.x, pieCenterPoint.y,pieRadius*0.5f,whitePaint);
 
             if(selectedIndex==NO_SELECTED_INDEX){
-                long length = sessionEnd-sessionStart;
                 //String duration = RReminder.getDurationFromMillis(getContext(),length);
-               // canvas.drawText(duration,pieCenterPoint.x, pieCenterPoint.y-25, textPaint);
+               //canvas.drawText(getContext().getString(R.string.pie_view_description),pieCenterPoint.x, pieCenterPoint.y-25, textPaint);
                // String time = RReminder.getTimeString(getContext(), sessionStart).toString()+ " - " + RReminder.getTimeString(getContext(), sessionEnd).toString();
                 //canvas.drawText(time,pieCenterPoint.x, pieCenterPoint.y+25, textPaint);
             } else {
@@ -474,20 +491,23 @@ public class PieView extends View {
                 selectedLength = pieHelperList.get(selectedIndex).getPeriodDuration();
                 long initialDuration = pieHelperList.get(selectedIndex).getPeriod().getInitialDuration();
                 selectedTo = selectedFrom + selectedLength;
-                String extendText="";
+                String extendTimes="";
+                String extendLength="";
                 if(extendCount>0){
                     if(extendCount==1){
-                        extendText = getContext().getString(R.string.selected_extended_once)+" "+RReminder.getShortDurationFromMillis(getContext(),selectedLength-initialDuration);
+                        extendTimes = getContext().getString(R.string.selected_extended_once);
                     } else {
-                        extendText = String.format(getContext().getString(R.string.selected_extended_multiple),extendCount)+" "+RReminder.getShortDurationFromMillis(getContext(),selectedLength-initialDuration);
+                        extendTimes = String.format(getContext().getString(R.string.selected_extended_multiple),extendCount);
                     }
+                    extendLength = RReminder.getExtendMinsFromMillis(getContext(),selectedLength-initialDuration);
                 }
-                Log.d(debug, "selected length: "+selectedLength);
+                //Log.d(debug, "selected length: "+selectedLength);
                 String selectedDuration = RReminder.getShortDurationFromMillis(getContext(),selectedLength);
                 canvas.drawText(selectedDuration,pieCenterPoint.x, pieCenterPoint.y+15, columnTextPaint);
                 String selectedTime = RReminder.getTimeString(getContext(), selectedFrom).toString()+ " - " + RReminder.getTimeString(getContext(), selectedTo).toString();
                 canvas.drawText(selectedTime,pieCenterPoint.x, pieCenterPoint.y+65, columnTextPaint);
-                canvas.drawText(extendText,pieCenterPoint.x, pieCenterPoint.y+115, cirExtPaint);
+                canvas.drawText(extendTimes,pieCenterPoint.x, pieCenterPoint.y+115, cirExtPaint);
+                canvas.drawText(extendLength,pieCenterPoint.x, pieCenterPoint.y+165, cirExtPaint);
                 if (selectedColor==colorWork){
                     dGears.setBounds(pieCenterPoint.x-70, pieCenterPoint.y-150, pieCenterPoint.x+70, pieCenterPoint.y-50);
                     dGears.draw(canvas);
@@ -535,8 +555,8 @@ public class PieView extends View {
                     imgX0 = x0+toPx(20)+xStepWidth/2f-toPx(30);
                     imgX1 = x0+toPx(20)+xStepWidth/2f+toPx(30);
                     if(cHelper.getPercent()<30){
-                        imgY0 = y0-toPx(128);
-                        imgY1 = y0-toPx(88);
+                        imgY0 = y0-toPx(148);
+                        imgY1 = y0-toPx(108);
                     } else {
                         imgY0 = y0+toPx(20);
                         imgY1 = y0+toPx(60);
@@ -552,26 +572,26 @@ public class PieView extends View {
                         dMug.setBounds((int)mugX0, (int)imgY0, (int)mugX1, (int)imgY1);
                         dMug.draw(canvas);
                     }
-                    Log.d(debug, "dpi to pixel 15: "+toPx(15));
+                    //Log.d(debug, "dpi to pixel 15: "+toPx(15));
                     periodCount = ((cHelper.getCount())>1 ? cHelper.getCount()+ " "+getContext().getString(R.string.periods) : cHelper.getCount()+ " "+getContext().getString(R.string.period));
                     totalLength = RReminder.getShortDurationFromMillis(getContext(),cHelper.getTotalLength());
                     extendCount = ((cHelper.getExtendCount())>1 ? cHelper.getExtendCount()+" "+getContext().getString(R.string.extensions) : cHelper.getExtendCount()+" "+getContext().getString(R.string.extension));
-                    extendTotalDuration = RReminder.getShortDurationFromMillis(getContext(),cHelper.getTotalExtendDuration());
+                    extendTotalDuration = RReminder.getExtendMinsFromMillis(getContext(),cHelper.getTotalExtendDuration());
 
                     if(cHelper.getPercent()<30){
                         if(cHelper.getExtendCount()>0){
-                            canvas.drawText(extendCount,imgX0+toPx(24), y0-toPx(40), columnTextPaint);
-                            canvas.drawText(extendTotalDuration,imgX0+toPx(24), y0-toPx(20), columnTextPaint);
+                            canvas.drawText(extendCount,imgX0+toPx(30), y0-toPx(40), columnTextExtendPaint);
+                            canvas.drawText(extendTotalDuration,imgX0+toPx(30), y0-toPx(25), columnTextExtendPaint);
                         }
-                        canvas.drawText(periodCount,imgX0+toPx(24), y0-toPx(80), columnTextPaint);
-                        canvas.drawText(totalLength,imgX0+toPx(24), y0-toPx(60), columnTextPaint);
+                        canvas.drawText(periodCount,imgX0+toPx(30), y0-toPx(80), columnTextPaint);
+                        canvas.drawText(totalLength,imgX0+toPx(30), y0-toPx(60), columnTextPaint);
 
                     } else {
-                        canvas.drawText(periodCount,imgX0+toPx(24), y0+toPx(88), columnTextPaint);
-                        canvas.drawText(totalLength,imgX0+toPx(24), y0+toPx(108), columnTextPaint);
+                        canvas.drawText(periodCount,imgX0+toPx(30), y0+toPx(88), columnTextPaint);
+                        canvas.drawText(totalLength,imgX0+toPx(30), y0+toPx(108), columnTextPaint);
                         if(cHelper.getExtendCount()>0){
-                            canvas.drawText(extendCount,imgX0+toPx(24), y0+toPx(128), columnTextPaint);
-                            canvas.drawText(extendTotalDuration,imgX0+toPx(24), y0+toPx(148), columnTextPaint);
+                            canvas.drawText(extendCount,imgX0+toPx(30), y0+toPx(128), columnTextExtendPaint);
+                            canvas.drawText(extendTotalDuration,imgX0+toPx(30), y0+toPx(143), columnTextExtendPaint);
                         }
                     }
 
@@ -633,7 +653,7 @@ public class PieView extends View {
         path.close();
 
         canvas.drawPath(path, cirPaint);
-        Log.d(debug, "draw selected line");
+        //Log.d(debug, "draw selected line");
         //canvas.drawLine(pieCenterPoint.x, pieCenterPoint.y, lineToX, lineToY, cirPaint);
     }
 

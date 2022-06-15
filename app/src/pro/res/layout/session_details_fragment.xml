@@ -23,7 +23,8 @@
         android:layout_below="@id/session_date"
         android:layout_centerHorizontal="true"
         android:textSize="20sp"
-        android:gravity="center" />
+        android:gravity="center"
+        android:layout_marginTop="20dp"/>
     <TextView
         android:id="@+id/session_duration"
         android:layout_width="match_parent"
@@ -33,21 +34,14 @@
         android:textSize="20sp"
         android:gravity="center" />
 
-    <Button
-        android:id="@+id/flip_to_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Period List"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        />
 
     <com.colormindapps.rest_reminder_alarm.charts.PieView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/pie_view"
-        android:layout_centerInParent="true"
-        android:layout_margin="10dp" />
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        />
 
 
 </RelativeLayout>
