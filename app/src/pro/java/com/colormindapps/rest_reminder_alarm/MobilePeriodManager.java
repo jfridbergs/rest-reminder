@@ -37,7 +37,12 @@ public class MobilePeriodManager extends PeriodManager {
 		Calendar endTime = Calendar.getInstance();
 		endTime.setTimeInMillis(when);
 
-		pi = PendingIntent.getBroadcast(mContext, (int)when, i, PendingIntent.FLAG_ONE_SHOT);
+		if(buildNumber>=Build.VERSION_CODES.M){
+			pi = PendingIntent.getBroadcast(mContext, (int)when, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			pi = PendingIntent.getBroadcast(mContext, (int)when, i, PendingIntent.FLAG_ONE_SHOT);
+		}
+
 		if(buildNumber>=Build.VERSION_CODES.M){
 			mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, when, pi);
 		} else if(buildNumber >= Build.VERSION_CODES.LOLLIPOP){

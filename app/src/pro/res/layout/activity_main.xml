@@ -188,9 +188,22 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 					android:layout_width="@dimen/button_period_end_extend_width"
 					android:layout_height="@dimen/button_period_end_extend_height"
 					android:layout_gravity="center"
+					android:stateListAnimator="@null"
 					android:background="@drawable/btn_extend_np"
 					android:onClick="showExtendDialog"
 					android:text="@string/extend_current_period" />
+
+				<Button
+					android:id="@+id/button_last_session"
+					style="@style/ExtendButton"
+					android:layout_width="@dimen/button_period_end_extend_width"
+					android:layout_height="@dimen/button_period_end_extend_height"
+					android:layout_gravity="center"
+					android:stateListAnimator="@null"
+					android:visibility="gone"
+					android:background="@drawable/btn_extend_np"
+					android:onClick="openLastSession"
+					android:text="@string/last_session" />
 
 
 				<Button
@@ -200,6 +213,7 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 					android:layout_height="@dimen/button_period_end_extend_height"
 					android:layout_toRightOf="@id/button_period_end_extend"
 					android:layout_gravity="right"
+					android:stateListAnimator="@null"
 					android:background="@drawable/btn_extend_np"
 					android:onClick="endPeriod" />
 

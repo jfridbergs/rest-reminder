@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 31
 
 
     defaultConfig {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 31
         versionName "1.0.2-pro"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -25,9 +25,9 @@ android {
         pro {
             dimension "default"
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "1.0.2-pro"
+            versionName "0.9-pro"
             minSdkVersion 21
-            targetSdkVersion 28
+            targetSdkVersion 31
         }
 
     }

@@ -8,16 +8,19 @@
     <Button
 	    android:id="@+id/extend_dialog_button_extend"
 		style="@style/ExtendDialogButton"
+		android:stateListAnimator="@null"
 	    android:text="@string/extend_current_period"
 		/>
 	<Button
 	    android:id="@+id/extend_dialog_button_extend1"
 		style="@style/ExtendDialogButton"
 	    android:text="@string/extend_current_period"
+		android:stateListAnimator="@null"
 	    android:visibility="gone" />
 	<Button
 	    android:id="@+id/extend_dialog_button_extend2"
 		style="@style/ExtendDialogButton"
+		android:stateListAnimator="@null"
 	    android:text="@string/extend_current_period"
 	    android:visibility="gone" />      
     

@@ -23,7 +23,7 @@ public class ColumnHelper {
 
     public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount, long totalExtendDuration){
         this.percent = percent;
-        this.targetHeight = percent * 500 / 100;
+        this.targetHeight = percent * 1000 / 100;
         this.color = color;
         this.count = count;
         this.extendCount = extendCount;

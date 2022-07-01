@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,10 +12,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:textSize="30sp"
-        android:textStyle="bold"
         android:layout_margin="15dp"
-        android:gravity="center" />
+        android:gravity="center"
+        android:textSize="@dimen/fragment_title"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,15 +28,18 @@
         android:layout_below="@id/session_date_from"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/session_date_from">
 
 
         <TextView
             android:id="@+id/label_totals"
-            android:layout_width="120dp"
+            android:layout_width="@dimen/overall_textview_width"
             android:layout_height="30dp"
             android:background="@drawable/border"
             android:gravity="center"
+            android:textSize="@dimen/overall_stats"
             android:text="@string/label_total"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -42,9 +48,10 @@
 
         <TextView
             android:id="@+id/label_count"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/overall_textview_width"
+            android:layout_height="@dimen/overall_textview_height"
             android:gravity="center"
+            android:textSize="@dimen/overall_stats"
             android:text="@string/label_count"
             app:layout_constraintBottom_toBottomOf="@+id/label_totals"
             app:layout_constraintEnd_toStartOf="@+id/label_totals"
@@ -52,9 +59,10 @@
 
         <TextView
             android:id="@+id/label_average"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/overall_textview_width"
+            android:layout_height="@dimen/overall_textview_height"
             android:gravity="center"
+            android:textSize="@dimen/overall_stats"
             android:text="@string/label_average"
             app:layout_constraintBottom_toBottomOf="@+id/label_totals"
             app:layout_constraintStart_toEndOf="@+id/label_totals"
@@ -62,67 +70,78 @@
 
         <TextView
             android:id="@+id/value_total"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/overall_textview_width"
+            android:layout_height="@dimen/overall_textview_height"
             android:background="@drawable/border"
             android:gravity="center"
             android:textColor="@color/black"
+            android:textSize="@dimen/overall_stats"
             app:layout_constraintEnd_toEndOf="@+id/label_totals"
             app:layout_constraintStart_toStartOf="@+id/label_totals"
             app:layout_constraintTop_toBottomOf="@+id/label_totals" />
 
         <TextView
             android:id="@+id/value_count"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/overall_textview_width"
+            android:layout_height="@dimen/overall_textview_height"
             android:gravity="center"
             android:textColor="@color/black"
+            android:textSize="@dimen/overall_stats"
             app:layout_constraintEnd_toEndOf="@+id/label_count"
             app:layout_constraintStart_toStartOf="@+id/label_count"
             app:layout_constraintTop_toBottomOf="@+id/label_count" />
 
         <TextView
             android:id="@+id/value_average"
-            android:layout_width="120dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/overall_textview_width"
+            android:layout_height="@dimen/overall_textview_height"
             android:gravity="center"
             android:textColor="@color/black"
+            android:textSize="@dimen/overall_stats"
             app:layout_constraintEnd_toEndOf="@+id/label_average"
             app:layout_constraintStart_toEndOf="@+id/label_totals"
             app:layout_constraintTop_toBottomOf="@+id/label_average" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.colormindapps.rest_reminder_alarm.charts.ColumnGraphView
-        android:id="@+id/column_graph_view"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/totals"
-        android:layout_centerInParent="true"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="10dp" />
+    <FrameLayout
+        android:id="@+id/frameLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHeight_default="spread"
+        app:layout_constraintTop_toBottomOf="@+id/totals">
+
+        <com.colormindapps.rest_reminder_alarm.charts.ColumnGraphView
+            android:id="@+id/column_graph_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp" />
+    </FrameLayout>
+
 
     <TextView
         android:id="@+id/no_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_marginStart="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
-        android:layout_marginBottom="15dp"
         android:text="@string/no_sessions_recorded"
-        android:textSize="30sp"
+        android:textSize="@dimen/fragment_title"
         android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/totals"
+        tools:visibility="visible" />
 
 
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

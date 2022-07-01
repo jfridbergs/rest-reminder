@@ -28,7 +28,8 @@
             android:name=".wear.WearMainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@android:style/Theme.DeviceDefault.Light">
+            android:theme="@android:style/Theme.DeviceDefault.Light"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

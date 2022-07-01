@@ -78,6 +78,7 @@
     
     <style name="ExtendButton" parent="@android:style/Widget.ImageButton">
         <item name="android:textColor">@color/black</item>
+        <item name="android:colorControlHighlight">#5677FC</item>
         <item name="android:textSize">@dimen/extend_button_text_size</item>
     </style>
 

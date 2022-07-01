@@ -8,7 +8,7 @@ android {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
         targetSdkVersion 31
-        versionCode 18
+        versionCode 22
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //android.test.InstrumentationTestRunner for robotium tests
 
@@ -22,6 +22,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            debuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
 
@@ -34,15 +35,15 @@ android {
             applicationId "com.colormindapps.rest_reminder_alarm"
             versionName "1.1.3.1-base"
             minSdkVersion 16
-            targetSdkVersion 29
+            targetSdkVersion 31
             dimension "default"
             proguardFile 'flavor-rules-base.pro'
         }
         pro {
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "1.1-pro"
+            versionName "Rest Reminder + 0.9.3."
             minSdkVersion 16
-            targetSdkVersion 29
+            targetSdkVersion 31
             dimension "default"
             proguardFile 'flavor-rules-pro.pro'
         }
@@ -61,6 +62,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+
 
 
 }
@@ -90,18 +92,18 @@ dependencies {
     testImplementation 'org.apache.maven:maven-ant-tasks:2.1.3'
 
     // Core library
-    androidTestImplementation 'androidx.test:core:1.0.0'
+    androidTestImplementation 'androidx.test:core:1.4.0'
 
 
     //Espresso
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test:runner:1.3.0-alpha02'
-    androidTestImplementation 'androidx.test:rules:1.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.1.0'
-    androidTestImplementation 'androidx.test.ext:truth:1.2.0'
-    androidTestImplementation 'com.google.truth:truth:0.42'
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test:runner:1.5.0-alpha04'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
+    androidTestImplementation 'androidx.test.ext:truth:1.4.0'
+    androidTestImplementation 'com.google.truth:truth:1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
     // fixes issue on linux/mac
    // testImplementation 'org.robolectric:robolectric:4.2.1'
    //testImplementation 'org.robolectric:shadows-play-services:3.0'

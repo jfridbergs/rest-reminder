@@ -1,0 +1,13 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    
+    <!-- Main Activity -->
+
+    <dimen name="fragment_title">60sp</dimen>
+    <dimen name="fragment_subtitle">40sp</dimen>
+    <dimen name="overall_stats">25sp</dimen>
+    <dimen name="overall_textview_width">220dp</dimen>
+    <dimen name="overall_textview_height">50dp</dimen>
+</resources>
+

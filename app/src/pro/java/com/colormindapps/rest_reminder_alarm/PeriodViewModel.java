@@ -31,6 +31,7 @@ public class PeriodViewModel extends AndroidViewModel {
     }
 
     LiveData<Period> getLastPeriod(){return mRepository.getLastPeriod();}
+    LiveData<List<Period>>getLastTwoPeriods(){return mRepository.getLastTwoPeriods();}
 
     public void deletePeriod(long startTime){mRepository.deletePeriod(startTime);}
 
@@ -38,6 +39,10 @@ public class PeriodViewModel extends AndroidViewModel {
     public void insert(Period period){
         mRepository.insertPeriod(period);
     }
+
+    public void deletePeriod(Period period){mRepository.deletePeriod(period);}
+
+    public void deleteShortSessionPeriods(long sessionStartTime){mRepository.deleteShortSessionPeriods(sessionStartTime);}
 
 
     public void update(Period period){

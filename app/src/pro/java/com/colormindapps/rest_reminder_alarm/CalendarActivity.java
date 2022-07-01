@@ -90,7 +90,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         navigationView.setNavigationItemSelectedListener(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle("Sessions");
+        toolbar.setTitle(R.string.sessions_title);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer =  findViewById(R.id.drawer_layout);
@@ -142,7 +142,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         Log.d(debug, "onMonthChanged");
         //noinspection ConstantConditions
         android.text.format.DateFormat df = new android.text.format.DateFormat();
-        getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
+       // getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
         int month = date.getMonth()-1;
         int shownValue = date.getYear()*100+month;
         if(!shownMonths.contains(shownValue)){

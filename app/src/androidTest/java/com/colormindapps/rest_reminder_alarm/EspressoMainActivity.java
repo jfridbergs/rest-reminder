@@ -1018,7 +1018,7 @@ public class EspressoMainActivity {
         onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(20000));
         intended(hasComponent(new ComponentName(getTargetContext(), NotificationActivity.class)));
-        String extendDialogTitle = getResourceString(com.colormindapps.rest_reminder_alarm.R.string.extend_dialog_title);
+        String extendDialogTitle = getResourceString(R.string.extend_dialog_title);
         onView(withId(R.id.button_notification_period_end_extend)).perform(click());
         onView(withId(R.id.extend_dialog_button_extend)).check(matches(isDisplayed()));
         onView(isRoot()).perform(CustomActions.waitFor(13000));

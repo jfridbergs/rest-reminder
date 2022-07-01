@@ -87,20 +87,32 @@ public class CounterService extends Service {
 			Intent notificationIntent = new Intent(this, MainActivity.class);
 			notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
 			notificationIntent.putExtra(RReminder.START_COUNTER, false);
-			PendingIntent pi = PendingIntent.getActivity(this, 15, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-				Intent turnOffIntent = new Intent (this, MainActivity.class);
-				turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
-				turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
-				turnOffIntent.putExtra(RReminder.PERIOD_END_TIME,periodEndTime);
-				PendingIntent pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
-				builder.addAction(R.drawable.ic_notify_turn_off , getString(R.string.notify_turn_off), pIntentTurnOff);
-				builder.setPriority(Notification.PRIORITY_MAX);
+			PendingIntent pi;
+			if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+				pi = PendingIntent.getActivity(this, 15, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+			} else {
+				pi = PendingIntent.getActivity(this, 15, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 			}
+
+
+
+			Intent turnOffIntent = new Intent (this, MainActivity.class);
+			turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
+			turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
+			turnOffIntent.putExtra(RReminder.PERIOD_END_TIME,periodEndTime);
+			PendingIntent pIntentTurnOff;
+			if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+				pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+			} else {
+				pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
+			}
+
+			builder.addAction(R.drawable.ic_notify_turn_off , getString(R.string.notify_turn_off), pIntentTurnOff);
+			builder.setPriority(Notification.PRIORITY_MAX);
 			//note = new Notification(android.R.drawable.stat_notify_sync, null, System.currentTimeMillis());
 			builder.setSmallIcon(R.drawable.ic_notify_work_period);
 			builder.setContentTitle(this.getString(R.string.notify_reminder_is_on_title));
+
 			if(type ==RReminder.WORK || type == RReminder.WORK_EXTENDED){
 				builder.setContentText(this.getString(R.string.notify_reminder_is_on_work_message));
 				builder.setSmallIcon(R.drawable.ic_notify_work_period);

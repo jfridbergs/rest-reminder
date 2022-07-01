@@ -2,6 +2,7 @@
 <resources>
     <string-array name="intervals_array">
         <item>overall</item>
+        <item>day</item>
         <item>week</item>
         <item>month</item>
         <item>year</item>

@@ -89,15 +89,20 @@ public class StatsFragment extends Fragment {
                 break;
             }
             case 1: {
-                intervalDateFrom.setText(RReminder.getSessionDateWeekString(intervalStart, intervalEnd-1000000));
+                intervalDateFrom.setText(RReminder.getSessionDateString(0,intervalEnd-1000000));
 
                 break;
             }
             case 2: {
-                intervalDateFrom.setText(RReminder.getSessionDateString(1,intervalStart+1000*60*60));
+                intervalDateFrom.setText(RReminder.getSessionDateWeekString(intervalStart, intervalEnd-1000000));
+
                 break;
             }
             case 3: {
+                intervalDateFrom.setText(RReminder.getSessionDateString(1,intervalStart+1000*60*60));
+                break;
+            }
+            case 4: {
                 intervalDateFrom.setText(RReminder.getSessionDateString(2,intervalStart+1000*60*60));
                 break;
             }
@@ -153,6 +158,10 @@ public class StatsFragment extends Fragment {
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / mSessionTotals.getTotalDuration())*100;
         int workPercentInt = Math.round(workPercent);
         int restPercentInt = 100-workPercentInt;
+
+        Log.d(debug, "date: "+RReminder.getSessionDateString(0,intervalEnd-1000000));
+        Log.d(debug, "workPercent: "+workPercentInt);
+        Log.d(debug, "restPercent: "+restPercentInt);
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
         columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));

@@ -45,16 +45,16 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
     private Session firstSession;
     private Spinner spinner;
     private Typeface titleFont;
-    private List<TimeInterval> yearly, monthly, weekly;
+    private List<TimeInterval> yearly, monthly, weekly, daily;
 
     private ImageView previous, next;
 
     private int currentIntervalType = 0;
 
     private ViewPager2 viewPager;
-    private ViewPager2.OnPageChangeCallback weeklyOnPageChangeCallback, monthlyOnPageChangeCallback, yearlyOnPageChangeCallback;
+    private ViewPager2.OnPageChangeCallback dailyOnPageChangeCallback, weeklyOnPageChangeCallback, monthlyOnPageChangeCallback, yearlyOnPageChangeCallback;
 
-    private FragmentStateAdapter pagerWeeklyAdapter, pagerMonthlyAdapter, pagerYearlyAdapter, pagerOverallAdapter;
+    private FragmentStateAdapter pagerDailyAdapter, pagerWeeklyAdapter, pagerMonthlyAdapter, pagerYearlyAdapter, pagerOverallAdapter;
 
 
     private String debug = "SESSION_DETAILS";
@@ -70,6 +70,23 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
         previous = findViewById(R.id.previous);
         next = findViewById(R.id.next);
+
+        dailyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                if(position ==0){
+                    previous.setVisibility(View.GONE);
+                } else {
+                    previous.setVisibility(View.VISIBLE);
+                }
+                if(position ==daily.size()-1){
+                    next.setVisibility(View.GONE);
+                } else {
+                    next.setVisibility(View.VISIBLE);
+                }
+            }
+        };
 
         weeklyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -139,7 +156,13 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             public void onChanged(@Nullable final Session session){
                 firstSession = session;
                 //launchPagerAdapter();
-                initIntervals();
+                if(firstSession!=null){
+                    initIntervals();
+                    findViewById(R.id.no_data).setVisibility(View.GONE);
+                } else {
+                    findViewById(R.id.no_data).setVisibility(View.VISIBLE);
+                }
+
             }
         });
 
@@ -179,20 +202,25 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 launchPagerAdapter(0);
                 currentIntervalType = 0;
                 break;
-            case "week":
+            case "day":
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(1);
                 currentIntervalType = 1;
                 break;
-            case "month":
+            case "week":
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(2);
                 currentIntervalType = 2;
                 break;
-            case "year":
+            case "month":
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(3);
                 currentIntervalType = 3;
+                break;
+            case "year":
+                unregisterCallback(currentIntervalType);
+                launchPagerAdapter(4);
+                currentIntervalType = 4;
                 break;
 
         }
@@ -260,6 +288,21 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         }
         weekly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
+        daily = new ArrayList<TimeInterval>();
+        date = Calendar.getInstance();
+        date.set(Calendar.HOUR_OF_DAY,0);
+        date.set(Calendar.MINUTE,0);
+        date.set(Calendar.SECOND,0);
+        intervalEnd = currentTime;
+        intervalStart = date.getTimeInMillis();
+        while(intervalStart>firstSessionStart){
+            daily.add(new TimeInterval(intervalStart,intervalEnd));
+            intervalEnd = intervalStart;
+            intervalStart-=86400000;
+        }
+
+        daily.add(new TimeInterval(firstSessionStart,intervalEnd));
+
 
         spinner.setOnItemSelectedListener(this);
 
@@ -274,26 +317,35 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 viewPager.setAdapter(pagerOverallAdapter);
             } break;
             case 1: {
+                if(pagerDailyAdapter==null) pagerDailyAdapter = new ScreenSlidePagerDailyAdapter(this);
+                viewPager.setAdapter(pagerDailyAdapter);
+                viewPager.registerOnPageChangeCallback(dailyOnPageChangeCallback);
+                viewPager.setCurrentItem(daily.size(), false);
+            } break;
+            case 2: {
                 if(pagerWeeklyAdapter==null) pagerWeeklyAdapter = new ScreenSlidePagerWeeklyAdapter(this);
                 viewPager.setAdapter(pagerWeeklyAdapter);
                 viewPager.registerOnPageChangeCallback(weeklyOnPageChangeCallback);
+                viewPager.setCurrentItem(weekly.size(), false);
             } break;
-            case 2: {
+            case 3: {
                 if(pagerMonthlyAdapter==null) pagerMonthlyAdapter = new ScreenSlidePagerMonthlyAdapter(this);
                 viewPager.setAdapter(pagerMonthlyAdapter);
                 viewPager.registerOnPageChangeCallback(monthlyOnPageChangeCallback);
+                viewPager.setCurrentItem(monthly.size(), false);
             } break;
-            case 3: {
+            case 4: {
                 if(pagerYearlyAdapter==null) pagerYearlyAdapter = new ScreenSlidePagerYearlyAdapter(this);
                 viewPager.setAdapter(pagerYearlyAdapter);
                 viewPager.registerOnPageChangeCallback(yearlyOnPageChangeCallback);
+                viewPager.setCurrentItem(yearly.size(), false);
             } break;
+
             default: break;
         }
 
-        int limit = Math.min(yearly.size(), 5);
-        viewPager.setOffscreenPageLimit(limit);
-        viewPager.setCurrentItem(weekly.size(), false);
+        viewPager.setOffscreenPageLimit(2);
+
         //Log.d(debug, "session position: "+getSessionPosition(sessionStart));
         //viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
 
@@ -301,9 +353,10 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 
     public void unregisterCallback(int type){
         switch(type){
-            case 1: viewPager.unregisterOnPageChangeCallback(weeklyOnPageChangeCallback); break;
-            case 2: viewPager.unregisterOnPageChangeCallback(monthlyOnPageChangeCallback); break;
-            case 3: viewPager.unregisterOnPageChangeCallback(yearlyOnPageChangeCallback); break;
+            case 1: viewPager.unregisterOnPageChangeCallback(dailyOnPageChangeCallback); break;
+            case 2: viewPager.unregisterOnPageChangeCallback(weeklyOnPageChangeCallback); break;
+            case 3: viewPager.unregisterOnPageChangeCallback(monthlyOnPageChangeCallback); break;
+            case 4: viewPager.unregisterOnPageChangeCallback(yearlyOnPageChangeCallback); break;
         }
     }
 
@@ -342,6 +395,22 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         super.onDestroy();
     }
 
+    private class ScreenSlidePagerDailyAdapter extends FragmentStateAdapter {
+        public ScreenSlidePagerDailyAdapter(FragmentActivity fa) {
+            super(fa);
+        }
+
+        @Override
+        public Fragment createFragment(int position) {
+            return StatsFragment.newInstance(1, daily.get(daily.size()-position-1).getStart(),daily.get(daily.size()-position-1).getEnd());
+        }
+
+        @Override
+        public int getItemCount() {
+            return daily.size();
+        }
+    }
+
     private class ScreenSlidePagerWeeklyAdapter extends FragmentStateAdapter {
         public ScreenSlidePagerWeeklyAdapter(FragmentActivity fa) {
             super(fa);
@@ -349,7 +418,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 
         @Override
         public Fragment createFragment(int position) {
-            return StatsFragment.newInstance(1, weekly.get(weekly.size()-position-1).getStart(),weekly.get(weekly.size()-position-1).getEnd());
+            return StatsFragment.newInstance(2, weekly.get(weekly.size()-position-1).getStart(),weekly.get(weekly.size()-position-1).getEnd());
         }
 
         @Override
@@ -365,7 +434,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 
         @Override
         public Fragment createFragment(int position) {
-            return StatsFragment.newInstance(2, monthly.get(monthly.size()-position-1).getStart(),monthly.get(monthly.size()-position-1).getEnd());
+            return StatsFragment.newInstance(3, monthly.get(monthly.size()-position-1).getStart(),monthly.get(monthly.size()-position-1).getEnd());
         }
 
         @Override
@@ -381,7 +450,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 
         @Override
         public Fragment createFragment(int position) {
-            return StatsFragment.newInstance(3, yearly.get(yearly.size()-position-1).getStart(),yearly.get(yearly.size()-position-1).getEnd());
+            return StatsFragment.newInstance(4, yearly.get(yearly.size()-position-1).getStart(),yearly.get(yearly.size()-position-1).getEnd());
         }
 
         @Override

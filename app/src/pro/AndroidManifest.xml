@@ -8,6 +8,7 @@
             android:label="@string/title_activity_calendar"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"
+            android:exported="false"
             android:theme="@style/Theme.WorkRestTheme.NoActionBar"></activity>
         <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionDetailsActivity"
@@ -15,6 +16,7 @@
             android:resizeableActivity="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"
+            android:exported="false"
             android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
         <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionDetailsViewActivity"
@@ -22,6 +24,7 @@
             android:resizeableActivity="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"
+            android:exported="false"
             android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
         <activity
             android:name="com.colormindapps.rest_reminder_alarm.StatsActivity"
@@ -29,11 +32,13 @@
             android:resizeableActivity="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity"
+            android:exported="false"
             android:theme="@style/Theme.WorkRestTheme.NoActionBar" />
         <activity
             android:name="com.colormindapps.rest_reminder_alarm.SessionsListActivity"
             android:label="@string/title_activity_sessions"
-            android:resizeableActivity="false" />
+            android:resizeableActivity="false"
+            android:exported="false"/>
     </application>
 
 </manifest>

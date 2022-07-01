@@ -78,7 +78,7 @@ public class EspressoDatabase {
     @Rule
     public IntentsTestRule<MainActivity> mActivityRule =
             new IntentsTestRule<MainActivity>(MainActivity.class, false, true);
-
+/*
     @Before
     public void setUp(){
         preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -710,6 +710,8 @@ public class EspressoDatabase {
         onView(withText("OK")).perform(click());
 
     }
+
+ */
 
 
 }

@@ -23,7 +23,7 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CardFrontViewFragment extends Fragment {
+public class SessionDetailsViewFragment extends Fragment {
 
     TextView sessionDate, sessionClock, sessionDuration;
     PieView pieView;
@@ -34,9 +34,9 @@ public class CardFrontViewFragment extends Fragment {
     List<PeriodTotals> mPeriodTotals;
     private String debug = "RR_CARD_FRONT";
 
-    public static CardFrontViewFragment newInstance( long sessionStart, long sessionEnd) {
+    public static SessionDetailsViewFragment newInstance(long sessionStart, long sessionEnd) {
 
-        CardFrontViewFragment fragment = new CardFrontViewFragment();
+        SessionDetailsViewFragment fragment = new SessionDetailsViewFragment();
         Bundle args = new Bundle();
         args.putLong("session_start", sessionStart);
         args.putLong("session_end", sessionEnd);
@@ -149,7 +149,6 @@ public class CardFrontViewFragment extends Fragment {
             pieHelperArrayList.add(new PieHelper(100f*intList.get(i)/totalInt));
         }
 
-        pieView.selectedPie(PieView.NO_SELECTED_INDEX);
         pieView.showPercentLabel(true);
         pieView.setDate(pieHelperArrayList);
     }
@@ -180,6 +179,9 @@ public class CardFrontViewFragment extends Fragment {
             //Log.d(debug, "period length: "+periodLength);
            // Log.d(debug, "percent: "+fraction);
             int periodType = mPeriods.get(i).getType();
+            Log.d(debug, "period start: "+RReminder.getTimeString(getContext(), mPeriods.get(i).getStartTime()));
+            Log.d(debug, "period duration: "+RReminder.getDurationFromMillis(getContext(), mPeriods.get(i).getDuration()));
+            Log.d(debug, "period initial duration: "+RReminder.getDurationFromMillis(getContext(), mPeriods.get(i).getInitialDuration()));
             switch(periodType){
                 case 1: case 3:{
                     totalWork+=periodLength;
@@ -219,20 +221,7 @@ public class CardFrontViewFragment extends Fragment {
         columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
         columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
         pieView.setColumnData(columnHelperList);
-        pieView.setOnPieClickListener(new PieView.OnPieClickListener() {
-            @Override
-            public void onPieClick(int index) {
-                if(index == PieView.NO_SELECTED_INDEX) {
-                    if (pieView.isDonutOnScreen()){
-                        Log.d(debug, "TO_COLUMN");
-                        pieView.toColumn();
-                    } else {
-                        pieView.toDonut();
-                    }
-                }
-            }
-        });
-        //pieView.selectedPie(2);
+
     }
 
 }

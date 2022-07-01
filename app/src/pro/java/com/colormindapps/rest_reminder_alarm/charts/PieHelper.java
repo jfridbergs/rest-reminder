@@ -20,7 +20,7 @@ public class PieHelper {
     private String debug="PIE_HELPER";
     private Period period;
 
-    int velocity = 5;
+    int velocity = 2;
 
     public PieHelper (float percent){
         this(percent, null, null);
@@ -30,6 +30,7 @@ public class PieHelper {
     }
 
     PieHelper(float percent, Period period, String title){
+        Log.d(debug, "percent: "+percent);
         this.sweepDegree = percent * 300;
         this.period = period;
         this.title = title;

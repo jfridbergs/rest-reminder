@@ -2,6 +2,7 @@ package com.colormindapps.rest_reminder_alarm.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -23,8 +24,14 @@ public interface PeriodDao {
     @Query("DELETE FROM period_table WHERE start_time = :startTime")
     void deletePeriod(long startTime);
 
+    @Query("DELETE FROM period_table WHERE start_time >= :sessionStartTime")
+    void deleteShortSessionPeriods(long sessionStartTime);
+
     @Query("DELETE FROM period_table WHERE start_time + duration < :currentTime")
     void deleteOlder(long currentTime);
+
+    @Delete
+    int deletePeriod(Period period);
 
 
     @Query("SELECT * FROM period_table WHERE start_time >= :sessionStart AND start_time<=:sessionEnd ORDER BY start_time ASC")
@@ -35,6 +42,9 @@ public interface PeriodDao {
 
     @Query("SELECT * FROM period_table ORDER BY start_time DESC LIMIT 1")
     LiveData<Period> getLastPeriod();
+
+    @Query("SELECT * FROM period_table ORDER BY start_time DESC LIMIT 2")
+    LiveData<List<Period>> getLastTwoPeriods();
 
     @Query("SELECT COUNT(*) FROM period_table WHERE period_type = :type AND start_time >= :sessionStart AND start_time < :sessionEnd")
     LiveData<Integer> getPeriodCount(int type, long sessionStart, long sessionEnd);

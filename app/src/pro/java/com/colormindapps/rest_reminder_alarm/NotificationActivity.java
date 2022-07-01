@@ -15,6 +15,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -28,6 +29,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
+import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -49,7 +52,7 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
-
+import java.util.List;
 
 
 public class NotificationActivity extends FragmentActivity implements
@@ -79,8 +82,13 @@ public class NotificationActivity extends FragmentActivity implements
 	private Node connectedNode;
 	private boolean mResolvingError = false;
 	private long currentPeriodStartTime = 0;
+	private TextView periodTypeTotals;
 
 	private String debug = "NOTIFICATION_ACTIVITY";
+
+	private LiveData<Session> lastLDSession;
+	private Observer<Session> lastSessionObserver;
+	private SessionsViewModel mSessionsViewModel;
 
 	//Request code for launching the Intent to resolve Google Play services errors.
 	private static final int REQUEST_RESOLVE_ERROR = 1000;
@@ -96,6 +104,7 @@ public class NotificationActivity extends FragmentActivity implements
 		buttonFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-Roman.otf");
 
 		mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
+		mSessionsViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
 
 		mPeriodViewModel.getLastPeriod().observe(this, new Observer<Period>(){
 			@Override
@@ -186,11 +195,27 @@ public class NotificationActivity extends FragmentActivity implements
         notificationTitle.setTypeface(titleFont);
         ImageView image =findViewById(R.id.notification_image);
         TextView notificationDescription =findViewById(R.id.notification_description);
+		TextView sessionStart = findViewById(R.id.session_start);
+		periodTypeTotals = findViewById(R.id.work_total);
+		TextView restTotals = findViewById(R.id.rest_total);
         notificationDescription.setTypeface(descriptionFont);
         Button notificationButton = findViewById(R.id.notification_button);
 		Button extendPeriodEnd =  findViewById(R.id.button_notification_period_end_extend);
         notificationButton.setTypeface(buttonFont);
         rootLayout =  findViewById(R.id.root_layout);
+
+		lastLDSession = mSessionsViewModel.getCurrentSession();
+		lastSessionObserver = session -> {
+			if(session!=null){
+				String startTime = RReminder.getTimeString(getApplicationContext(),session.getSessionStart()).toString();
+				sessionStart.setText(getString(R.string.session_started, startTime));
+			}
+			fillSessionTotals(session.getSessionStart());
+			lastLDSession.removeObserver(lastSessionObserver);
+
+
+		};
+		lastLDSession.observe(this, lastSessionObserver);
 
 
         switch(type){
@@ -293,6 +318,17 @@ public class NotificationActivity extends FragmentActivity implements
 
 
     }
+
+	public void fillSessionTotals(long sessionStart){
+		mPeriodViewModel.getPeriodTotals(sessionStart,previousPeriodEnd).observe(this, new Observer<List<PeriodTotals>>(){
+			@Override
+			public void onChanged(@Nullable final List<PeriodTotals> periodTotals){
+				String workTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(0).getTotalDuration());
+				String restTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(1).getTotalDuration());
+				periodTypeTotals.setText(getString(R.string.session_details, workTotals, restTotals));
+			}
+		});
+	}
 	
 	@Override
 	protected void onResume(){
@@ -552,7 +588,7 @@ public class NotificationActivity extends FragmentActivity implements
 	
 	public void showExtendDialog(){
 		if(currentPeriodStartTime!=0){
-			DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, currentPeriodStartTime,mCalendar, 1,previousPeriodEnd);
+			DialogFragment newFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, type, extendCount, mCalendar, 1,previousPeriodEnd);
 			newFragment.show(getSupportFragmentManager(), "extendDialog");
 		}
 

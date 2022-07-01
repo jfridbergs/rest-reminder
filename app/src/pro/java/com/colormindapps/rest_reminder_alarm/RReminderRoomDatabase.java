@@ -181,7 +181,7 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             for(int i = 1; i<current.get(Calendar.DAY_OF_MONTH);i=i+2){
                 date.set(Calendar.DAY_OF_MONTH,i);
                 Log.d("DATABASE", "year (day): "+date.get(Calendar.YEAR));
-                insertSession(date.getTimeInMillis(),5+i,15+i,10+i);
+                insertSession(date.getTimeInMillis(),5+(i/2),15+i,10+i);
             }
             /*
             long time = Calendar.getInstance().getTimeInMillis();

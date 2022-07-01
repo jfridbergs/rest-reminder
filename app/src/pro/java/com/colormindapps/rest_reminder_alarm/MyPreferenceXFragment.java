@@ -164,10 +164,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 			} else {
 				Log.d("RREMINDER_PREFERENCE", "IS null");
 			}
-			dataFromCounterSerivce = parentActivity.getDataFromService();
-			periodType = dataFromCounterSerivce.getInt(RReminder.PERIOD_TYPE);
-			extendCount = dataFromCounterSerivce.getInt(RReminder.EXTEND_COUNT);
-			periodEndTimeValue = dataFromCounterSerivce.getLong(RReminder.PERIOD_END_TIME);
+			//dataFromCounterSerivce = parentActivity.getDataFromService();
 		}
 
 		//updating the preferences values on wear device

@@ -70,6 +70,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.colormindapps.rest_reminder_alarm.data.Period;
+import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
 import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
@@ -171,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements
 	private Typeface swipeFont;
 	private Typeface timerFont;
 	private RelativeLayout timerButtonLayout;
-	private Button extendPeriodEnd,  endPeriodMultipleWindow;
+	private Button extendPeriodEnd,  endPeriodMultipleWindow, lastSession;
 	private TextView timerHour1, timerMinute1, timerSecond1, timerHour2, timerSecond2, timerMinute2, colon, point;
 	private int turnOffValue=0;
 	private boolean turnOffFirstIntent;
@@ -185,10 +186,11 @@ public class MainActivity extends AppCompatActivity implements
 	private Session currentSession;
 	private Period mPeriod;
 	private boolean initialObserverCall;
-	private LiveData<Session> currentLDSession;
+	private LiveData<Session> currentLDSession, lastLDSession;
 	private LiveData<Period> currentLDPeriod;
-	private Observer<Session> sessionObserver;
+	private Observer<Session> sessionObserver, lastSessionObserver;
 	private Observer<Period> periodObserver;
+	private Session mLastSession;
 
 	private ValueAnimator bgAnimation;
 
@@ -234,8 +236,13 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	else if (item.getItemId() == R.id.menu_delete_db){
-		mSessionsViewModel.deleteOlder(0);
-		Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
+		if(!RReminderMobile.isCounterServiceRunning(getApplicationContext())){
+			mSessionsViewModel.deleteOlder(0);
+			Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
+		} else {
+			Toast.makeText(this, "only when Rest Reminder is turned off", Toast.LENGTH_SHORT).show();
+		}
+
 
 
 	}
@@ -501,6 +508,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		description =  findViewById(R.id.description_text);
 		extendPeriodEnd = findViewById(R.id.button_period_end_extend);
+		lastSession = findViewById(R.id.button_last_session);
 		endPeriodMultipleWindow = findViewById(R.id.button_end_period);
 		swipeArea =  findViewById(R.id.swipe_area_text);
 		swipeAreaListenerUsed = false;
@@ -559,12 +567,15 @@ public class MainActivity extends AppCompatActivity implements
 		//dismissExtendDialog();
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			turnedOff = false;
+			/*
 			mPeriodViewModel.getLastPeriod().observe(this, new Observer<Period>(){
 				@Override
 				public void onChanged(@Nullable final Period period){
 					periodStartTime = period.getStartTime();
 				}
 			});
+
+			 */
 		}
 
 
@@ -872,7 +883,6 @@ public class MainActivity extends AppCompatActivity implements
 
 		currentSession = new Session(0,sessionStartTime,sessionStartTime);
 		mSessionsViewModel.insert(currentSession);
-		periodStartTime = sessionStartTime;
 		mPeriod = new Period(0,1,sessionStartTime,firstPeriodEndTime-sessionStartTime,0,0l,0);
 		Log.d(debug, "insert period value: "+firstPeriodEndTime);
 		mPeriodViewModel.insert(mPeriod);
@@ -923,18 +933,25 @@ public class MainActivity extends AppCompatActivity implements
 		currentLDSession.observe(this, sessionObserver);
 	}
 
-	public void getAndUpdatePeriodDb(long startTime, long duration, boolean swipe){
-		currentLDPeriod = mPeriodViewModel.getPeriod(startTime);
+	public void getAndUpdatePeriodDb(long newEnd, boolean swipe){
+		currentLDPeriod = mPeriodViewModel.getLastPeriod();
 		periodObserver = new Observer<Period>() {
 			@Override
 			public void onChanged(Period period) {
 				Log.d(debug, "getPeriod observer onChanged");
 				mPeriod = period;
+				long actualDuration = newEnd - mPeriod.getStartTime();
 				if(swipe){
-					mPeriod.setInitialDuration(period.getDuration());
 					mPeriod.setEnded(1);
+					long initialDuration = mPeriod.getInitialDuration();
+					//special case when a period has been extended and then ended before its intended end time (negative extend length)
+					if(initialDuration!=0 && initialDuration > actualDuration){
+						Log.d(debug, "initialDuration > actual duration");
+						mPeriod.setInitialDuration(actualDuration);
+
+					}
 				}
-				mPeriod.setDuration(duration);
+				mPeriod.setDuration(actualDuration);
 				updateCurrentPeriod();
 			}
 		};
@@ -943,8 +960,8 @@ public class MainActivity extends AppCompatActivity implements
 		currentLDPeriod.observe(this, periodObserver);
 	}
 
-	public void getAndUpdatePeriodExtend(long startTime, long newEndTime, int type, int extendCount){
-		currentLDPeriod = mPeriodViewModel.getPeriod(startTime);
+	public void getAndUpdatePeriodExtend(long newEndTime, int type, int extendCount){
+		currentLDPeriod = mPeriodViewModel.getLastPeriod();
 		periodObserver = new Observer<Period>() {
 			@Override
 			public void onChanged(Period period) {
@@ -954,7 +971,7 @@ public class MainActivity extends AppCompatActivity implements
 				if(extendCount==1){
 					mPeriod.setInitialDuration(period.getDuration());
 				}
-				mPeriod.setDuration(newEndTime-startTime);
+				mPeriod.setDuration(newEndTime-period.getStartTime());
 				Log.d(debug, "getPeriod observer onChanged");
 				mPeriodViewModel.update(mPeriod);
 				currentLDPeriod.removeObserver(periodObserver);
@@ -1006,7 +1023,15 @@ public class MainActivity extends AppCompatActivity implements
 			public void onChanged(Session session) {
 				currentSession = session;
 				currentSession.setSessionEnd(currentTime);
-				mSessionsViewModel.update(currentSession);
+				long sessionStartTime = currentSession.getSessionStart();
+				if((currentTime - sessionStartTime) > 1000*60){
+					mSessionsViewModel.update(currentSession);
+					getAndUpdatePeriodDb(currentTime,false);
+				} else {
+					mSessionsViewModel.deleteSession(currentSession);
+					mPeriodViewModel.deleteShortSessionPeriods(sessionStartTime);
+				}
+
 				currentLDSession.removeObserver(sessionObserver);
 			}
 		};
@@ -1015,7 +1040,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		Log.d(debug, "period original end time:"+periodEndTime);
 		Log.d(debug, "period actual end time:"+ currentTime);
-		getAndUpdatePeriodDb(periodStartTime,currentTime-periodStartTime,false);
+
 
 
 
@@ -1171,7 +1196,7 @@ public class MainActivity extends AppCompatActivity implements
 			}
 			new MobilePeriodManager(getApplicationContext()).setPeriod(updatedType,updatedPeriodEndTime, updatedExtendCount);
 			RReminderMobile.startCounterService(getApplicationContext(), updatedType, updatedExtendCount, updatedPeriodEndTime, false);
-			getAndUpdatePeriodExtend(periodStartTime,updatedPeriodEndTime,updatedType,updatedExtendCount);
+			getAndUpdatePeriodExtend(updatedPeriodEndTime,updatedType,updatedExtendCount);
 
 			Intent intent = new Intent(this, CounterService.class);
 			bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -1263,6 +1288,7 @@ public class MainActivity extends AppCompatActivity implements
 		endPeriodMultipleWindow.setVisibility(View.GONE);
 		if (isOn) {
 			activityTitle.setTextColor(colorBlack);
+			lastSession.setVisibility(View.GONE);
 			//toolBar.setTitleTextColor(colorBlack);
 			if(displayTurnOffHint()){
 				description.setText(R.string.description_turn_off);
@@ -1424,6 +1450,22 @@ public class MainActivity extends AppCompatActivity implements
 
 
 		} else {
+
+			lastLDSession = mSessionsViewModel.getLastSession();
+			lastSessionObserver = session -> {
+				if(session!=null){
+						lastSession.setVisibility(View.VISIBLE);
+				} else {
+					lastSession.setVisibility(View.GONE);
+				}
+				lastLDSession.removeObserver(lastSessionObserver);
+
+
+			};
+			lastLDSession.observe(this, lastSessionObserver);
+
+
+
 			toolBar.setTitleTextColor(colorWhite);
 			activityTitle.setTextColor(colorWhite);
 			activityTitle.setText(getString(R.string.reminder_off_title));
@@ -1725,13 +1767,31 @@ public class MainActivity extends AppCompatActivity implements
 	public void showExtendDialog(View v) {
 		if(RReminder.getExtendOptionsCount(MainActivity.this)>1){
 			stopCountDownTimer();
-			extendFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, periodType, extendCount, periodStartTime,periodEndTimeValue, 0, 0l);
+			extendFragment = ExtendDialog.newInstance(R.string.extend_dialog_title, periodType, extendCount, periodEndTimeValue, 0, 0l);
 			extendFragment.show(getSupportFragmentManager(), "extendDialog");
 			dialogOnScreen = true;
 		} else {
 			extendPeriod(RReminder.EXTEND_PERIOD_SINGLE_OPTION,periodType);
 		}
 
+	}
+
+	public void openLastSession(View v){
+
+
+		lastLDSession = mSessionsViewModel.getLastSession();
+		lastSessionObserver = session -> {
+			if(session!=null){
+				Intent intent = new Intent(getApplicationContext(), SessionDetailsViewActivity.class);
+				intent.putExtra(RReminder. DB_SESSION_START, session.getSessionStart());
+				intent.putExtra(RReminder. DB_SESSION_END, session.getSessionEnd());
+				startActivity(intent);
+			}
+			lastLDSession.removeObserver(lastSessionObserver);
+
+
+		};
+		lastLDSession.observe(this, lastSessionObserver);
 	}
 
 	public void extendPeriod(int flag,int functionType){
@@ -1767,7 +1827,7 @@ public class MainActivity extends AppCompatActivity implements
 		functionCalendar = RReminder.getTimeAfterExtend(getApplicationContext(), 1, timeRemaining);
 		new MobilePeriodManager(getApplicationContext()).setPeriod(functionType,functionCalendar, extendCount);
 		RReminderMobile.startCounterService(getApplicationContext(), functionType, extendCount, functionCalendar, false);
-		getAndUpdatePeriodExtend(periodStartTime, functionCalendar, functionType, extendCount);
+		getAndUpdatePeriodExtend(functionCalendar, functionType, extendCount);
 
 		updateReminderStatus(RReminder.DATA_API_SOURCE_MOBILE,functionType,functionCalendar,extendCount, true, wearOn);
 
@@ -1867,7 +1927,7 @@ public class MainActivity extends AppCompatActivity implements
 				if (menuLayout instanceof ViewGroup) {
 					// index here depends on actual toolbar layout
 					menu3dots = ((ViewGroup) menuLayout).getChildAt(0);
-					viewTarget = new ViewTarget(menu3dots);
+					viewTarget = new ViewTarget(R.id.nav_view, this);
 				} else {
 					viewTarget = new ViewTarget(R.id.timer_layout, this);
 				}
@@ -2014,7 +2074,7 @@ public class MainActivity extends AppCompatActivity implements
 		long currentTime = Calendar.getInstance().getTimeInMillis();
 		functionCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, currentTime, 1, 0L);
 		//update previously running period with end values
-		getAndUpdatePeriodDb(periodStartTime, currentTime-periodStartTime, true);
+		getAndUpdatePeriodDb( currentTime, true);
 
 
 
@@ -2336,7 +2396,7 @@ public class MainActivity extends AppCompatActivity implements
 
 					}
 
-					fullSwipeLength = requiredSwipeDistance * 6 / 10;
+					fullSwipeLength = requiredSwipeDistance * 3 / 10;
 
 
 					tempDescription = description.getText();

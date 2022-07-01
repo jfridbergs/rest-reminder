@@ -31,7 +31,7 @@ public class SessionDetailsFragment extends Fragment {
     int sessionId;
     List<Period> mPeriods;
     OnFlipCardListener parentActivity;
-    private String debug = "RR_CARD_FRONT";
+    private String debug = "DETAILS_FRAGMENT";
 
     public static SessionDetailsFragment newInstance(int sessionId, long sessionStart, long sessionEnd) {
 
@@ -123,7 +123,6 @@ public class SessionDetailsFragment extends Fragment {
             pieHelperArrayList.add(new PieHelper(100f*intList.get(i)/totalInt));
         }
 
-        pieView.selectedPie(PieView.NO_SELECTED_INDEX);
         pieView.showPercentLabel(true);
         pieView.setDate(pieHelperArrayList);
     }
@@ -202,19 +201,7 @@ public class SessionDetailsFragment extends Fragment {
         columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), workCount, totalWork, workExtendCount,0));
         columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), restCount, totalRest, restExtendCount,0));
         pieView.setColumnData(columnHelperList);
-        pieView.setOnPieClickListener(new PieView.OnPieClickListener() {
-            @Override
-            public void onPieClick(int index) {
-                if(index == PieView.NO_SELECTED_INDEX) {
-                    if (pieView.isDonutOnScreen()){
-                        pieView.toColumn();
-                    } else {
-                        pieView.toDonut();
-                    }
-                }
-            }
-        });
-        //pieView.selectedPie(2);
+
     }
 
 }

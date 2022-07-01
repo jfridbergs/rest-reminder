@@ -36,6 +36,8 @@ public class SessionsViewModel extends AndroidViewModel {
     LiveData<List<Session>> getSessionsInPeriodASC(long from, long to){ return mRepository.getSessionsInPeriodASC(from, to);}
     LiveData<Session> getSessionByStart(long sessionStartTime){return mRepository.getSessionByStart(sessionStartTime);}
     LiveData<Session> getFirstSession(){return mRepository.getFirstSession();}
+    LiveData<Session> getLastSession(){return mRepository.getLastSession();}
+    LiveData<Session> getCurrentSession(){return mRepository.getCurrentSession();}
     LiveData<Session> getSessionById(int sessionId){return mRepository.getSessionById(sessionId);}
     LiveData<SessionTotals> getSessionTotals(long start, long end){return mRepository.getSessionTotals(start, end);}
 
@@ -47,6 +49,8 @@ public class SessionsViewModel extends AndroidViewModel {
     public void deleteOlder(long currentTime){
         mRepository.deleteOlderSessions(currentTime);
     }
+
+    public void deleteSession(Session session) {mRepository.deleteSession(session);}
 
     public void update(Session session){
         mRepository.updateSession(session);

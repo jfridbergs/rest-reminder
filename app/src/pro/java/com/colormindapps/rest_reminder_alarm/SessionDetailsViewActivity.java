@@ -155,7 +155,7 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
 
         @Override
         public Fragment createFragment(int position) {
-            return CardFrontViewFragment.newInstance(mSessions.get(position).getSessionStart(),mSessions.get(position).getSessionEnd());
+            return SessionDetailsViewFragment.newInstance(mSessions.get(position).getSessionStart(),mSessions.get(position).getSessionEnd());
         }
 
         @Override

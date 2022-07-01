@@ -23,6 +23,7 @@ import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -32,7 +33,7 @@ public class ExtendDialog extends DialogFragment{
 	private int extendCount;
 	private int periodType;
 	private int activityType;
-	private long periodEndTimeValue, periodStartTime;
+	private long periodEndTimeValue;
 	private OnDialogCloseListener parentActivity;
 	public boolean dialogIsOpen;
 	private boolean positiveDismissal = false;
@@ -40,7 +41,9 @@ public class ExtendDialog extends DialogFragment{
 	private Period mPeriod;
 	private PeriodViewModel mPeriodViewModel;
 	private LiveData<Period> currentLDPeriod;
+	private LiveData<List<Period>> currentLDPeriodList;
 	private Observer<Period> periodObserver;
+	private Observer<List<Period>> periodListObserver;
 
 	String debug = "EXTEND_DIALOG";
 	
@@ -65,14 +68,13 @@ public class ExtendDialog extends DialogFragment{
 	
 
 	
-	public static ExtendDialog newInstance(int title, @RReminder.PeriodType int periodType, int extendCount, long periodStartTime, long periodEndTimeValue, int activityType, long previousPeriodEnd){
+	public static ExtendDialog newInstance(int title, @RReminder.PeriodType int periodType, int extendCount, long periodEndTimeValue, int activityType, long previousPeriodEnd){
 		ExtendDialog fragment = new ExtendDialog();
 		Bundle args = new Bundle();
 		args.putInt("title", title);
 		args.putInt(RReminder.PERIOD_TYPE, periodType);
 		args.putInt(RReminder.EXTEND_COUNT, extendCount);
 		args.putLong(RReminder.PERIOD_END_TIME, periodEndTimeValue);
-		args.putLong(RReminder.PERIOD_START_TIME, periodStartTime);
 		args.putLong(RReminder.PREVIOUS_PERIOD_END_TIME, previousPeriodEnd);
 		args.putInt(RReminder.ACTIVITY_TYPE, activityType);
 		fragment.setArguments(args);
@@ -92,7 +94,6 @@ public class ExtendDialog extends DialogFragment{
 			periodType = data.getInt(RReminder.PERIOD_TYPE);
 			extendCount = data.getInt(RReminder.EXTEND_COUNT);
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-			periodStartTime = data.getLong(RReminder.PERIOD_START_TIME);
 			activityType = data.getInt(RReminder.ACTIVITY_TYPE);
 		}
 		LayoutInflater inflater = requireActivity().getLayoutInflater();
@@ -143,7 +144,6 @@ public class ExtendDialog extends DialogFragment{
 			case 1:
 				RReminderMobile.cancelCounterAlarm(context.getApplicationContext(), RReminder.getNextType(periodType), extendCount,periodEndTimeValue);
 				toastText = getString(R.string.notification_toast_period_extended);
-				mPeriodViewModel.deletePeriod(periodStartTime);
 				break;
 			default:
 				toastText = "activity type exception"; break;
@@ -178,7 +178,7 @@ public class ExtendDialog extends DialogFragment{
 			dialogIsOpen = false;
 			break;
 		case 1:
-			getAndUpdatePeriodDb(functionCalendar, periodType, extendCount);
+			getAndUpdatePeriodDbNotification(functionCalendar, functionType, extendCount);
 			Intent i = new Intent(context, MainActivity.class);
             i.setAction(RReminder.PERIOD_EXTENDED_FROM_NOTIFICATION_ACTIVITY);
 			i.putExtra(RReminder.PERIOD_END_TIME, functionCalendar);
@@ -204,13 +204,31 @@ public class ExtendDialog extends DialogFragment{
 				mPeriod.setExtendCount(extendCount);
 				mPeriod.setInitialDuration(period.getDuration());
 				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
-				Log.d(debug, "getPeriod observer onChanged");
 				mPeriodViewModel.update(mPeriod);
 				currentLDPeriod.removeObserver(periodObserver);
 			}
 		};
 
 		currentLDPeriod.observe(this, periodObserver);
+	}
+
+	public void getAndUpdatePeriodDbNotification( long newEndTime, int type, int extendCount){
+		currentLDPeriodList = mPeriodViewModel.getLastTwoPeriods();
+		periodListObserver = new Observer<List<Period>>() {
+			@Override
+			public void onChanged(List<Period> periods) {
+				mPeriodViewModel.deletePeriod(periods.get(0));
+				mPeriod = periods.get(1);
+				mPeriod.setType(type);
+				mPeriod.setExtendCount(extendCount);
+				mPeriod.setInitialDuration(mPeriod.getDuration());
+				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
+				mPeriodViewModel.update(mPeriod);
+				currentLDPeriodList.removeObserver(periodListObserver);
+			}
+		};
+
+		currentLDPeriodList.observe(this, periodListObserver);
 	}
 
 

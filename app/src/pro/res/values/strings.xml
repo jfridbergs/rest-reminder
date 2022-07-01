@@ -5,6 +5,9 @@
     <string name="title_activity_sessions">Sessions</string>
     <string name="title_activity_session_details" translatable="false">SessionDetailsActivity</string>
     <string name="title_activity_calendar" translatable="false">CalendarActivity</string>
+    <string name="last_session">last session</string>
+    <string name="session_started">Session started at %1$s</string>
+    <string name="session_details">(work: %1$s, rest: %2$s)</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label" translatable="false">First Fragment</string>
     <string name="second_fragment_label" translatable="false">Second Fragment</string>

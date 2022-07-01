@@ -2,6 +2,7 @@ package com.colormindapps.rest_reminder_alarm.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -21,6 +22,9 @@ public interface SessionDao {
 
     @Query("DELETE FROM session_table")
     void deleteAll();
+
+    @Delete
+    int deleteSession(Session session);
 
     @Query("DELETE FROM session_table WHERE session_end < :currentTime")
     void deleteOlder(long currentTime);
@@ -44,10 +48,17 @@ public interface SessionDao {
     @Query("SELECT * FROM session_table ORDER BY session_start ASC LIMIT 1")
     LiveData<Session> getFirstSession();
 
+    @Query("SELECT * FROM session_table WHERE session_end > session_start ORDER BY session_start DESC LIMIT 1")
+    LiveData<Session> getLastSession();
+
+    @Query("SELECT * FROM session_table  ORDER BY session_start DESC LIMIT 1")
+    LiveData<Session> getCurrentSession();
+
+
     @Query("SELECT * FROM session_table WHERE session_id = :sessionId")
     LiveData<Session> getSessionById(int sessionId);
 
-    @Query("SELECT COUNT(*) as session_count, SUM(session_end - session_start) as total_duration, AVG(session_end - session_start) as session_average_length FROM session_table WHERE session_start >= :sessionStart AND session_start < :sessionEnd")
+    @Query("SELECT COUNT(*) as session_count, SUM(session_end - session_start) as total_duration, AVG(session_end - session_start) as session_average_length FROM session_table WHERE session_start >= :sessionStart AND session_start < :sessionEnd AND session_end > session_start")
     LiveData<SessionTotals> getSessionTotals(long sessionStart, long sessionEnd);
 
 }
