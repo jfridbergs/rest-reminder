@@ -213,5 +213,5 @@
     <string name="label_average">Average</string>
     <string name="average_session_length">Average session: %1$s</string>
     <string name="no_sessions_recorded">No data</string>
-    <string name="sessions_extend_mins">(%1$d min)</string>
+    <string name="sessions_extend_mins" translatable="false">(%1$d min)</string>
 </resources>

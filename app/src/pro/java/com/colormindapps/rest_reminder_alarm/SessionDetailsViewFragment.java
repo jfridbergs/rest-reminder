@@ -32,7 +32,7 @@ public class SessionDetailsViewFragment extends Fragment {
     private PeriodViewModel mPeriodViewModel;
     List<Period> mPeriods;
     List<PeriodTotals> mPeriodTotals;
-    private String debug = "RR_CARD_FRONT";
+    private String debug = "SESSION_DETAILS_FRAGMENT";
 
     public static SessionDetailsViewFragment newInstance(long sessionStart, long sessionEnd) {
 
@@ -116,17 +116,9 @@ public class SessionDetailsViewFragment extends Fragment {
             @Override
             public void onChanged(@Nullable final List<Period> periods){
                 mPeriods = periods;
-                long lastPeriodLength = mPeriods.get(mPeriods.size()-1).getDuration();
-                long sessionEndTitle = sessionEnd;
-                long sessionLengthTitle = 0l;
-                if(lastPeriodLength<60*1000){
-                    sessionEndTitle-=lastPeriodLength;
-                    sessionLengthTitle = sessionEndTitle-sessionStart;
-                } else {
-                    sessionLengthTitle = sessionEnd-sessionStart;
-                }
+                long sessionLengthTitle = sessionEnd-sessionStart;
 
-                sessionClock.setText(String.format(getString(R.string.time_from_to),RReminder.getTimeString(getContext(), sessionStart).toString(),RReminder.getTimeString(getContext(), sessionEndTitle).toString()));
+                sessionClock.setText(String.format(getString(R.string.time_from_to),RReminder.getTimeString(getContext(), sessionStart).toString(),RReminder.getTimeString(getContext(), sessionEnd).toString()));
                 sessionDuration.setText(RReminder.getDurationFromMillis(getContext(),sessionLengthTitle));
                 set(pieView);
             }
@@ -155,15 +147,8 @@ public class SessionDetailsViewFragment extends Fragment {
 
     private void set(PieView pieView){
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<>();
-        long lastPeriodLength = mPeriods.get(mPeriods.size()-1).getDuration();
-        int periodCount;
-        if(lastPeriodLength<60*1000){
-            sessionLength-=lastPeriodLength;
-            sessionEnd-=lastPeriodLength;
-            periodCount=mPeriods.size()-2;
-        } else {
-            periodCount= mPeriods.size()-1;
-        }
+        int periodCount = mPeriods.size()-1;
+
         int percentSum = 0;
         long totalWork = 0;
         long totalRest = 0;
@@ -171,10 +156,12 @@ public class SessionDetailsViewFragment extends Fragment {
         int restCount = 0;
         int workExtendCount = 0;
         int restExtendCount = 0;
+        float fractionTotal=0;
         //Log.d(debug, "Period count: "+mPeriods.size());
         for (int i=0; i<=periodCount;i++){
             long periodLength = mPeriods.get(i).getDuration();
             float fraction = (float)periodLength / sessionLength;
+            fractionTotal+=fraction;
             //Log.d(debug, "session length: "+sessionLength);
             //Log.d(debug, "period length: "+periodLength);
            // Log.d(debug, "percent: "+fraction);
@@ -202,6 +189,7 @@ public class SessionDetailsViewFragment extends Fragment {
             pieHelperArrayList.add(new PieHelper(fraction, mPeriods.get(i)));
 
         }
+        Log.d(debug, "fractionTotal: "+fractionTotal);
         /*
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<PieHelper>();
         pieHelperArrayList.add(new PieHelper(20, Color.BLACK));
@@ -214,12 +202,11 @@ public class SessionDetailsViewFragment extends Fragment {
         pieView.setSession(sessionStart,sessionEnd);
 
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / sessionLength)*100;
-        int workPercentInt = Math.round(workPercent);
-        int restPercentInt = 100-workPercentInt;
+        float restPercent = 100-workPercent;
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
-        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
-        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
+        columnHelperList.add(new ColumnHelper(workPercent, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
+        columnHelperList.add(new ColumnHelper(restPercent, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
         pieView.setColumnData(columnHelperList);
 
     }

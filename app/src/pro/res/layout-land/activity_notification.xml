@@ -77,6 +77,25 @@
 			        android:layout_marginBottom="@dimen/notification_description_marginVertical"
 			        android:gravity="center_vertical|center"        
 			        android:text="@string/notification_sample_text" />
+				<TextView
+					android:id="@+id/session_start"
+					style="@style/NormalFont"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginTop="@dimen/notification_description_marginVertical"
+					android:layout_marginLeft="@dimen/notification_description_marginHorizontal"
+					android:layout_marginRight="@dimen/notification_description_marginHorizontal"
+					android:gravity="center_vertical|center" />
+				<TextView
+					android:id="@+id/periods_total"
+					style="@style/SmallFont"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:layout_marginLeft="@dimen/notification_description_marginHorizontal"
+					android:layout_marginRight="@dimen/notification_description_marginHorizontal"
+					android:layout_marginBottom="@dimen/notification_description_marginVertical"
+					android:gravity="center_vertical|center" />
+
 	        </LinearLayout>
 
 	        <RelativeLayout
@@ -95,6 +114,7 @@
 	                android:layout_marginBottom="0dp"
 	                android:layout_marginLeft="@dimen/button_notification_period_end_extend_marginHorizontal"
 	                android:layout_marginRight="@dimen/button_notification_period_end_extend_marginHorizontal"
+					android:stateListAnimator="@null"
 	                android:background="@drawable/btn_extend_np"
 	                android:text="@string/extend_current_period" />
 		
@@ -108,6 +128,7 @@
 				    android:layout_marginBottom="0dp"
 				    android:layout_marginLeft="@dimen/notification_button_marginHorizontal"
 				    android:layout_marginRight="@dimen/notification_button_marginHorizontal"
+					android:stateListAnimator="@null"
 				    android:layout_toRightOf="@id/button_notification_period_end_extend"
 				    android:background="@drawable/btn_notification_np"
 				    android:onClick="notificationButtonAction"

@@ -312,6 +312,12 @@ public class PieView extends View {
         postInvalidate();
     }
 
+    public ArrayList<PieHelper> getPeriodList(){
+        return pieHelperList;
+    }
+
+    public ArrayList<ColumnHelper> getColumnList(){return columnHelperList;}
+
 
     public boolean isDonutOnScreen(){
         return booleanDrawDonut;
@@ -554,7 +560,7 @@ public class PieView extends View {
                     float imgX0, imgX1, imgY0, imgY1;
                     imgX0 = x0+xStepWidth/2f+toPx(33)-toPx(30);
                     imgX1 = x0+xStepWidth/2f+toPx(33)+toPx(30);
-                    if(cHelper.getPercent()<20){
+                    if(cHelper.getPercent()<25){
                         imgY0 = y0-toPx(RReminder.isTablet(getContext())?208:148);
                         imgY1 = y0-toPx(RReminder.isTablet(getContext())?168:108);
                     } else {
@@ -579,7 +585,7 @@ public class PieView extends View {
                     extendCount = ((cHelper.getExtendCount())>1 ? cHelper.getExtendCount()+" "+getContext().getString(R.string.extensions) : cHelper.getExtendCount()+" "+getContext().getString(R.string.extension));
                     extendTotalDuration = RReminder.getExtendMinsFromMillis(getContext(),cHelper.getTotalExtendDuration());
 
-                    if(cHelper.getPercent()<20){
+                    if(cHelper.getPercent()<25){
                         if(cHelper.getExtendCount()>0){
                             canvas.drawText(extendCount,textX0, y0-toPx(RReminder.isTablet(getContext())?60:40), columnTextExtendPaint);
                             canvas.drawText(extendTotalDuration,textX0, y0-toPx(RReminder.isTablet(getContext())?40:25), columnTextExtendAmountPaint);
@@ -744,6 +750,7 @@ public class PieView extends View {
         int index = 0;
         for (PieHelper pieHelper : pieHelperList) {
             Log.d(debug, "start degree: "+pieHelper.getStartDegree()+", end degree: "+pieHelper.getEndDegree());
+            Log.d(debug, "percent: "+pieHelper.getPercentStr());
             if (degree >= pieHelper.getStartDegree() && degree <= pieHelper.getEndDegree()) {
                 return index;
             }

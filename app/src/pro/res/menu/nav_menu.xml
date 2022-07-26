@@ -48,20 +48,6 @@
 
 
 
-    <item android:title="For testing">
-        <menu>
-            <item
-                android:id="@+id/menu_populate_db"
-                android:title="Fill database"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/menu_delete_db"
-                android:title="Delete database"
-                app:showAsAction="never"/></menu>
-
-    </item>
-
-
 
 
 

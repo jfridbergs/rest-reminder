@@ -196,8 +196,7 @@ public class NotificationActivity extends FragmentActivity implements
         ImageView image =findViewById(R.id.notification_image);
         TextView notificationDescription =findViewById(R.id.notification_description);
 		TextView sessionStart = findViewById(R.id.session_start);
-		periodTypeTotals = findViewById(R.id.work_total);
-		TextView restTotals = findViewById(R.id.rest_total);
+		periodTypeTotals = findViewById(R.id.periods_total);
         notificationDescription.setTypeface(descriptionFont);
         Button notificationButton = findViewById(R.id.notification_button);
 		Button extendPeriodEnd =  findViewById(R.id.button_notification_period_end_extend);
@@ -358,7 +357,7 @@ public class NotificationActivity extends FragmentActivity implements
 
 			new MobilePeriodManager(getApplicationContext()).setPeriod(nextType, nextPeriodEnd, extendCount);
 			RReminderMobile.startCounterService(this, nextType, 0, nextPeriodEnd, false);
-			Period nextPeriod = new Period(0,nextType,currentTime,nextPeriodEnd,0,0,0);
+			Period nextPeriod = new Period(0,nextType,currentTime,nextPeriodEnd-currentTime,0,0,0);
 			RReminderRoomDatabase.getDatabase(this)
 					.insertPeriod(nextPeriod);
 

@@ -106,6 +106,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         Calendar mycal = new GregorianCalendar(year, month, 1);
         int daysInMonth = mycal.getActualMaximum(Calendar.DAY_OF_MONTH);
         long periodFrom = RReminder.getMillisFromDate(year,month,1,true);
+        Log.d(debug, "decorateMonth, from value: "+periodFrom);
         long periodTo = RReminder.getMillisFromDate(year,month,daysInMonth,false);
 
 
@@ -126,12 +127,14 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
             calendar.setTimeInMillis(from);
             daysArray.add(calendar.get(Calendar.DAY_OF_MONTH));
         }
+        Log.d(debug, "daysArray contents: "+daysArray.toString());
         hSetNumbers = new HashSet(daysArray);
         ArrayList<CalendarDay> dates = new ArrayList<>();
         for (int day : hSetNumbers){
             dates.add(CalendarDay.from(year, month,day));
         }
         Log.d(debug, "arraylistDates size: "+dates.size());
+        Log.d(debug, "arraylistDates: "+dates.toString());
         eventDecorator = new EventDecorator(getApplicationContext(),dates);
         calendarView.addDecorator(eventDecorator);
         calendarView.invalidateDecorators();
@@ -143,7 +146,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         //noinspection ConstantConditions
         android.text.format.DateFormat df = new android.text.format.DateFormat();
        // getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
-        int month = date.getMonth()-1;
+        int month = date.getMonth();
         int shownValue = date.getYear()*100+month;
         if(!shownMonths.contains(shownValue)){
             Log.d(debug, "new month/year, add more decorations");

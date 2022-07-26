@@ -36,6 +36,7 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
     private PeriodViewModel mPeriodViewModel;
     private SessionsViewModel mSessionViewModel;
     private List<Period> mPeriods;
+    private int viewPagerPosition;
     private List<Session> mSessions;
     private ImageView previous, next;
 
@@ -58,7 +59,19 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
         mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
 
         previous = findViewById(R.id.previous);
+        previous.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(viewPagerPosition-1, true);
+            }
+        });
         next = findViewById(R.id.next);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(viewPagerPosition+1, true);
+            }
+        });
 
         viewPager = findViewById(R.id.pager);
         Log.d(debug, "session start: "+ sessionStart);
@@ -68,6 +81,7 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
                 } else {
@@ -117,6 +131,7 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
         viewPager.setOffscreenPageLimit(1);
         Log.d(debug, "session position: "+getSessionPosition(sessionStart));
         viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
+        viewPagerPosition = getSessionPosition(sessionStart);
         if(getSessionPosition(sessionStart) ==0){
             previous.setVisibility(View.GONE);
         } else {
@@ -180,10 +195,6 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
         else if (item.getItemId() == R.id.menu_session_list){
             Intent i = new Intent(this, CalendarActivity.class);
             startActivity(i);
-        }
-        else if (item.getItemId() == R.id.menu_populate_db){
-            // mSessionsViewModel.populateDatabase();
-            Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
         }
         else if (item.getItemId() == R.id.menu_open_stats){
             Intent i = new Intent(this, StatsActivity.class);

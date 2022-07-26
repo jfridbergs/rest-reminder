@@ -10,13 +10,14 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.matcher.BoundedMatcher;
 import androidx.test.internal.util.Checks;
 
+import com.colormindapps.rest_reminder_alarm.charts.ColumnGraphView;
+import com.colormindapps.rest_reminder_alarm.charts.PieView;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -24,6 +25,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import static androidx.core.util.Preconditions.checkNotNull;
 import static androidx.test.core.app.ApplicationProvider.getApplicationContext;
+import static java.lang.Math.abs;
 
 public class CustomMatchers {
     public static Matcher<View> withBackgroundColor(final int color) {
@@ -33,6 +35,8 @@ public class CustomMatchers {
             public boolean matchesSafely(View view) {
                 Drawable background = view.getBackground();
                 if (background instanceof ColorDrawable){
+                    Log.d("MATCHER", "actual color: "+((ColorDrawable) background).getColor());
+                    Log.d("MATCHER", "expected color: "+color);
                     return color == ((ColorDrawable) background).getColor();
                 } else {
                     return false;
@@ -63,6 +67,283 @@ public class CustomMatchers {
             }
         };
     }
+
+    public static Matcher<View> hasPeriodCount(final int periodCount) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                return pieView.getPeriodList().size() == periodCount;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("has period count: ");
+                description.appendValue(periodCount);
+            }
+        };
+    }
+
+    public static Matcher<View> hasPeriodLength(final int position, final long expectedLength) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                long length = pieView.getPeriodList().get(position).getPeriodDuration();
+                Log.d("CUSTOM_MATCHER", "period length abs: "+abs(length-expectedLength));
+                return abs(length-expectedLength) <1500;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected period length: ");
+                description.appendValue(expectedLength);
+
+            }
+        };
+    }
+
+    public static Matcher<View> hasPeriodStart(final int position, final long expectedStart) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                long periodStart = pieView.getPeriodList().get(position).getPeriodStart();
+                Log.d("CUSTOM_MATCHER", "period start abs: "+abs(periodStart-expectedStart));
+                return abs(periodStart-expectedStart) <1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected period start: ");
+                description.appendValue(expectedStart);
+
+            }
+        };
+    }
+
+    public static Matcher<View> hasPeriodType(final int position, final int expectedType) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                int type = pieView.getPeriodList().get(position).getPeriodType();
+                return type == expectedType;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected period type: ");
+                description.appendValue(expectedType);
+            }
+        };
+    }
+
+    public static Matcher<View> hasPercent(final int position, final float expectedPercent) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                float percent = pieView.getColumnList().get(position).getPercent();
+                Log.d("CUSTOM_MATCHER", "period percent abs: "+abs(percent- expectedPercent));
+                Log.d("CUSTOM_MATCHER", "actual percent: "+percent);
+                return abs(percent- expectedPercent)<1.0f;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected period percent: ");
+                description.appendValue(expectedPercent);
+            }
+        };
+    }
+
+    public static Matcher<View> hasEnded(final int position) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                return pieView.getPeriodList().get(position).getPeriod().getEnded()==1;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected period end status for period: ");
+                description.appendValue(position);
+            }
+        };
+    }
+
+    public static Matcher<View> hasExtendCount(final int position, final int expectedExtendCount) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                return pieView.getPeriodList().get(position).getPeriod().getExtendCount()==expectedExtendCount;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected extend count for period: ");
+                description.appendValue(position);
+                description.appendText(" is: ");
+                description.appendValue(expectedExtendCount);
+            }
+        };
+    }
+
+    public static Matcher<View> hasExtendLength(final int position, final long expectedExtendLength) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                long actualExtendLength = pieView.getPeriodList().get(position).getPeriod().getDuration() - pieView.getPeriodList().get(position).getPeriod().getInitialDuration();
+                Log.d("CUSTOM_MATCHER", "period extend length: "+abs(actualExtendLength-expectedExtendLength));
+                return abs(actualExtendLength-expectedExtendLength) <1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected extend length for period: ");
+                description.appendValue(position);
+                description.appendText(" is: ");
+                description.appendValue(expectedExtendLength);
+            }
+        };
+    }
+
+    public static Matcher<View> hasTotalLength(final int position, final long expectedLength) {
+        return new BoundedMatcher<View, PieView>(PieView.class) {
+
+            @Override
+            protected boolean matchesSafely(PieView pieView) {
+                /*
+                long lastPeriodLength = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodDuration();
+                int lastPeriodType = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodType();
+                Log.d("CUSTOM_MATCHER", "last period type: "+lastPeriodType+ ", and length: "+lastPeriodLength);
+
+                 */
+                long length = pieView.getColumnList().get(position).getTotalLength();
+
+                Log.d("CUSTOM_MATCHER", "actual length: "+length);
+                return abs(length-expectedLength)<1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("expected total length: ");
+                description.appendValue(expectedLength);
+            }
+        };
+    }
+
+    public static Matcher<View> hasColumnTotalLength(final int position, final long expectedLength) {
+        return new BoundedMatcher<View, ColumnGraphView>(ColumnGraphView.class) {
+
+            @Override
+            protected boolean matchesSafely(ColumnGraphView columnGraphView) {
+                /*
+                long lastPeriodLength = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodDuration();
+                int lastPeriodType = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodType();
+                Log.d("CUSTOM_MATCHER", "last period type: "+lastPeriodType+ ", and length: "+lastPeriodLength);
+
+                 */
+                long length = columnGraphView.getColumnList().get(position).getTotalLength();
+
+                Log.d("CUSTOM_MATCHER", "actual length: "+length);
+                return abs(length-expectedLength)<1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("for type: ");
+                description.appendValue(position);
+                description.appendText(" expected column total length: ");
+                description.appendValue(expectedLength);
+            }
+        };
+    }
+
+    public static Matcher<View> hasColumnTotalCount(final int position, final int expectedCount) {
+        return new BoundedMatcher<View, ColumnGraphView>(ColumnGraphView.class) {
+
+            @Override
+            protected boolean matchesSafely(ColumnGraphView columnGraphView) {
+                /*
+                long lastPeriodLength = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodDuration();
+                int lastPeriodType = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodType();
+                Log.d("CUSTOM_MATCHER", "last period type: "+lastPeriodType+ ", and length: "+lastPeriodLength);
+
+                 */
+                int count = columnGraphView.getColumnList().get(position).getCount();
+
+                return count == expectedCount;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("for type: ");
+                description.appendValue(position);
+                description.appendText(" expected column total count: ");
+                description.appendValue(expectedCount);
+            }
+        };
+    }
+
+    public static Matcher<View> hasColumnTotalExtendLength(final int position, final long expectedLength) {
+        return new BoundedMatcher<View, ColumnGraphView>(ColumnGraphView.class) {
+
+            @Override
+            protected boolean matchesSafely(ColumnGraphView columnGraphView) {
+                /*
+                long lastPeriodLength = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodDuration();
+                int lastPeriodType = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodType();
+                Log.d("CUSTOM_MATCHER", "last period type: "+lastPeriodType+ ", and length: "+lastPeriodLength);
+
+                 */
+                long length = columnGraphView.getColumnList().get(position).getTotalExtendDuration();
+
+                Log.d("CUSTOM_MATCHER", "actual length: "+length);
+                return abs(length-expectedLength)<1000;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("for type: ");
+                description.appendValue(position);
+                description.appendText(" expected column total extend length: ");
+                description.appendValue(expectedLength);
+            }
+        };
+    }
+
+    public static Matcher<View> hasColumnTotalExtendCount(final int position, final int expectedCount) {
+        return new BoundedMatcher<View, ColumnGraphView>(ColumnGraphView.class) {
+
+            @Override
+            protected boolean matchesSafely(ColumnGraphView columnGraphView) {
+                /*
+                long lastPeriodLength = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodDuration();
+                int lastPeriodType = pieView.getPeriodList().get(pieView.getPeriodList().size()-1).getPeriodType();
+                Log.d("CUSTOM_MATCHER", "last period type: "+lastPeriodType+ ", and length: "+lastPeriodLength);
+
+                 */
+                int count = columnGraphView.getColumnList().get(position).getExtendCount();
+
+                return count == expectedCount;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("for type: ");
+                description.appendValue(position);
+                description.appendText(" expected column total extend count: ");
+                description.appendValue(expectedCount);
+            }
+        };
+    }
+
+
 
     public static Matcher<View> withNumberPickerValue(final int expectedValue) {
         return new BoundedMatcher<View, NumberPicker>(NumberPicker.class) {

@@ -3,6 +3,7 @@ package com.colormindapps.rest_reminder_alarm;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,6 +21,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
@@ -32,6 +34,8 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -45,11 +49,17 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
     private Session firstSession;
     private Spinner spinner;
     private Typeface titleFont;
+    private Comparator<TimeInterval> comparator;
     private List<TimeInterval> yearly, monthly, weekly, daily;
+    private final int INTERVAL_DAY = 0;
+    private final int INTERVAL_WEEK = 1;
+    private final int INTERVAL_MONTH = 2;
+    private final int INTERVAL_YEAR = 3;
 
     private ImageView previous, next;
 
     private int currentIntervalType = 0;
+    private int viewPagerPosition;
 
     private ViewPager2 viewPager;
     private ViewPager2.OnPageChangeCallback dailyOnPageChangeCallback, weeklyOnPageChangeCallback, monthlyOnPageChangeCallback, yearlyOnPageChangeCallback;
@@ -69,12 +79,34 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
         mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
         previous = findViewById(R.id.previous);
+        previous.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(viewPagerPosition-1, true);
+            }
+        });
         next = findViewById(R.id.next);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                viewPager.setCurrentItem(viewPagerPosition+1, true);
+            }
+        });
+
+        comparator = new Comparator<TimeInterval>() {
+            @Override
+            public int compare(TimeInterval lhs, TimeInterval rhs) {
+                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                return Long.compare(rhs.getStart(), lhs.getStart());
+            }
+        };
 
         dailyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                Log.d(debug, "daily changed position: "+position);
+                viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
                 } else {
@@ -92,6 +124,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
                 } else {
@@ -109,6 +142,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
                 } else {
@@ -126,6 +160,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
+                viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
                 } else {
@@ -208,11 +243,13 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 currentIntervalType = 1;
                 break;
             case "week":
+                Log.d(debug, "week item pressed");
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(2);
                 currentIntervalType = 2;
                 break;
             case "month":
+                Log.d(debug, "month item pressed");
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(3);
                 currentIntervalType = 3;
@@ -237,76 +274,130 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         date.set(Calendar.DAY_OF_MONTH,1);
         date.set(Calendar.MONTH,0);
         date.set(Calendar.HOUR_OF_DAY,0);
-        date.set(Calendar.MINUTE,0);
-        date.set(Calendar.SECOND,0);
+        date.clear(Calendar.MINUTE);
+        date.clear(Calendar.SECOND);
+        date.clear(Calendar.MILLISECOND);
         yearly = new ArrayList<TimeInterval>();
         long intervalEnd = currentTime;
         long intervalStart = date.getTimeInMillis();
         while(intervalStart>firstSessionStart){
-            yearly.add(new TimeInterval(intervalStart,intervalEnd));
-            date.set(Calendar.YEAR,(date.get(Calendar.YEAR)-1));
+            checkIntervalForSessions(INTERVAL_YEAR, intervalStart,intervalEnd, false);
+            //yearly.add(new TimeInterval(intervalStart,intervalEnd));
+            date.add(Calendar.YEAR,-1);
             intervalEnd = intervalStart;
             intervalStart = date.getTimeInMillis();
         }
-        yearly.add(new TimeInterval(firstSessionStart,intervalEnd));
+        checkIntervalForSessions(INTERVAL_YEAR, firstSessionStart,intervalEnd, true);
+        //yearly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
         monthly = new ArrayList<TimeInterval>();
         date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_MONTH,1);
         date.set(Calendar.HOUR_OF_DAY,0);
-        date.set(Calendar.MINUTE,0);
-        date.set(Calendar.SECOND,0);
+        date.clear(Calendar.MINUTE);
+        date.clear(Calendar.SECOND);
+        date.clear(Calendar.MILLISECOND);
         intervalEnd = currentTime;
         intervalStart = date.getTimeInMillis();
         int month = date.get(Calendar.MONTH);
         while(intervalStart>firstSessionStart){
-            monthly.add(new TimeInterval(intervalStart,intervalEnd));
-            month-=1;
-            if(month<0) {
-                date.set(Calendar.YEAR, (date.get(Calendar.YEAR) - 1));
-                month = 11;
-            }
-            date.set(Calendar.MONTH,month);
+            checkIntervalForSessions(INTERVAL_MONTH, intervalStart, intervalEnd, false);
+            //monthly.add(new TimeInterval(intervalStart,intervalEnd));
+            date.add(Calendar.MONTH,-1);
             intervalEnd = intervalStart;
             intervalStart = date.getTimeInMillis();
         }
-        monthly.add(new TimeInterval(firstSessionStart,intervalEnd));
+        checkIntervalForSessions(INTERVAL_MONTH, firstSessionStart, intervalEnd, true);
+        //monthly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
         weekly = new ArrayList<TimeInterval>();
         date = Calendar.getInstance();
         int dayOfWeek = date.get(Calendar.DAY_OF_WEEK)-2;
         date.set(Calendar.DAY_OF_MONTH,(date.get(Calendar.DAY_OF_MONTH)-dayOfWeek));
         date.set(Calendar.HOUR_OF_DAY,0);
-        date.set(Calendar.MINUTE,0);
-        date.set(Calendar.SECOND,0);
+        date.clear(Calendar.MINUTE);
+        date.clear(Calendar.SECOND);
+        date.clear(Calendar.MILLISECOND);
         intervalEnd = currentTime;
         intervalStart = date.getTimeInMillis();
         while(intervalStart>firstSessionStart){
-            weekly.add(new TimeInterval(intervalStart,intervalEnd));
+            checkIntervalForSessions(INTERVAL_WEEK, intervalStart, intervalEnd, false);
+            //weekly.add(new TimeInterval(intervalStart,intervalEnd));
             intervalEnd = intervalStart;
-            intervalStart-=604800000;
+            date.add(Calendar.WEEK_OF_YEAR,-1);
+            intervalStart=date.getTimeInMillis();
         }
-        weekly.add(new TimeInterval(firstSessionStart,intervalEnd));
+        checkIntervalForSessions(INTERVAL_WEEK, intervalStart, intervalEnd, true);
+        //weekly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
         daily = new ArrayList<TimeInterval>();
         date = Calendar.getInstance();
         date.set(Calendar.HOUR_OF_DAY,0);
-        date.set(Calendar.MINUTE,0);
-        date.set(Calendar.SECOND,0);
+        date.clear(Calendar.MINUTE);
+        date.clear(Calendar.SECOND);
+        date.clear(Calendar.MILLISECOND);
         intervalEnd = currentTime;
         intervalStart = date.getTimeInMillis();
         while(intervalStart>firstSessionStart){
-            daily.add(new TimeInterval(intervalStart,intervalEnd));
+            checkIntervalForSessions(INTERVAL_DAY, intervalStart, intervalEnd, false);
+            //daily.add(new TimeInterval(intervalStart,intervalEnd));
             intervalEnd = intervalStart;
-            intervalStart-=86400000;
+            date.add(Calendar.DAY_OF_MONTH,-1);
+            //intervalStart-=86400000;
+            intervalStart=date.getTimeInMillis();
         }
-
-        daily.add(new TimeInterval(firstSessionStart,intervalEnd));
+        checkIntervalForSessions(INTERVAL_DAY, firstSessionStart, intervalEnd, true);
+        //daily.add(new TimeInterval(firstSessionStart,intervalEnd));
 
 
         spinner.setOnItemSelectedListener(this);
 
         launchPagerAdapter(0);
+    }
+
+
+
+    public void checkIntervalForSessions(int type, long start, long end, boolean last){
+        LiveData<Integer> hasSessionLD = mSessionViewModel.hasSessions(start, end);
+        Observer <Integer> hasSessionsObserver = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                if(integer!=0){
+                    switch(type){
+                        case INTERVAL_DAY: {
+                            daily.add(new TimeInterval(start,end));
+                            if (last) {
+                                Collections.sort(daily, comparator);
+                            }
+                        }   break;
+                        case INTERVAL_WEEK:{
+                            weekly.add(new TimeInterval(start,end));
+                            if (last) {
+                                //Log.d(debug, "sorting weekly arraylist");
+                                Collections.sort(weekly, comparator);
+                            } break;
+                        }
+                        case INTERVAL_MONTH:{
+                            monthly.add(new TimeInterval(start,end));
+                            if (last) {
+                                Log.d(debug, "sorting monthly arraylist");
+                                Collections.sort(monthly, comparator);
+                            }
+                        } break;
+                        case INTERVAL_YEAR:{
+                            yearly.add(new TimeInterval(start,end));
+                            if (last) {
+                                Collections.sort(yearly, comparator);
+                            }
+                        } break;
+                        default: break;
+                    }
+                }
+
+                hasSessionLD.removeObserver(this);
+            }
+        };
+        hasSessionLD.observe(this, hasSessionsObserver);
     }
 
     public void launchPagerAdapter(int intervalType){
@@ -320,25 +411,30 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 if(pagerDailyAdapter==null) pagerDailyAdapter = new ScreenSlidePagerDailyAdapter(this);
                 viewPager.setAdapter(pagerDailyAdapter);
                 viewPager.registerOnPageChangeCallback(dailyOnPageChangeCallback);
-                viewPager.setCurrentItem(daily.size(), false);
+                viewPager.setCurrentItem(daily.size()-1, false);
+                viewPagerPosition = daily.size()-1;
+                Log.d(debug, "daily size: "+daily.size());
             } break;
             case 2: {
                 if(pagerWeeklyAdapter==null) pagerWeeklyAdapter = new ScreenSlidePagerWeeklyAdapter(this);
                 viewPager.setAdapter(pagerWeeklyAdapter);
                 viewPager.registerOnPageChangeCallback(weeklyOnPageChangeCallback);
-                viewPager.setCurrentItem(weekly.size(), false);
+                viewPager.setCurrentItem(weekly.size()-1, false);
+                viewPagerPosition = weekly.size()-1;
             } break;
             case 3: {
                 if(pagerMonthlyAdapter==null) pagerMonthlyAdapter = new ScreenSlidePagerMonthlyAdapter(this);
                 viewPager.setAdapter(pagerMonthlyAdapter);
                 viewPager.registerOnPageChangeCallback(monthlyOnPageChangeCallback);
-                viewPager.setCurrentItem(monthly.size(), false);
+                viewPager.setCurrentItem(monthly.size()-1, false);
+                viewPagerPosition = monthly.size()-1;
             } break;
             case 4: {
                 if(pagerYearlyAdapter==null) pagerYearlyAdapter = new ScreenSlidePagerYearlyAdapter(this);
                 viewPager.setAdapter(pagerYearlyAdapter);
                 viewPager.registerOnPageChangeCallback(yearlyOnPageChangeCallback);
-                viewPager.setCurrentItem(yearly.size(), false);
+                viewPager.setCurrentItem(yearly.size()-1, false);
+                viewPagerPosition = yearly.size()-1;
             } break;
 
             default: break;

@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
@@ -37,7 +38,7 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 
-public class PreferenceXActivity extends AppCompatActivity implements PreferenceActivityLinkedService, PreferenceFragmentCompat.OnPreferenceStartScreenCallback,
+public class PreferenceXActivity extends AppCompatActivity implements PreferenceActivityLinkedService, PreferenceFragmentCompat.OnPreferenceStartScreenCallback, OnClearDbDialogCloseListener,
 		DataApi.DataListener,
 		OnPreferencesOpenListener,
 		MessageApi.MessageListener,
@@ -79,7 +80,7 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 			long timeRemaining = mService.getCounterTimeValue();
 			getSupportFragmentManager()
 					.beginTransaction()
-					.replace(R.id.settings, new MyPreferenceXFragment())
+					.replace(R.id.settings, new PreferenceXFragment())
 					.commit();
 
 		}
@@ -103,7 +104,7 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 				} else {
 					getSupportFragmentManager()
 							.beginTransaction()
-							.replace(R.id.settings, new MyPreferenceXFragment())
+							.replace(R.id.settings, new PreferenceXFragment())
 							.commit();
 				}
 	            // Display the fragment as the main content.
@@ -322,4 +323,9 @@ public class PreferenceXActivity extends AppCompatActivity implements Preference
 		}
 	}
 
+	@Override
+	public void deleteDB() {
+		SessionsViewModel mSessionsViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
+		mSessionsViewModel.deleteOlder(0);
+	}
 }

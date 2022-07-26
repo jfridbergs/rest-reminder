@@ -40,6 +40,7 @@ public class SessionsViewModel extends AndroidViewModel {
     LiveData<Session> getCurrentSession(){return mRepository.getCurrentSession();}
     LiveData<Session> getSessionById(int sessionId){return mRepository.getSessionById(sessionId);}
     LiveData<SessionTotals> getSessionTotals(long start, long end){return mRepository.getSessionTotals(start, end);}
+    LiveData<Integer> hasSessions(long from, long to){return mRepository.hasSessions(from, to);}
 
 
     public void insert(Session session){
@@ -57,4 +58,6 @@ public class SessionsViewModel extends AndroidViewModel {
     }
 
     public void populateDatabase(){mRepository.populateDatabase();}
+
+    public void populateDatabaseForStats(){mRepository.populateDatabaseForStats();}
 }

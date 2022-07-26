@@ -191,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements
 	private Observer<Session> sessionObserver, lastSessionObserver;
 	private Observer<Period> periodObserver;
 	private Session mLastSession;
+	private final int FLAG_SWIPE = 1;
+	private final int FLAG_TURN_OFF = 2;
 
 	private ValueAnimator bgAnimation;
 
@@ -226,24 +228,6 @@ public class MainActivity extends AppCompatActivity implements
 	else if (item.getItemId() == R.id.menu_session_list){
 		Intent intent  = new Intent(this, CalendarActivity.class);
 		startActivity(intent);
-
-	}
-	else if (item.getItemId() == R.id.menu_populate_db){
-		mSessionsViewModel.populateDatabase();
-		Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
-
-
-	}
-
-	else if (item.getItemId() == R.id.menu_delete_db){
-		if(!RReminderMobile.isCounterServiceRunning(getApplicationContext())){
-			mSessionsViewModel.deleteOlder(0);
-			Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
-		} else {
-			Toast.makeText(this, "only when Rest Reminder is turned off", Toast.LENGTH_SHORT).show();
-		}
-
-
 
 	}
 	else if (item.getItemId() == R.id.menu_open_stats){
@@ -933,7 +917,7 @@ public class MainActivity extends AppCompatActivity implements
 		currentLDSession.observe(this, sessionObserver);
 	}
 
-	public void getAndUpdatePeriodDb(long newEnd, boolean swipe){
+	public void getAndUpdatePeriodDb(long newEnd, int flag){
 		currentLDPeriod = mPeriodViewModel.getLastPeriod();
 		periodObserver = new Observer<Period>() {
 			@Override
@@ -941,14 +925,25 @@ public class MainActivity extends AppCompatActivity implements
 				Log.d(debug, "getPeriod observer onChanged");
 				mPeriod = period;
 				long actualDuration = newEnd - mPeriod.getStartTime();
-				if(swipe){
-					mPeriod.setEnded(1);
-					long initialDuration = mPeriod.getInitialDuration();
-					//special case when a period has been extended and then ended before its intended end time (negative extend length)
-					if(initialDuration!=0 && initialDuration > actualDuration){
-						Log.d(debug, "initialDuration > actual duration");
-						mPeriod.setInitialDuration(actualDuration);
+				switch (flag){
+					case FLAG_SWIPE:{
+						mPeriod.setEnded(1);
+						long initialDuration = mPeriod.getInitialDuration();
+						//special case when a period has been extended and then ended before its intended end time (negative extend length)
+						if(initialDuration!=0 && initialDuration > actualDuration){
+							Log.d(debug, "initialDuration > actual duration");
+							mPeriod.setInitialDuration(actualDuration);
 
+						}
+					} break;
+					case FLAG_TURN_OFF:{
+						if(actualDuration<20*1000){
+							mPeriodViewModel.deletePeriod(mPeriod);
+							currentSession.setSessionEnd(currentSession.getSessionEnd()-actualDuration);
+							mSessionsViewModel.update(currentSession);
+							currentLDPeriod.removeObserver(periodObserver);
+							return;
+						}
 					}
 				}
 				mPeriod.setDuration(actualDuration);
@@ -1006,6 +1001,20 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
+	public void deleteDbForTests(){
+		if(!RReminderMobile.isCounterServiceRunning(getApplicationContext())){
+			mSessionsViewModel.deleteOlder(0);
+			Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
+		} else {
+			Toast.makeText(this, "only when Rest Reminder is turned off", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public void populateDbForTests(){
+		mSessionsViewModel.populateDatabaseForStats();
+		Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
+	}
+
 	private void setReminderOff(long periodEndTime) {
 		Log.d(debug, "setReminderOff");
 		setReminderOffCounter++;
@@ -1025,8 +1034,9 @@ public class MainActivity extends AppCompatActivity implements
 				currentSession.setSessionEnd(currentTime);
 				long sessionStartTime = currentSession.getSessionStart();
 				if((currentTime - sessionStartTime) > 1000*60){
+					Log.d(debug, "update session status to FINISHED");
 					mSessionsViewModel.update(currentSession);
-					getAndUpdatePeriodDb(currentTime,false);
+					getAndUpdatePeriodDb(currentTime,FLAG_TURN_OFF);
 				} else {
 					mSessionsViewModel.deleteSession(currentSession);
 					mPeriodViewModel.deleteShortSessionPeriods(sessionStartTime);
@@ -1037,12 +1047,6 @@ public class MainActivity extends AppCompatActivity implements
 		};
 
 		currentLDSession.observe(this, sessionObserver);
-
-		Log.d(debug, "period original end time:"+periodEndTime);
-		Log.d(debug, "period actual end time:"+ currentTime);
-
-
-
 
 
 		cancelNotification(periodEndTimeValue,true);
@@ -1451,11 +1455,13 @@ public class MainActivity extends AppCompatActivity implements
 
 		} else {
 
-			lastLDSession = mSessionsViewModel.getLastSession();
+			lastLDSession = mSessionsViewModel.getCurrentSession();
 			lastSessionObserver = session -> {
 				if(session!=null){
-						lastSession.setVisibility(View.VISIBLE);
+					Log.d(debug, "show last session button: TRUE");
+					lastSession.setVisibility(View.VISIBLE);
 				} else {
+					Log.d(debug, "show last session button: FALSE");
 					lastSession.setVisibility(View.GONE);
 				}
 				lastLDSession.removeObserver(lastSessionObserver);
@@ -2074,7 +2080,7 @@ public class MainActivity extends AppCompatActivity implements
 		long currentTime = Calendar.getInstance().getTimeInMillis();
 		functionCalendar = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, currentTime, 1, 0L);
 		//update previously running period with end values
-		getAndUpdatePeriodDb( currentTime, true);
+		getAndUpdatePeriodDb( currentTime, FLAG_SWIPE);
 
 
 

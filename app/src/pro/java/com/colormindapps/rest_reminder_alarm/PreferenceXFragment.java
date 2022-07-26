@@ -8,12 +8,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
@@ -24,8 +28,8 @@ import androidx.preference.SwitchPreference;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 
-public class MyPreferenceXFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener{
-	public String reminderModeKey, workPeriodLengthKey, restPeriodLengthKey,enableColorizedNotificationsKey, enableExtendKey,changeSummaryKey,extendEnabledKey,startNextEnabledKey,extendBaseLengthKey, prefScreenExtendKey;
+public class PreferenceXFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener{
+	public String reminderModeKey, workPeriodLengthKey, restPeriodLengthKey,enableColorizedNotificationsKey, enableExtendKey,changeSummaryKey,extendEnabledKey,startNextEnabledKey,extendBaseLengthKey, prefScreenExtendKey, clearDbKey;
 	public String testModeSummary;
 	SharedPreferences sharedPreferences;
 	String workPeriodLength, restPeriodLength;
@@ -38,8 +42,8 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 
 
-	public static MyPreferenceXFragment newInstance() {
-		return new MyPreferenceXFragment();
+	public static PreferenceXFragment newInstance() {
+		return new PreferenceXFragment();
 	}
 
 	private void setParentActivity(PreferenceActivityLinkedService activity){
@@ -58,6 +62,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		prefScreenExtendKey =  getString(R.string.pref_screen_period_extend_key);
 		enableExtendKey = getString(R.string.pref_enable_extend_key);
 		enableColorizedNotificationsKey = getString(R.string.pref_colorize_notifications_key);
+		clearDbKey = getString(R.string.pref_delete_recorded_sessions_key);
 
 		final SwitchPreference customPreference = findPreference(enableExtendKey);
 		final Preference customSettings = findPreference(prefScreenExtendKey);
@@ -214,6 +219,21 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 
     }
+
+	@Override
+	public boolean onPreferenceTreeClick(Preference preference) {
+		 if(preference.getKey().equals(clearDbKey)) {
+			DialogFragment clearDbDialog = ClearDbDialog.newInstance(
+					R.string.intro_title);
+			clearDbDialog.setTargetFragment(this, 0);
+			clearDbDialog.setStyle(DialogFragment.STYLE_NORMAL, R.style.BatteryDialogTitle );
+			clearDbDialog.show(this.getParentFragmentManager(), "clearDbDialog");
+			return true;
+		}
+		else {
+			return super.onPreferenceTreeClick(preference);
+		}
+	}
 
 	@Override
 	public void onDestroy(){

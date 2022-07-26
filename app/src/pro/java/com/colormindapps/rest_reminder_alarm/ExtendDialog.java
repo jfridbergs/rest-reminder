@@ -202,7 +202,9 @@ public class ExtendDialog extends DialogFragment{
 				mPeriod = period;
 				mPeriod.setType(type);
 				mPeriod.setExtendCount(extendCount);
-				mPeriod.setInitialDuration(period.getDuration());
+				if(extendCount==1){
+					mPeriod.setInitialDuration(period.getDuration());
+				}
 				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
 				mPeriodViewModel.update(mPeriod);
 				currentLDPeriod.removeObserver(periodObserver);
@@ -221,7 +223,9 @@ public class ExtendDialog extends DialogFragment{
 				mPeriod = periods.get(1);
 				mPeriod.setType(type);
 				mPeriod.setExtendCount(extendCount);
-				mPeriod.setInitialDuration(mPeriod.getDuration());
+				if(extendCount==1){
+					mPeriod.setInitialDuration(mPeriod.getDuration());
+				}
 				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
 				mPeriodViewModel.update(mPeriod);
 				currentLDPeriodList.removeObserver(periodListObserver);

@@ -54,6 +54,9 @@ public interface SessionDao {
     @Query("SELECT * FROM session_table  ORDER BY session_start DESC LIMIT 1")
     LiveData<Session> getCurrentSession();
 
+    @Query("SELECT COUNT(*) FROM session_table WHERE session_start>=:from AND session_start<:to")
+    LiveData<Integer> hasSessions(long from, long to);
+
 
     @Query("SELECT * FROM session_table WHERE session_id = :sessionId")
     LiveData<Session> getSessionById(int sessionId);

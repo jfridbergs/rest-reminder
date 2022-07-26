@@ -30,6 +30,14 @@
     <string name="manual_activity_title">User Manual</string>
     <string name="stats_activity_title">Stats</string>
 
+    <string name="stats_title_overall">Overall stats</string>
+
+    <string name="pref_delete_recorded_sessions_key" translatable="false">delete_recorded_sessions</string>
+    <string name="pref_delete_recorded_sessions_title">Delete recorded sessions</string>
+    <string name="clear_db_dialog_warning">Delete all previously recorded sessions?</string>
+    <string name="clear_db_dialog_title">Confirmation</string>
+
+
 
 
 

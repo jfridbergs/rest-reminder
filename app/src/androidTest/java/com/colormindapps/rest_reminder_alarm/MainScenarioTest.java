@@ -163,7 +163,7 @@ public class MainScenarioTest {
             String expectedOfflineTitle = RReminderTest.getResourceString(R.string.reminder_off_title);
             onView(withId(R.id.period_title)).check(matches(withText(expectedOfflineTitle)));
             int expectedColor = getApplicationContext().getResources().getColor(com.colormindapps.rest_reminder_alarm.R.color.black);
-            onView(withId(R.id.mainActivityLayout)).check(matches(CustomMatchers.withBackgroundColor(expectedColor)));
+            onView(withId(R.id.drawer_layout)).check(matches(CustomMatchers.withBackgroundColor(expectedColor)));
         }
     }
 

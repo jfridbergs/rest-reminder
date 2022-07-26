@@ -15,6 +15,7 @@ import androidx.annotation.IntDef;
 import androidx.core.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
@@ -240,6 +241,8 @@ public class RReminder {
 	}
 
 	public static String getSessionDateWeekString(long from, long to){
+		Log.d("RREMINDER", "DATE_WEEK_STRING from: "+from );
+		Log.d("RREMINDER", "DATE_WEEK_STRING to: "+to );
 		Calendar fromDate = Calendar.getInstance();
 		Calendar toDate = Calendar.getInstance();
 		String output = "";

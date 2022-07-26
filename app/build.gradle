@@ -8,7 +8,7 @@ android {
         applicationId "com.colormindapps.rest_reminder_alarm"
         minSdkVersion 16
         targetSdkVersion 31
-        versionCode 22
+        versionCode 24
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         //android.test.InstrumentationTestRunner for robotium tests
 
@@ -41,7 +41,7 @@ android {
         }
         pro {
             applicationId "com.colormindapps.rest_reminder_alarm.pro"
-            versionName "Rest Reminder + 0.9.3."
+            versionName "Rest Reminder + 0.9.5."
             minSdkVersion 16
             targetSdkVersion 31
             dimension "default"

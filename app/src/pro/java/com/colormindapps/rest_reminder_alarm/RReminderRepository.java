@@ -51,6 +51,7 @@ public class RReminderRepository {
     LiveData<Session> getFirstSession() {return mSessionDao.getFirstSession();}
     LiveData<Session> getLastSession() {return mSessionDao.getLastSession();}
     LiveData<Session> getCurrentSession() {return mSessionDao.getCurrentSession();}
+    LiveData<Integer> hasSessions(long from, long to){return mSessionDao.hasSessions(from, to);}
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
     LiveData<Period> getPeriod(long startTime) {return mPeriodDao.getPeriod(startTime);}
     LiveData<Period> getLastPeriod(){return mPeriodDao.getLastPeriod();}
@@ -60,172 +61,86 @@ public class RReminderRepository {
     LiveData<SessionTotals> getSessionTotals(long start, long end){return mSessionDao.getSessionTotals(start, end);}
 
 
-
-
-    public void insertPeriod (Period period){
-        new insertPeriodAsyncTask(mPeriodDao).execute(period);
+    void insertPeriod(Period period) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mPeriodDao.insertPeriod(period);
+        });
     }
 
-    public void deletePeriod(Period period){
-        new deleteByPeriodAsyncTask(mPeriodDao).execute(period);
+    void deletePeriod(Period period) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mPeriodDao.deletePeriod(period);
+        });
     }
 
-    public void deleteSession(Session session){
-        new deleteBySessionAsyncTask(mSessionDao).execute(session);
+    void deleteSession(Session session) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mSessionDao.deleteSession(session);
+        });
     }
+
 
     public void populateDatabase(){
         db.populateDatabase();
     }
 
-    private static class insertPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
-        private PeriodDao mAsyncTaskDao;
-        insertPeriodAsyncTask(PeriodDao dao){
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Period... params){
-            mAsyncTaskDao.insertPeriod(params[0]);
-            return null;
-        }
+    public void populateDatabaseForStats(){
+        db.populateDatabaseForStats();
     }
 
-    private static class deleteByPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
-        private PeriodDao mAsyncTaskDao;
-        deleteByPeriodAsyncTask(PeriodDao dao){
-            mAsyncTaskDao = dao;
-        }
 
-        @Override
-        protected Void doInBackground(final Period... params){
-            mAsyncTaskDao.deletePeriod(params[0]);
-            return null;
-        }
+
+
+
+
+
+    void insertSession(Session session) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mSessionDao.insertSession(session);
+        });
     }
 
-    private static class deleteBySessionAsyncTask extends AsyncTask<Session, Void, Void> {
-        private SessionDao mAsyncTaskDao;
-        deleteBySessionAsyncTask(SessionDao dao){
-            mAsyncTaskDao = dao;
-        }
 
-        @Override
-        protected Void doInBackground(final Session... params){
-            mAsyncTaskDao.deleteSession(params[0]);
-            return null;
-        }
-    }
 
-    public void insertSession (Session session){
-        new insertSessionAsyncTask(mSessionDao).execute(session);
-    }
 
-    private static class insertSessionAsyncTask extends AsyncTask<Session, Void, Void> {
-        private SessionDao mAsyncTaskDao;
-        insertSessionAsyncTask(SessionDao dao){
-            mAsyncTaskDao = dao;
-        }
 
-        @Override
-        protected Void doInBackground(final Session... params){
-            mAsyncTaskDao.insertSession(params[0]);
-            return null;
-        }
-    }
 
-    public void deleteOlderSessions (long currentTime){
-        new deleteAsyncTask(mSessionDao, mPeriodDao).execute(currentTime);
-    }
-
-    public void deletePeriod(long endTime){
-        new deletePeriodAsyncTask(mPeriodDao).execute(endTime);
-    }
-
-    public void deleteShortSessionPeriods(long sessionStartTime){
-        new deleteShortSessionPeriodsAsyncTask(mPeriodDao).execute(sessionStartTime);
-    }
-
-    private static class deleteAsyncTask extends AsyncTask<Long, Void, Void>{
-        private SessionDao mAsyncTaskDao;
-        private PeriodDao mAsyncTaskPeriodDao;
-        deleteAsyncTask(SessionDao dao, PeriodDao pDao){
-            mAsyncTaskDao = dao;
-            mAsyncTaskPeriodDao = pDao;
-        }
-
-        @Override
-        protected Void doInBackground(final Long... params){
-            if(params[0]>0L){
-                mAsyncTaskDao.deleteOlder(params[0]);
-                mAsyncTaskPeriodDao.deleteOlder(params[0]);
+    void deleteOlderSessions(long currentTime) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            if(currentTime>0L){
+                mSessionDao.deleteOlder(currentTime);
+                mPeriodDao.deleteOlder(currentTime);
             } else {
-                mAsyncTaskDao.deleteAll();
-                mAsyncTaskPeriodDao.deleteAll();
+                mSessionDao.deleteAll();
+                mPeriodDao.deleteAll();
             }
-
-            return null;
-        }
+        });
     }
 
-    private static class deletePeriodAsyncTask extends AsyncTask<Long, Void, Void>{
-        private PeriodDao mAsyncTaskPeriodDao;
-        deletePeriodAsyncTask(PeriodDao pDao){
-            mAsyncTaskPeriodDao = pDao;
-        }
-
-        @Override
-        protected Void doInBackground(final Long... params){
-                mAsyncTaskPeriodDao.deletePeriod(params[0]);
-            return null;
-        }
+    void deletePeriod(long endTime) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mPeriodDao.deletePeriod(endTime);
+        });
     }
 
-    private static class deleteShortSessionPeriodsAsyncTask extends AsyncTask<Long, Void, Void>{
-        private PeriodDao mAsyncTaskPeriodDao;
-        deleteShortSessionPeriodsAsyncTask(PeriodDao pDao){
-            mAsyncTaskPeriodDao = pDao;
-        }
-
-        @Override
-        protected Void doInBackground(final Long... params){
-            mAsyncTaskPeriodDao.deleteShortSessionPeriods(params[0]);
-            return null;
-        }
+    void deleteShortSessionPeriods(long sessionStartTime) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mPeriodDao.deleteShortSessionPeriods(sessionStartTime);
+        });
     }
 
-    public void updatePeriod (Period period){
-        new updatePeriodAsyncTask(mPeriodDao).execute(period);
+
+    void updatePeriod(Period period) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mPeriodDao.updatePeriod(period);
+        });
     }
 
-    private static class updatePeriodAsyncTask extends AsyncTask<Period, Void, Void>{
-        private PeriodDao mAsyncTaskDao;
-        updatePeriodAsyncTask(PeriodDao dao){
-            mAsyncTaskDao = dao;
-        }
 
-        @Override
-        protected Void doInBackground(final Period... params){
-            mAsyncTaskDao.updatePeriod(params[0]);
-            return null;
-        }
-    }
-
-    public void updateSession (Session session){
-        new updateSessionAsyncTask(mSessionDao).execute(session);
-    }
-
-    private static class updateSessionAsyncTask extends AsyncTask<Session, Void, Void>{
-        private SessionDao mAsyncTaskDao;
-        updateSessionAsyncTask(SessionDao dao){
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Session... params){
-            mAsyncTaskDao.updateSession(params[0]);
-            return null;
-        }
+    void updateSession(Session session) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            mSessionDao.updateSession(session);
+        });
     }
 
 

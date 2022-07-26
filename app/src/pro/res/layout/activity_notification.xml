@@ -85,24 +85,12 @@
 				android:layout_marginTop="@dimen/notification_description_marginVertical"
 				android:layout_marginLeft="@dimen/notification_description_marginHorizontal"
 				android:layout_marginRight="@dimen/notification_description_marginHorizontal"
-				android:layout_marginBottom="@dimen/notification_description_marginVertical"
 				android:gravity="center_vertical|center" />
 			<TextView
-				android:id="@+id/work_total"
-				style="@style/NormalFont"
+				android:id="@+id/periods_total"
+				style="@style/SmallFont"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="@dimen/notification_description_marginVertical"
-				android:layout_marginLeft="@dimen/notification_description_marginHorizontal"
-				android:layout_marginRight="@dimen/notification_description_marginHorizontal"
-				android:layout_marginBottom="@dimen/notification_description_marginVertical"
-				android:gravity="center_vertical|center" />
-			<TextView
-				android:id="@+id/rest_total"
-				style="@style/NormalFont"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="@dimen/notification_description_marginVertical"
 				android:layout_marginLeft="@dimen/notification_description_marginHorizontal"
 				android:layout_marginRight="@dimen/notification_description_marginHorizontal"
 				android:layout_marginBottom="@dimen/notification_description_marginVertical"

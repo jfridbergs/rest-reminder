@@ -40,7 +40,7 @@ public class StatsFragment extends Fragment {
     List<Period> mPeriods;
     List<PeriodTotals> mPeriodTotals;
     SessionTotals mSessionTotals;
-    private String debug = "RR_CARD_FRONT";
+    private String debug = "STATS_FRAGMENT";
 
     public static StatsFragment newInstance(int intervalType, long intervalStart, long intervalEnd) {
 
@@ -85,7 +85,7 @@ public class StatsFragment extends Fragment {
 
         switch(intervalType){
             case 0: {
-                intervalDateFrom.setText("Overall stats");
+                intervalDateFrom.setText(getString(R.string.stats_title_overall));
                 break;
             }
             case 1: {
@@ -157,15 +157,15 @@ public class StatsFragment extends Fragment {
     private void set(ColumnGraphView columnGraphView){
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / mSessionTotals.getTotalDuration())*100;
         int workPercentInt = Math.round(workPercent);
-        int restPercentInt = 100-workPercentInt;
+        float restPercent = 100-workPercent;
 
         Log.d(debug, "date: "+RReminder.getSessionDateString(0,intervalEnd-1000000));
-        Log.d(debug, "workPercent: "+workPercentInt);
-        Log.d(debug, "restPercent: "+restPercentInt);
+        Log.d(debug, "workPercent: "+workPercent);
+        Log.d(debug, "restPercent: "+restPercent);
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
-        columnHelperList.add(new ColumnHelper(workPercentInt, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
-        columnHelperList.add(new ColumnHelper(restPercentInt, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
+        columnHelperList.add(new ColumnHelper(workPercent, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
+        columnHelperList.add(new ColumnHelper(restPercent, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
         columnGraphView.setColumnData(columnHelperList);
     }
 

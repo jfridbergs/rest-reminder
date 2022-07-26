@@ -47,6 +47,10 @@
 
     </style>
 
+    <style name="SmallFont" parent="NormalFont">
+        <item name="android:textSize">@dimen/description_small_text_size</item>
+    </style>
+
     <style name="NotificationExtendDescriptionFont" parent="@android:style/TextAppearance.Medium">
         <item name="android:textColor">@color/black</item>
         <item name="android:textSize">@dimen/extend_description_text_text_size</item>

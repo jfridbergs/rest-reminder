@@ -13,7 +13,10 @@
     <string name="last_session">pēdējā sesija</string>
     <string name="session_started">Sesija sākās %1$s</string>
     <string name="session_details">(darbs: %1$s, atpūta: %2$s)</string>
-
+    <string name="stats_title_overall">Kopējā statistika</string>
+    <string name="pref_delete_recorded_sessions_title">Izdzēst saglabātās sesijas</string>
+    <string name="clear_db_dialog_warning">Izdzēst visas iepriekš saglabātās sesijas?</string>
+    <string name="clear_db_dialog_title">Brīdinājums</string>
 
 
 </resources>

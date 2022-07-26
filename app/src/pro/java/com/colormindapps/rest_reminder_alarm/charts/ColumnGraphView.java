@@ -196,7 +196,7 @@ public class ColumnGraphView extends View {
                 Log.d(debug, "stepWidth: "+xStepWidth);
                 Log.d(debug, "image x0: "+imgX0);
                 Log.d(debug, "image x1: "+imgX1);
-                    if(cHelper.getPercent()<20){
+                    if(cHelper.getPercent()<25){
                         imgY0 = y0-toPx(RReminder.isTablet(getContext())?208:148);
                         imgY1 = y0-toPx(RReminder.isTablet(getContext())?168:108);
                     } else {
@@ -220,7 +220,7 @@ public class ColumnGraphView extends View {
                     extendCount = ((cHelper.getExtendCount())>1 ? cHelper.getExtendCount()+" "+getContext().getString(R.string.extensions) : cHelper.getExtendCount()+" "+getContext().getString(R.string.extension));
                     extendTotalDuration = RReminder.getExtendMinsFromMillis(getContext(),cHelper.getTotalExtendDuration());
 
-                    if(cHelper.getPercent()<20){
+                    if(cHelper.getPercent()<25){
                         if(cHelper.getExtendCount()>0){
                             canvas.drawText(extendCount,textX0, y0-toPx(RReminder.isTablet(getContext())?60:40), columnTextExtendPaint);
                             canvas.drawText(extendTotalDuration,textX0, y0-toPx(RReminder.isTablet(getContext())?40:25), columnTextExtendAmountPaint);
@@ -277,6 +277,8 @@ public class ColumnGraphView extends View {
     private float toPx(float dpi){
         return dpi * getResources().getDisplayMetrics().density;
     }
+
+    public ArrayList<ColumnHelper> getColumnList(){return columnHelperList;}
 
     private int measureWidth(int measureSpec) {
         int preferred = 3;

@@ -159,7 +159,7 @@ public class EspressoPreferencesOnly {
         } else {
             pActivityRule.getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
-        onView(isRoot()).perform(CustomActions.waitFor(2000));
+       // onView(isRoot()).perform(CustomActions.waitFor(2000));
 
         Espresso.pressBack();
 

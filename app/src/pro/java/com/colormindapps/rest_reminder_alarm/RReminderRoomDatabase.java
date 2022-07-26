@@ -17,6 +17,8 @@ import com.colormindapps.rest_reminder_alarm.data.SessionDao;
 
 import java.util.Calendar;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Database(entities = {Period.class, Session.class}, version = 1)
 public abstract class RReminderRoomDatabase extends RoomDatabase {
@@ -27,6 +29,10 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
 
     private static volatile RReminderRoomDatabase INSTANCE;
+
+    private static final int NUMBER_OF_THREADS = 4;
+    static final ExecutorService databaseExecutor =
+            Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
     static RReminderRoomDatabase getDatabase(final Context context){
         Log.d("ROOM_DATABASE", "getDatabase");
@@ -55,34 +61,31 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
     };
 
-    public void insertPeriod (Period period){
-        new insertPeriodAsyncTask(INSTANCE.periodDao()).execute(period);
+    void insertPeriod(Period period) {
+        RReminderRoomDatabase.databaseExecutor.execute(() -> {
+            INSTANCE.periodDao().insertPeriod(period);
+        });
     }
+
+
 
     public void populateDatabase(){
-        new PopulateSessionDbAsync(INSTANCE).execute();
+        new PopulateSessionDbAsync(INSTANCE, false).execute();
+    }
+    public void populateDatabaseForStats(){
+        new PopulateSessionDbAsync(INSTANCE, true).execute();
     }
 
-    private static class insertPeriodAsyncTask extends AsyncTask<Period, Void, Void> {
-        private PeriodDao mAsyncTaskDao;
-        insertPeriodAsyncTask(PeriodDao dao){
-            mAsyncTaskDao = dao;
-        }
-
-        @Override
-        protected Void doInBackground(final Period... params){
-            mAsyncTaskDao.insertPeriod(params[0]);
-            return null;
-        }
-    }
 
     private static class PopulateSessionDbAsync extends AsyncTask<Void, Void, Void> {
         private final SessionDao mDao;
         private final PeriodDao mPeriodDao;
+        private final boolean forStatsTest;
 
-        PopulateSessionDbAsync(RReminderRoomDatabase db){
+        PopulateSessionDbAsync(RReminderRoomDatabase db, boolean forStats){
             mDao = db.sessionDao();
             mPeriodDao = db.periodDao();
+            forStatsTest=forStats;
         }
 
         public void insertSession(long from, int rounds, int work, int rest){
@@ -109,6 +112,38 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
         }
 
+        public void insertLongStatsSession(long from){
+            Session session;
+            long endTime = from;
+            endTime = insertDefaultWorkPeriod(endTime,45);
+            endTime = insertDefaultRestPeriod(endTime,15);
+            endTime = insertExtendedWorkPeriod(endTime,45,1);
+            endTime = insertExtendedRestPeriod(endTime,15,1);
+            endTime = insertDefaultWorkPeriod(endTime,45);
+            endTime = insertDefaultRestPeriod(endTime,15);
+            endTime = insertDefaultWorkPeriod(endTime,45);
+            endTime = insertExtendedRestPeriod(endTime,15,1);
+            endTime = insertDefaultWorkPeriod(endTime,45);
+
+            session = new Session(0,from, endTime);
+            mDao.insertSession(session);
+        }
+
+        public void insertShortStatsSession(long from){
+            Session session;
+            long endTime = from;
+            endTime = insertDefaultWorkPeriod(endTime,45);
+            endTime = insertDefaultRestPeriod(endTime,15);
+            endTime = insertExtendedWorkPeriod(endTime,45,1);
+            endTime = insertExtendedRestPeriod(endTime,15,2);
+            endTime = insertExtendedWorkPeriod(endTime,45,1);
+            endTime = insertDefaultRestPeriod(endTime,15);
+            endTime = insertDefaultWorkPeriod(endTime,45);
+
+            session = new Session(0,from, endTime);
+            mDao.insertSession(session);
+        }
+
 
 
         public long insertDefaultWorkPeriod( long startTime, int length){
@@ -133,9 +168,10 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             return startTime+workLength;
         }
 
+
         public long insertExtendedRestPeriod( long startTime, int length, int count){
             long initRestLength = (long) length *60*1000;
-            long restLength = initRestLength + (long) count *3*60*1000;
+            long restLength = initRestLength + (long) count *5*60*1000;
             Period period = new Period(0,4, startTime,restLength,count, initRestLength,0);
             mPeriodDao.insertPeriod(period);
             return startTime+restLength;
@@ -145,13 +181,92 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
         protected Void doInBackground(final Void... params){
             //mDao.deleteAll();
             //mPeriodDao.deleteAll();
-            Calendar date = Calendar.getInstance();
-            date.set(2022,3,16,8,0);
-            long time = date.getTimeInMillis();
-            mDao.deleteOlder(time);
-            mPeriodDao.deleteOlder(time);
-            date.set(Calendar.DAY_OF_MONTH,15);
-            time = date.getTimeInMillis();
+            if(forStatsTest){
+                Calendar date = Calendar.getInstance();
+                date.set(Calendar.MONTH,5);
+                date.set(Calendar.DAY_OF_MONTH,24);
+                date.set(Calendar.HOUR_OF_DAY,8);
+                date.set(Calendar.MINUTE,0);
+                long time = date.getTimeInMillis();
+                mDao.deleteOlder(time);
+                mPeriodDao.deleteOlder(time);
+
+
+                //for daily selection - current day
+                insertLongStatsSession(time);
+                date.set(Calendar.HOUR_OF_DAY,16);
+                insertShortStatsSession(date.getTimeInMillis());
+                //for weekly selection: -1 week = 2days (1 L each); latest day L session serves as a previous day in daily selection test
+                date.set(Calendar.HOUR_OF_DAY,8);
+                time = date.getTimeInMillis();
+                time-=604800000;
+                insertLongStatsSession(time);
+                time-=86400000;
+                insertLongStatsSession(time);
+                ///-2 week: 3 S days
+                time-=604800000;
+                insertShortStatsSession(time);
+                time-=86400000;
+                insertShortStatsSession(time);
+                time-=86400000;
+                insertShortStatsSession(time);
+
+                date.set(Calendar.MONTH,date.get(Calendar.MONTH)-1);
+                date.set(Calendar.DAY_OF_MONTH,5);
+                date.set(Calendar.HOUR_OF_DAY,8);
+                time = date.getTimeInMillis();
+                insertLongStatsSession(time);
+                time+=86400000;
+                insertShortStatsSession(time);
+                time+=86400000;
+                insertShortStatsSession(time);
+                // yearly test
+                date.set(Calendar.YEAR,2021);
+                time = date.getTimeInMillis();
+                insertLongStatsSession(time);
+                time+=86400000;
+                insertShortStatsSession(time);
+                time+=86400000;
+                insertLongStatsSession(time);
+                time+=86400000;
+                insertShortStatsSession(time);
+
+
+                //special cases for week interval, when week is split between 2 months or 2 years
+                // may/june week
+                Calendar day = Calendar.getInstance();
+                day.set(2022,5,3,8,0);
+                time = day.getTimeInMillis();
+                insertShortStatsSession(time);
+
+                // 2021/2022 week
+                day.set(2022,0,1,8,0);
+                time = day.getTimeInMillis();
+                insertShortStatsSession(time);
+
+                /*
+                day.set(2021,11,23,8,0);
+                time = day.getTimeInMillis();
+                insertShortStatsSession(time);
+
+                day.set(2022,0,8,8,0);
+                time = day.getTimeInMillis();
+                insertShortStatsSession(time);
+
+                 */
+
+
+
+
+
+            } else {
+                Calendar date = Calendar.getInstance();
+                date.set(2022,3,16,8,0);
+                long time = date.getTimeInMillis();
+                mDao.deleteOlder(time);
+                mPeriodDao.deleteOlder(time);
+                date.set(Calendar.DAY_OF_MONTH,15);
+                time = date.getTimeInMillis();
 
                 date.set(Calendar.YEAR,2021);
                 for (int j=0;j<12;j++){
@@ -164,25 +279,27 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
 
 
-            Calendar current = Calendar.getInstance();
-            date.set(Calendar.YEAR,current.get(Calendar.YEAR));
+                Calendar current = Calendar.getInstance();
+                date.set(Calendar.YEAR,current.get(Calendar.YEAR));
 
-            for(int i=0; i<current.get(Calendar.MONTH);i++){
-                date.set(Calendar.MONTH,i);
-                for (int k=1;k<25;k=k+5){
-                    date.set(Calendar.DAY_OF_MONTH,k);
-                    Log.d("DATABASE", "year (month): "+date.get(Calendar.YEAR));
-                    insertSession(date.getTimeInMillis(),5+i,15+k,10+i);
+                for(int i=0; i<current.get(Calendar.MONTH);i++){
+                    date.set(Calendar.MONTH,i);
+                    for (int k=1;k<25;k=k+5){
+                        date.set(Calendar.DAY_OF_MONTH,k);
+                        Log.d("DATABASE", "year (month): "+date.get(Calendar.YEAR));
+                        insertSession(date.getTimeInMillis(),5+i,15+k,10+i);
+                    }
+                }
+                date.set(Calendar.MONTH,current.get(Calendar.MONTH));
+                Log.d("RR_DB", "CURRENT_DAY_OF_MONTH: "+current.get(Calendar.DAY_OF_MONTH));
+                Log.d("RR_DB", "CURRENT_MONTH: "+current.get(Calendar.MONTH));
+                for(int i = 1; i<current.get(Calendar.DAY_OF_MONTH);i=i+2){
+                    date.set(Calendar.DAY_OF_MONTH,i);
+                    Log.d("DATABASE", "year (day): "+date.get(Calendar.YEAR));
+                    insertSession(date.getTimeInMillis(),5+(i/2),15+i,10+i);
                 }
             }
-            date.set(Calendar.MONTH,current.get(Calendar.MONTH));
-            Log.d("RR_DB", "CURRENT_DAY_OF_MONTH: "+current.get(Calendar.DAY_OF_MONTH));
-            Log.d("RR_DB", "CURRENT_MONTH: "+current.get(Calendar.MONTH));
-            for(int i = 1; i<current.get(Calendar.DAY_OF_MONTH);i=i+2){
-                date.set(Calendar.DAY_OF_MONTH,i);
-                Log.d("DATABASE", "year (day): "+date.get(Calendar.YEAR));
-                insertSession(date.getTimeInMillis(),5+(i/2),15+i,10+i);
-            }
+
             /*
             long time = Calendar.getInstance().getTimeInMillis();
             //first record is a day old session

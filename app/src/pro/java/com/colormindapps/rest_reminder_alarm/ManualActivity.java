@@ -103,10 +103,6 @@ public class ManualActivity extends AppCompatActivity implements NavigationView.
 			Intent i = new Intent(this, CalendarActivity.class);
 			startActivity(i);
 		}
-		else if (item.getItemId() == R.id.menu_populate_db){
-			// mSessionsViewModel.populateDatabase();
-			Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
-		}
 		else if (item.getItemId() == R.id.menu_open_stats){
 			Intent i = new Intent(this, StatsActivity.class);
 			startActivity(i);
@@ -123,22 +119,7 @@ public class ManualActivity extends AppCompatActivity implements NavigationView.
 		return true;
 	}
 	
-	@Override
-	public boolean onOptionsItemSelected (MenuItem item){
-		if (item.getItemId()==R.id.menu_settings_x){
-				Intent i = new Intent(this, PreferenceXActivity.class);
-				startActivity(i);
-				return true;
-		} else if (item.getItemId() == R.id.menu_feedback){
-			Intent Email = new Intent(Intent.ACTION_SEND);
-			Email.setType("text/email");
-			Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
-			Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
-			startActivity(Intent.createChooser(Email, "Send Feedback:"));
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+
 	
 	public void backToTop(View v){
 		manual.scrollTo(0,0);
