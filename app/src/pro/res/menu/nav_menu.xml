@@ -4,7 +4,7 @@
     tools:showIn="navigation_view">
 
 
-    <group android:checkableBehavior="single">
+    <group>
         <item
             android:id="@+id/timer"
             android:title="@string/navigation_timer"
@@ -15,7 +15,7 @@
             android:title="@string/menu_settings"
             app:showAsAction="never"/>
     </group>
-    <group android:checkableBehavior="single">
+    <group>
         <item android:title="@string/navigation_history">
             <menu>
                 <item
@@ -29,7 +29,7 @@
             </menu>
         </item>
     </group>
-    <group android:checkableBehavior="single">
+    <group>
         <item android:title="@string/navigation_help">
             <menu>
                 <item
@@ -45,10 +45,4 @@
 
         </item>
     </group>
-
-
-
-
-
-
 </menu>

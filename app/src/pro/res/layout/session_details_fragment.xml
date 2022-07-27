@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context="com.colormindapps.rest_reminder_alarm.SessionsListActivity">
+    tools:context="com.colormindapps.rest_reminder_alarm.SessionDetailsViewActivity">
 
     <TextView
         android:id="@+id/session_date"
