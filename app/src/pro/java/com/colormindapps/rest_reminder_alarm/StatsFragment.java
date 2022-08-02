@@ -9,17 +9,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.colormindapps.rest_reminder_alarm.charts.ColumnGraphView;
 import com.colormindapps.rest_reminder_alarm.charts.ColumnHelper;
-import com.colormindapps.rest_reminder_alarm.charts.PieHelper;
-import com.colormindapps.rest_reminder_alarm.charts.PieView;
-import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
 import com.colormindapps.rest_reminder_alarm.data.SessionTotals;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
@@ -37,10 +32,9 @@ public class StatsFragment extends Fragment {
     long  intervalStart, intervalEnd;
     private PeriodViewModel mPeriodViewModel;
     private SessionsViewModel mSessionsViewModel;
-    List<Period> mPeriods;
     List<PeriodTotals> mPeriodTotals;
     SessionTotals mSessionTotals;
-    private String debug = "STATS_FRAGMENT";
+    private final String debug = "STATS_FRAGMENT";
 
     public static StatsFragment newInstance(int intervalType, long intervalStart, long intervalEnd) {
 
@@ -66,8 +60,9 @@ public class StatsFragment extends Fragment {
         }
         View view = inflater.inflate(R.layout.stats_fragment, container, false);
 
-        titleFont = Typeface.createFromAsset(getContext().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
-
+        if(getActivity()!=null){
+            titleFont = Typeface.createFromAsset(getActivity().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
+        }
         constraintLayout = view.findViewById(R.id.totals);
 
         noData = view.findViewById(R.id.no_data);
@@ -121,49 +116,43 @@ public class StatsFragment extends Fragment {
     }
 
     public void fillContent(){
-        mSessionsViewModel.getSessionTotals(intervalStart, intervalEnd).observe(getViewLifecycleOwner(), new Observer<SessionTotals>(){
-            @Override
-            public void onChanged(@Nullable final SessionTotals sessionTotals){
-                mSessionTotals = sessionTotals;
-                if(sessionTotals.getSessionCount()>0){
-                    sessionCount.setText(""+sessionTotals.getSessionCount());
-                    sessionTotalLength.setText(RReminder.getShortDurationFromMillis(getContext(),sessionTotals.getTotalDuration()));
-                    sessionAverageLength.setText(RReminder.getShortDurationFromMillis(getContext(),sessionTotals.getSessionAverageLength()));
-                    fillGraph();
-                } else {
-                    constraintLayout.setVisibility(View.GONE);
-                    columnGraphView.setVisibility(View.GONE);
-                    noData.setVisibility(View.VISIBLE);
-                }
-
+        mSessionsViewModel.getSessionTotals(intervalStart, intervalEnd).observe(getViewLifecycleOwner(), sessionTotals -> {
+            mSessionTotals = sessionTotals;
+            if(sessionTotals.getSessionCount()>0){
+                String sessionCountString = ""+sessionTotals.getSessionCount();
+                sessionCount.setText(sessionCountString);
+                sessionTotalLength.setText(RReminder.getShortDurationFromMillis(getContext(),sessionTotals.getTotalDuration()));
+                sessionAverageLength.setText(RReminder.getShortDurationFromMillis(getContext(),sessionTotals.getSessionAverageLength()));
+                fillGraph();
+            } else {
+                constraintLayout.setVisibility(View.GONE);
+                columnGraphView.setVisibility(View.GONE);
+                noData.setVisibility(View.VISIBLE);
             }
+
         });
 
     }
 
     private void fillGraph(){
-        mPeriodViewModel.getPeriodTotals(intervalStart, intervalEnd).observe(getViewLifecycleOwner(), new Observer<List<PeriodTotals>>(){
-            @Override
-            public void onChanged(@Nullable final List<PeriodTotals> periodTotals){
-                mPeriodTotals = periodTotals;
-                int periodCount = mPeriodTotals.get(0).getPeriodCount();
-                long totalDuration = mPeriodTotals.get(0).getTotalDuration();
-                Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
-                set(columnGraphView);
-            }
+        mPeriodViewModel.getPeriodTotals(intervalStart, intervalEnd).observe(getViewLifecycleOwner(), periodTotals -> {
+            mPeriodTotals = periodTotals;
+            int periodCount = mPeriodTotals.get(0).getPeriodCount();
+            long totalDuration = mPeriodTotals.get(0).getTotalDuration();
+            Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
+            set(columnGraphView);
         });
     }
 
     private void set(ColumnGraphView columnGraphView){
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / mSessionTotals.getTotalDuration())*100;
-        int workPercentInt = Math.round(workPercent);
         float restPercent = 100-workPercent;
 
         Log.d(debug, "date: "+RReminder.getSessionDateString(0,intervalEnd-1000000));
         Log.d(debug, "workPercent: "+workPercent);
         Log.d(debug, "restPercent: "+restPercent);
 
-        ArrayList<ColumnHelper> columnHelperList = new ArrayList<ColumnHelper>();
+        ArrayList<ColumnHelper> columnHelperList = new ArrayList<>();
         columnHelperList.add(new ColumnHelper(workPercent, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));
         columnHelperList.add(new ColumnHelper(restPercent, getResources().getColor(R.color.rest_chart), mPeriodTotals.get(1).getPeriodCount(), mPeriodTotals.get(1).getTotalDuration(), mPeriodTotals.get(1).getExtendCount(), mPeriodTotals.get(1).getTotalExtendDuration()));
         columnGraphView.setColumnData(columnHelperList);

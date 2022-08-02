@@ -10,15 +10,14 @@ public class PieHelper {
     private float targetStartDegree;
     private float targetEndDegree;
     private float middleDegree;
-    private String title;
+    private final String title;
     private float sweepDegree;
     private float extendStartDegree= 0;
     private boolean isAnimated = false;
     private boolean extended = false;
     private boolean drawAll = false;
     private boolean drawExtended = false;
-    private String debug="PIE_HELPER";
-    private Period period;
+    private final Period period;
 
     int velocity = 2;
 
@@ -30,6 +29,7 @@ public class PieHelper {
     }
 
     PieHelper(float percent, Period period, String title){
+        String debug = "PIE_HELPER";
         Log.d(debug, "percent: "+percent);
         this.sweepDegree = percent * 300;
         this.period = period;
@@ -59,13 +59,7 @@ public class PieHelper {
 
     }
 
-    PieHelper setTarget(PieHelper targetPie){
-        this.targetStartDegree = targetPie.getStartDegree();
-        this.targetEndDegree = targetPie.getEndDegree();
-        this.title = targetPie.getTitle();
-        this.sweepDegree = targetPie.getSweep();
-        return this;
-    }
+
 
     void setDegree(float startDegree, float endDegree){
         this.startDegree = startDegree;
@@ -76,9 +70,6 @@ public class PieHelper {
         this.isAnimated = status;
     }
 
-    void setDrawExtended(boolean status){
-        this.drawExtended = status;
-    }
 
     void setDrawAllStatus(boolean status){
         this.drawAll = status;
@@ -108,8 +99,7 @@ public class PieHelper {
         this.startDegree = updateSelf(startDegree, targetStartDegree, velocity);
         this.endDegree = updateSelf(endDegree, targetEndDegree, velocity);
         this.sweepDegree = endDegree - startDegree;
-       // Log.d(debug, "UPDATE endDegree: "+this.endDegree);
-       // Log.d(debug, "UPDATE extendStartDegree: "+this.extendStartDegree);
+
         if(this.extended && this.endDegree>this.extendStartDegree){
            // Log.d(debug, "START_DRAWING_EXT");
             drawExtended = true;
@@ -126,10 +116,6 @@ public class PieHelper {
         //Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
     }
 
-    String getPercentStr(){
-        float percent = sweepDegree / 300 * 100;
-        return String.valueOf((int)percent) + "%";
-    }
 
     public Period getPeriod(){
         return period;
@@ -148,8 +134,6 @@ public class PieHelper {
     }
 
     public int getPeriodExtendCount(){return period.getExtendCount();}
-
-    public float getExtendStartDegree(){return this.extendStartDegree;}
 
     public String getTitle(){
         return title;

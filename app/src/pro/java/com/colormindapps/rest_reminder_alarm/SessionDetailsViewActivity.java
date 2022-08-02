@@ -6,10 +6,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -17,12 +15,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.google.android.material.navigation.NavigationView;
@@ -31,11 +27,7 @@ import java.util.List;
 
 
 public class SessionDetailsViewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private long sessionStart, sessionEnd;
-    boolean showingBack = false;
-    private PeriodViewModel mPeriodViewModel;
-    private SessionsViewModel mSessionViewModel;
-    private List<Period> mPeriods;
+    private long sessionStart;
     private int viewPagerPosition;
     private List<Session> mSessions;
     private ImageView previous, next;
@@ -43,35 +35,22 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
     private ViewPager2 viewPager;
     private ViewPager2.OnPageChangeCallback onPageChangeCallback;
 
-    private FragmentStateAdapter pagerAdapter;
 
-
-    private String debug = "SESSION_DETAILS";
+    private final String debug = "SESSION_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.session_details_view_activity);
-        sessionStart = getIntent().getLongExtra(RReminder.DB_SESSION_START,0l);
-        sessionEnd = getIntent().getLongExtra(RReminder.DB_SESSION_END,0l);
+        sessionStart = getIntent().getLongExtra(RReminder.DB_SESSION_START, 0L);
+        long sessionEnd = getIntent().getLongExtra(RReminder.DB_SESSION_END, 0L);
 
-        mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
-        mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
+        SessionsViewModel mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
 
         previous = findViewById(R.id.previous);
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewPager.setCurrentItem(viewPagerPosition-1, true);
-            }
-        });
+        previous.setOnClickListener(view -> viewPager.setCurrentItem(viewPagerPosition-1, true));
         next = findViewById(R.id.next);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewPager.setCurrentItem(viewPagerPosition+1, true);
-            }
-        });
+        next.setOnClickListener(view -> viewPager.setCurrentItem(viewPagerPosition+1, true));
 
         viewPager = findViewById(R.id.pager);
         Log.d(debug, "session start: "+ sessionStart);
@@ -97,13 +76,10 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
 
         viewPager.registerOnPageChangeCallback(onPageChangeCallback);
 
-        mSessionViewModel.getAllSessionsPieView().observe(this, new Observer<List<Session>>(){
-            @Override
-            public void onChanged(@Nullable final List<Session> sessions){
-                mSessions = sessions;
-                launchPagerAdapter();
+        mSessionViewModel.getAllSessionsPieView().observe(this, sessions -> {
+            mSessions = sessions;
+            launchPagerAdapter();
 
-            }
         });
 
 
@@ -125,9 +101,8 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
     }
 
     public void launchPagerAdapter(){
-        pagerAdapter = new ScreenSlidePagerAdapter(this);
+        FragmentStateAdapter pagerAdapter = new ScreenSlidePagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
-        int limit = Math.min(mSessions.size(), 5);
         viewPager.setOffscreenPageLimit(1);
         Log.d(debug, "session position: "+getSessionPosition(sessionStart));
         viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
@@ -145,9 +120,6 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
 
     }
 
-    public List<Period> getPeriods(){
-        return mPeriods;
-    }
 
     public int getSessionPosition(long sessionStart){
         int i = 0;
@@ -168,6 +140,7 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return SessionDetailsViewFragment.newInstance(mSessions.get(position).getSessionStart(),mSessions.get(position).getSessionEnd());

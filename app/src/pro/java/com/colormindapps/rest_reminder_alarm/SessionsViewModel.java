@@ -13,22 +13,17 @@ import java.util.List;
 
 public class SessionsViewModel extends AndroidViewModel {
 
-    private RReminderRepository mRepository;
-    private LiveData<List<Session>> mAllSessions, mAllSessionsPieView;
-    private LiveData<Session> mSession;
+    private final RReminderRepository mRepository;
+    private final LiveData<List<Session>> mAllSessionsPieView;
     String debug =  "SESSIONS_VIEW_MODEL";
 
     public SessionsViewModel(Application application){
         super(application);
         Log.d(debug, "initiated");
         mRepository = new RReminderRepository(application);
-        mAllSessions = mRepository.getAllSessions();
         mAllSessionsPieView = mRepository.getAllSessionsPieData();
     }
 
-    LiveData<List<Session>> getAllSessions(){
-        return mAllSessions;
-    }
     LiveData<List<Session>> getAllSessionsPieView(){
         return mAllSessionsPieView;
     }
@@ -56,8 +51,6 @@ public class SessionsViewModel extends AndroidViewModel {
     public void update(Session session){
         mRepository.updateSession(session);
     }
-
-    public void populateDatabase(){mRepository.populateDatabase();}
 
     public void populateDatabaseForStats(){mRepository.populateDatabaseForStats();}
 }

@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -36,12 +35,11 @@ import java.util.List;
 public class CalendarActivity extends AppCompatActivity implements OnMonthChangedListener, OnDateSelectedListener, NavigationView.OnNavigationItemSelectedListener {
     MaterialCalendarView calendarView;
 
-    private EventDecorator eventDecorator;
     private SessionsViewModel mSessionsViewModel;
     int yearValue, monthValue;
     HashSet<Integer> hSetNumbers;
     private ArrayList<Integer> shownMonths;
-    private String debug = "RR_CALENDAR";
+    private final String debug = "RR_CALENDAR";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +111,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         mSessionsViewModel.getSessionsInPeriod(periodFrom, periodTo).observe(this, new Observer<List<Session>>(){
             @Override
             public void onChanged(@Nullable final List<Session> sessions){
+                assert sessions != null;
                 decorateCalendar(sessions, year, month);
                 mSessionsViewModel.getSessionsInPeriod(periodFrom, periodTo).removeObserver(this);
             }
@@ -127,15 +126,15 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
             calendar.setTimeInMillis(from);
             daysArray.add(calendar.get(Calendar.DAY_OF_MONTH));
         }
-        Log.d(debug, "daysArray contents: "+daysArray.toString());
+        Log.d(debug, "daysArray contents: "+daysArray);
         hSetNumbers = new HashSet(daysArray);
         ArrayList<CalendarDay> dates = new ArrayList<>();
         for (int day : hSetNumbers){
             dates.add(CalendarDay.from(year, month,day));
         }
         Log.d(debug, "arraylistDates size: "+dates.size());
-        Log.d(debug, "arraylistDates: "+dates.toString());
-        eventDecorator = new EventDecorator(getApplicationContext(),dates);
+        Log.d(debug, "arraylistDates: "+dates);
+        EventDecorator eventDecorator = new EventDecorator(getApplicationContext(), dates);
         calendarView.addDecorator(eventDecorator);
         calendarView.invalidateDecorators();
     }
@@ -143,9 +142,7 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
     @Override
     public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
         Log.d(debug, "onMonthChanged");
-        //noinspection ConstantConditions
-        android.text.format.DateFormat df = new android.text.format.DateFormat();
-       // getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
+        // getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
         int month = date.getMonth();
         int shownValue = date.getYear()*100+month;
         if(!shownMonths.contains(shownValue)){
@@ -169,18 +166,15 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
         long periodFrom = RReminder.getMillisFromDate( date.getYear(),date.getMonth(),day,true);
         long periodTo = RReminder.getMillisFromDate(date.getYear(),date.getMonth(),day,false);
 
-        mSessionsViewModel.getSessionsInPeriodASC(periodFrom, periodTo).observe(this, new Observer<List<Session>>(){
-            @Override
-            public void onChanged(@Nullable final List<Session> sessions){
-                Intent intent = new Intent(getApplicationContext(), SessionDetailsViewActivity.class);
-                if(sessions.size()>0){
-                    intent.putExtra(RReminder. DB_SESSION_START, sessions.get(0).getSessionStart());
-                    intent.putExtra(RReminder. DB_SESSION_END, sessions.get(0).getSessionEnd());
-                    startActivity(intent);
-                }
-
-
+        mSessionsViewModel.getSessionsInPeriodASC(periodFrom, periodTo).observe(this, sessions -> {
+            Intent intent = new Intent(getApplicationContext(), SessionDetailsViewActivity.class);
+            if(sessions.size()>0){
+                intent.putExtra(RReminder. DB_SESSION_START, sessions.get(0).getSessionStart());
+                intent.putExtra(RReminder. DB_SESSION_END, sessions.get(0).getSessionEnd());
+                startActivity(intent);
             }
+
+
         });
     }
 

@@ -1,16 +1,13 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.core.app.NotificationManagerCompat;
@@ -19,7 +16,6 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -29,39 +25,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.colormindapps.rest_reminder_alarm.data.Period;
-import com.colormindapps.rest_reminder_alarm.data.PeriodTotals;
 import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.CapabilityApi;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataItem;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.DataMapItem;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
 
 import java.util.Calendar;
-import java.util.List;
 
 
-public class NotificationActivity extends FragmentActivity implements
-		DataApi.DataListener,
-		OnDialogCloseListener,
-		MessageApi.MessageListener,
-		CapabilityApi.CapabilityListener,
-		GoogleApiClient.OnConnectionFailedListener,
-		GoogleApiClient.ConnectionCallbacks {
+public class NotificationActivity extends FragmentActivity implements OnDialogCloseListener {
 	private long mCalendar, previousPeriodEnd;
 	private int type, extendCount;
 	public static boolean isOnVisible;
@@ -75,23 +45,15 @@ public class NotificationActivity extends FragmentActivity implements
 	Typeface titleFont, descriptionFont, buttonFont;
 	NotificationManagerCompat mgr;
 	String work,rest;
-	boolean wearOn = false;
 	private PeriodViewModel mPeriodViewModel;
 
-	private GoogleApiClient mGoogleApiClient;
-	private Node connectedNode;
-	private boolean mResolvingError = false;
 	private long currentPeriodStartTime = 0;
 	private TextView periodTypeTotals;
-
-	private String debug = "NOTIFICATION_ACTIVITY";
 
 	private LiveData<Session> lastLDSession;
 	private Observer<Session> lastSessionObserver;
 	private SessionsViewModel mSessionsViewModel;
 
-	//Request code for launching the Intent to resolve Google Play services errors.
-	private static final int REQUEST_RESOLVE_ERROR = 1000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,18 +68,10 @@ public class NotificationActivity extends FragmentActivity implements
 		mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
 		mSessionsViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
 
-		mPeriodViewModel.getLastPeriod().observe(this, new Observer<Period>(){
-			@Override
-			public void onChanged(@Nullable final Period period){
-				currentPeriodStartTime = period.getStartTime();
-			}
+		mPeriodViewModel.getLastPeriod().observe(this, period -> {
+			assert period != null;
+			currentPeriodStartTime = period.getStartTime();
 		});
-
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
-				.addApi(Wearable.API)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.build();
 
 		if(RReminder.getMode(this)==1){
 	        final Window win = getWindow();
@@ -169,25 +123,12 @@ public class NotificationActivity extends FragmentActivity implements
 
 	@Override
 	protected void onStop(){
-		if (!mResolvingError && (mGoogleApiClient != null) && (mGoogleApiClient.isConnected())) {
-
-			Wearable.DataApi.removeListener(mGoogleApiClient, this);
-			Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-			Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
-
-			mGoogleApiClient.disconnect();
-		}
-
 		super.onStop();
 	}
 	
 	@Override
 	protected void onStart(){
 		super.onStart();
-
-		if (!mResolvingError) {
-			mGoogleApiClient.connect();
-		}
 
 		RelativeLayout rootLayout;
         TextView notificationTitle = findViewById(R.id.notification_title);
@@ -209,6 +150,7 @@ public class NotificationActivity extends FragmentActivity implements
 				String startTime = RReminder.getTimeString(getApplicationContext(),session.getSessionStart()).toString();
 				sessionStart.setText(getString(R.string.session_started, startTime));
 			}
+			assert session != null;
 			fillSessionTotals(session.getSessionStart());
 			lastLDSession.removeObserver(lastSessionObserver);
 
@@ -319,13 +261,10 @@ public class NotificationActivity extends FragmentActivity implements
     }
 
 	public void fillSessionTotals(long sessionStart){
-		mPeriodViewModel.getPeriodTotals(sessionStart,previousPeriodEnd).observe(this, new Observer<List<PeriodTotals>>(){
-			@Override
-			public void onChanged(@Nullable final List<PeriodTotals> periodTotals){
-				String workTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(0).getTotalDuration());
-				String restTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(1).getTotalDuration());
-				periodTypeTotals.setText(getString(R.string.session_details, workTotals, restTotals));
-			}
+		mPeriodViewModel.getPeriodTotals(sessionStart,previousPeriodEnd).observe(this, periodTotals -> {
+			String workTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(0).getTotalDuration());
+			String restTotals = RReminder.getShortDurationFromMillis(getApplicationContext(),periodTotals.get(1).getTotalDuration());
+			periodTypeTotals.setText(getString(R.string.session_details, workTotals, restTotals));
 		});
 	}
 	
@@ -377,9 +316,6 @@ public class NotificationActivity extends FragmentActivity implements
 	}
 
 	public void turnoffMobile(){
-		if (mGoogleApiClient!=null) {
-			mGoogleApiClient.disconnect();
-		}
 		Intent intent = new Intent(this, MainActivity.class);
 		intent.setAction(RReminder.ACTION_TURN_OFF);
 		intent.putExtra(RReminder.START_COUNTER, false);
@@ -389,152 +325,7 @@ public class NotificationActivity extends FragmentActivity implements
 		finish();
 	}
 
-	@Override
-	public void onDataChanged(DataEventBuffer dataEvents) {
-		Log.d(debug, "onDataChanged: " + dataEvents);
 
-		for (DataEvent event : dataEvents) {
-
-			if (event.getType() == DataEvent.TYPE_CHANGED) {
-				DataItem item = event.getDataItem();
-
-				if(item.getUri().getPath().compareTo(RReminder.DATA_API_REMINDER_STATUS_PATH)==0){
-					DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
-						Log.d(debug, "call updateActivityStatus from onDataChanged");
-						Log.d(debug, "difference between wear and mobile: "+Math.abs(dataMap.getLong(RReminder.PERIOD_END_TIME)-mCalendar));
-						if(wearOn && !dataMap.getBoolean(RReminder.DATA_API_WEAR_ON)){
-							Log.d(debug, "turn off reminder from NotificationActivity");
-							turnoffMobile();
-						} else if(wearOn && dataMap.getLong(RReminder.PERIOD_END_TIME)> mCalendar && Math.abs(dataMap.getLong(RReminder.PERIOD_END_TIME)-mCalendar)>2000){
-							Log.d(debug, "close NotificationActivity and return to MainActivity");
-							//if reminder status was updated while notificationA was on screen, first cancel currently running mobile period and then set up new mobile period with values from reminder data
-							RReminderMobile.cancelCounterAlarm(NotificationActivity.this.getApplicationContext(), type, extendCount,mCalendar);
-
-							int newPeriodType = dataMap.getInt(RReminder.PERIOD_TYPE);
-							long newPeriodEndTime = dataMap.getLong(RReminder.PERIOD_END_TIME);
-							int newExtendCount = dataMap.getInt(RReminder.EXTEND_COUNT);
-							boolean wearOn = dataMap.getBoolean(RReminder.DATA_API_WEAR_ON);
-							new MobilePeriodManager(NotificationActivity.this.getApplicationContext()).setPeriod(newPeriodType, newPeriodEndTime, newExtendCount);
-
-							RReminderMobile.startCounterService(NotificationActivity.this.getApplicationContext(), newPeriodType, newExtendCount, newPeriodEndTime, false);
-							// TO-DO: implement database update
-							finish();
-						}
-
-				}
-			}
-		}
-	}
-
-	@Override
-	public void onConnected(Bundle connectionHint) {
-		Log.d(debug, "Google API Client was connected");
-		mResolvingError = false;
-		Wearable.DataApi.addListener(mGoogleApiClient, this);
-		Wearable.MessageApi.addListener(mGoogleApiClient, this);
-		Wearable.CapabilityApi.addListener(
-				mGoogleApiClient, this, Uri.parse("wear://"), CapabilityApi.FILTER_REACHABLE);
-		getConnectedNode();
-	}
-
-	@Override
-	public void onConnectionSuspended(int cause) {
-		Log.d(debug, "Connection to Google API client was suspended");
-	}
-
-	@Override
-	public void onMessageReceived(final MessageEvent messageEvent) {
-		Log.d(debug, "onMessageReceived() A message from watch was received:"
-				+ messageEvent.getRequestId() + " " + messageEvent.getPath());
-
-		//mDataItemListAdapter.add(new Event("Message from watch", messageEvent.toString()));
-	}
-
-	@Override
-	public void onCapabilityChanged(final CapabilityInfo capabilityInfo) {
-		Log.d(debug, "onCapabilityChanged: " + capabilityInfo);
-
-		//mDataItemListAdapter.add(new Event("onCapabilityChanged", capabilityInfo.toString()));
-	}
-
-	@Override
-	public void onConnectionFailed(ConnectionResult result) {
-		if (!mResolvingError) {
-
-			if (result.hasResolution()) {
-				try {
-					mResolvingError = true;
-					result.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
-				} catch (IntentSender.SendIntentException e) {
-					// There was an error with the resolution intent. Try again.
-					mGoogleApiClient.connect();
-				}
-			} else {
-				Log.e(debug, "Connection to Google API client has failed");
-				mResolvingError = false;
-
-				Wearable.DataApi.removeListener(mGoogleApiClient, this);
-				Wearable.MessageApi.removeListener(mGoogleApiClient, this);
-				Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
-
-			}
-		}
-	}
-
-	private void getData(final String pathToContent) {
-		Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
-			@Override
-			public void onResult(NodeApi.GetLocalNodeResult getLocalNodeResult) {
-
-				String nodeID;
-				if (connectedNode != null){
-					nodeID = connectedNode.getId();
-				} else {
-					nodeID = getLocalNodeResult.getNode().getId();
-				}
-
-				Uri uri = new Uri.Builder()
-						.scheme(PutDataRequest.WEAR_URI_SCHEME)
-						.path(pathToContent)
-						.authority(nodeID)
-						.build();
-
-				Wearable.DataApi.getDataItem(mGoogleApiClient, uri)
-						.setResultCallback(
-								new ResultCallback<DataApi.DataItemResult>() {
-									@Override
-									public void onResult(DataApi.DataItemResult dataItemResult) {
-
-										if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
-											DataMap data = DataMap.fromByteArray(dataItemResult.getDataItem().getData());
-											Log.d(debug, "googleAPI source: "+data.getInt(RReminder.DATA_API_SOURCE)+ ", type: "+ data.getInt(RReminder.PERIOD_TYPE)+ ", mobileOn: "+ data.getBoolean(RReminder.DATA_API_MOBILE_ON)+
-											", wearOn: "+data.getBoolean(RReminder.DATA_API_WEAR_ON));
-											wearOn = data.getBoolean(RReminder.DATA_API_WEAR_ON);
-										}
-									}
-								}
-						);
-			}
-		});
-	}
-
-	private void getConnectedNode()
-	{
-		Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
-			@Override
-			public void onResult(NodeApi.GetConnectedNodesResult nodes) {
-				for (Node node : nodes.getNodes()) {
-					connectedNode = node;
-				}
-				getData(RReminder.DATA_API_REMINDER_STATUS_PATH);
-			}
-		});
-	}
-
-	
-	@Override
-	public void stopCountDownTimerForDialog(){
-	}
 
     @Override
     public void dialogIsClosed(boolean eulaAccepted){
@@ -568,18 +359,7 @@ public class NotificationActivity extends FragmentActivity implements
 		
 	}
 
-	@Override
-	public void updateWearStatus(int type, long periodEndTimeValue, int extendCount, boolean mobileOn){
-		Log.d(debug, "updateWearStatus(), type: " + type);
-		updateReminderStatus(type,periodEndTimeValue,extendCount, mobileOn, wearOn);
-	}
 
-	public void updateReminderStatus(int type, long periodEndTimeValue, int extendCount, boolean mobileOn, boolean wearOn){
-		PendingResult<DataApi.DataItemResult> pendingResult =
-				Wearable.DataApi.putDataItem(mGoogleApiClient,RReminder.createStatusData(RReminder.DATA_API_SOURCE_MOBILE,type,periodEndTimeValue,extendCount, mobileOn, wearOn));
-	}
-
-	
 	@Override
 	public void unbindFromFragment(){
 	}

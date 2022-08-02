@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -11,8 +12,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -45,7 +44,6 @@ public class ExtendDialog extends DialogFragment{
 	private Observer<Period> periodObserver;
 	private Observer<List<Period>> periodListObserver;
 
-	String debug = "EXTEND_DIALOG";
 	
 	private void setParentActivity(OnDialogCloseListener activity){
 		parentActivity = activity;
@@ -130,6 +128,7 @@ public class ExtendDialog extends DialogFragment{
 		super.onCancel(dialog);
 	}
 	
+	@SuppressLint("SwitchIntDef")
 	private void buttonAction(Context context, int multiplier){
 		String toastText; 
 		long timeRemaining = 0L;
@@ -155,11 +154,15 @@ public class ExtendDialog extends DialogFragment{
 		long functionCalendar;
 
 
-		
-		switch(functionType){
-		case RReminder.WORK:  functionType = RReminder.WORK_EXTENDED; break;
-		case RReminder.REST:  functionType = RReminder.REST_EXTENDED; break;
-		default: break;
+		switch (functionType) {
+			case RReminder.WORK:
+				functionType = RReminder.WORK_EXTENDED;
+				break;
+			case RReminder.REST:
+				functionType = RReminder.REST_EXTENDED;
+				break;
+			default:
+				break;
 		}
 		
 		extendCount+=1;
@@ -168,7 +171,6 @@ public class ExtendDialog extends DialogFragment{
 
 		RReminderMobile.startCounterService(context.getApplicationContext(), functionType, extendCount, functionCalendar, false);
 
-		parentActivity.updateWearStatus(functionType,functionCalendar,extendCount, true);
 		parentActivity.cancelNotificationForDialog(functionCalendar,false);
 		switch(activityType){
 		case 0:
@@ -196,19 +198,16 @@ public class ExtendDialog extends DialogFragment{
 
 	public void getAndUpdatePeriodDb( long newEndTime, int type, int extendCount){
 		currentLDPeriod = mPeriodViewModel.getLastPeriod();
-		periodObserver = new Observer<Period>() {
-			@Override
-			public void onChanged(Period period) {
-				mPeriod = period;
-				mPeriod.setType(type);
-				mPeriod.setExtendCount(extendCount);
-				if(extendCount==1){
-					mPeriod.setInitialDuration(period.getDuration());
-				}
-				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
-				mPeriodViewModel.update(mPeriod);
-				currentLDPeriod.removeObserver(periodObserver);
+		periodObserver = period -> {
+			mPeriod = period;
+			mPeriod.setType(type);
+			mPeriod.setExtendCount(extendCount);
+			if(extendCount==1){
+				mPeriod.setInitialDuration(period.getDuration());
 			}
+			mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
+			mPeriodViewModel.update(mPeriod);
+			currentLDPeriod.removeObserver(periodObserver);
 		};
 
 		currentLDPeriod.observe(this, periodObserver);
@@ -216,20 +215,17 @@ public class ExtendDialog extends DialogFragment{
 
 	public void getAndUpdatePeriodDbNotification( long newEndTime, int type, int extendCount){
 		currentLDPeriodList = mPeriodViewModel.getLastTwoPeriods();
-		periodListObserver = new Observer<List<Period>>() {
-			@Override
-			public void onChanged(List<Period> periods) {
-				mPeriodViewModel.deletePeriod(periods.get(0));
-				mPeriod = periods.get(1);
-				mPeriod.setType(type);
-				mPeriod.setExtendCount(extendCount);
-				if(extendCount==1){
-					mPeriod.setInitialDuration(mPeriod.getDuration());
-				}
-				mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
-				mPeriodViewModel.update(mPeriod);
-				currentLDPeriodList.removeObserver(periodListObserver);
+		periodListObserver = periods -> {
+			mPeriodViewModel.deletePeriod(periods.get(0));
+			mPeriod = periods.get(1);
+			mPeriod.setType(type);
+			mPeriod.setExtendCount(extendCount);
+			if(extendCount==1){
+				mPeriod.setInitialDuration(mPeriod.getDuration());
 			}
+			mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
+			mPeriodViewModel.update(mPeriod);
+			currentLDPeriodList.removeObserver(periodListObserver);
 		};
 
 		currentLDPeriodList.observe(this, periodListObserver);
@@ -246,7 +242,7 @@ public class ExtendDialog extends DialogFragment{
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnDialogCloseListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context + " must implement OnExtendDialogSelectedListener");
         }
     }
 

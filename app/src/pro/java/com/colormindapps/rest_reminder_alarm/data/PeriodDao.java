@@ -31,7 +31,7 @@ public interface PeriodDao {
     void deleteOlder(long currentTime);
 
     @Delete
-    int deletePeriod(Period period);
+    void deletePeriod(Period period);
 
 
     @Query("SELECT * FROM period_table WHERE start_time >= :sessionStart AND start_time<=:sessionEnd ORDER BY start_time ASC")

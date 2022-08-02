@@ -1,58 +1,32 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.os.Vibrator;
+
+import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
-import com.colormindapps.rest_reminder_alarm.shared.ReminderStatus;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.wearable.CapabilityApi;
-import com.google.android.gms.wearable.CapabilityInfo;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
-
-import java.util.Calendar;
 
 
-public class MobilePeriodService extends JobIntentService implements
-		GoogleApiClient.ConnectionCallbacks,
-		DataApi.DataListener,
-		CapabilityApi.CapabilityListener,
-		GoogleApiClient.OnConnectionFailedListener {
 
-	long mCalendar;
+public class MobilePeriodService extends JobIntentService {
+
 	int type;
 	int extendCount;
 	int typeForNotification;
 	long periodEndedTime, nextPeriodEndTime;
-	boolean noReminderStatus = false;
 	Intent periodIntent;
 	String notificationMessage;
 	NotificationManagerCompat mgr;
-	ReminderStatus statusData;
 
 	static final int JOB_ID = 1000;
 
@@ -65,8 +39,7 @@ public class MobilePeriodService extends JobIntentService implements
 
 	String debug  = "MOBILE_PERIOD_SERVICE";
 
-	private GoogleApiClient mGoogleApiClient;
-	private Node connectedNode;
+
 
 
 
@@ -80,129 +53,17 @@ public class MobilePeriodService extends JobIntentService implements
 	@Override
 	public void onDestroy() {
 		Log.d(debug, "onDestroy");
-		if ((mGoogleApiClient != null) && mGoogleApiClient.isConnected()) {
-			Wearable.DataApi.removeListener(mGoogleApiClient, this);
-			Wearable.CapabilityApi.removeListener(mGoogleApiClient, this);
-			mGoogleApiClient.disconnect();
-		}
 		super.onDestroy();
 
 	}
 
 	@Override
-	protected void onHandleWork(Intent intent) {
+	protected void onHandleWork(@NonNull Intent intent) {
 		Log.d(debug, "onHandleWork");
-		mGoogleApiClient = new GoogleApiClient.Builder(this)
-				.addApi(Wearable.API)
-				.addConnectionCallbacks(this)
-				.addOnConnectionFailedListener(this)
-				.build();
-		mGoogleApiClient.connect();
 		periodIntent = intent;
-	}
-
-	@Override
-	public void onConnected(Bundle connectionHint) {
-		Log.d(debug, "onConnected(): Successfully connected to Google API client");
-		Wearable.DataApi.addListener(mGoogleApiClient, this);
-		Wearable.CapabilityApi.addListener(
-				mGoogleApiClient, this, Uri.parse("wear://"), CapabilityApi.FILTER_REACHABLE);
-		//it is required to connect to Google API before doing any work
-		getConnectedNode();
-	}
-
-	@Override
-	public void onConnectionSuspended(int cause) {
-		Log.d(debug, "onConnectionSuspended(): Connection to Google API client was suspended");
-	}
-
-	@Override
-	public void onConnectionFailed(ConnectionResult result) {
-		Log.e(debug, "onConnectionFailed(): Failed to connect, with result: " + result);
-		noReminderStatus = true;
 		doServiceWork();
-	}
-
-	@Override
-	public void onCapabilityChanged(CapabilityInfo capabilityInfo) {
-		Log.d(debug, "onCapabilityChanged: " + capabilityInfo);
-	}
-
-	@Override
-	public void onDataChanged(DataEventBuffer dataEvents) {
-		Log.d(debug, "onDataChanged(): " + dataEvents);
-
-		for (DataEvent event : dataEvents) {
-			if (event.getType() == DataEvent.TYPE_CHANGED) {
-
-			}
-		}
-	}
-
-	public void updateReminderStatus(int type, long periodEndTimeValue, int extendCount, boolean mobileOn, boolean wearOn){
-		PendingResult<DataApi.DataItemResult> pendingResult =
-				Wearable.DataApi.putDataItem(mGoogleApiClient,RReminder.createStatusData(RReminder.DATA_API_SOURCE_MOBILE,type,periodEndTimeValue,extendCount, mobileOn, wearOn));
-	}
-
-	private void getData(final String pathToContent) {
-		Log.d(debug, "attempt to get data from DATA API");
-
-		Wearable.NodeApi.getLocalNode(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetLocalNodeResult>() {
-			@Override
-			public void onResult(NodeApi.GetLocalNodeResult getLocalNodeResult) {
-
-				String nodeID;
-				if (connectedNode != null){
-					nodeID = connectedNode.getId();
-				} else {
-					nodeID = getLocalNodeResult.getNode().getId();
-				}
-
-				Uri uri = new Uri.Builder()
-						.scheme(PutDataRequest.WEAR_URI_SCHEME)
-						.path(pathToContent)
-						.authority(nodeID)
-						.build();
-
-				Wearable.DataApi.getDataItem(mGoogleApiClient, uri)
-						.setResultCallback(
-								new ResultCallback<DataApi.DataItemResult>() {
-									@Override
-									public void onResult(DataApi.DataItemResult dataItemResult) {
-
-										if (dataItemResult.getStatus().isSuccess() && dataItemResult.getDataItem() != null) {
-											DataMap data = DataMap.fromByteArray(dataItemResult.getDataItem().getData());
-											statusData = setReminderData(data.getInt(RReminder.PERIOD_TYPE), data.getLong(RReminder.PERIOD_END_TIME), data.getInt(RReminder.EXTEND_COUNT), data.getInt(RReminder.DATA_API_SOURCE),data.getBoolean(RReminder.DATA_API_MOBILE_ON));
-
-										}
-										//only after connecting to Google API and checking whether or not it has reminderStatus stored in Data API, we can continue with the rest of MobilePeriodService function
-										doServiceWork();
-									}
-								}
-						);
-			}
-		});
-	}
-
-	private void getConnectedNode()
-	{
-		Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
-			@Override
-			public void onResult(NodeApi.GetConnectedNodesResult nodes) {
-				for (Node node : nodes.getNodes()) {
-					connectedNode = node;
-				}
-				getData(RReminder.DATA_API_REMINDER_STATUS_PATH);
-			}
-		});
-	}
-
-	public ReminderStatus setReminderData(int periodType, long periodEndTime, int extendCount, int commandSource, boolean mobileOn){
-		Log.d(debug, "obtaining reminder status data from data api");
-		return new ReminderStatus(periodType, periodEndTime, extendCount, commandSource, mobileOn, true);
 
 	}
-
 
 	public void doServiceWork(){
 		if(periodIntent.getExtras()!=null){
@@ -222,12 +83,6 @@ public class MobilePeriodService extends JobIntentService implements
 			mgr = NotificationManagerCompat.from(getApplicationContext());
 			mgr.cancel(24);
 
-
-
-
-			//PowerManager pm = (PowerManager)
-			//getSystemService(Context.POWER_SERVICE);
-			//boolean isScreenOn = pm.isScreenOn();
 			if(RReminder.isActiveModeNotificationEnabled(this)){
 				mgr.notify(1, RReminderMobile.updateOnGoingNotification(this, type, nextPeriodEndTime, true));
 			}
@@ -236,28 +91,13 @@ public class MobilePeriodService extends JobIntentService implements
 			} else {
 				launchNotification();
 			}
-
-			Log.d(debug, "checking, if app is running on wear");
-			if(!noReminderStatus){
-				if(!statusData.isWearOn()){
-					updateReminderStatus(type, nextPeriodEndTime,0, true, false);
-				}
-
-			}
-
 	}
 
 
 	public void gotoNotificationActivity(){
-						/*
-				Intent playIntent = new Intent(context, PlaySoundService.class);
-				playIntent.putExtra(Scheduler.PERIOD_TYPE,typeForNotification);
-				context.startService(playIntent);
-				*/
 
-		//Set the next period end alarms and start service, if any automatical mode is selected
-		if(RReminder.getMode(this) != 1){
-		}
+
+		//Set the next period end alarms and start service, if any automatic mode is selected
 
 		Intent actionIntent = new Intent(this, NotificationActivity.class);
 		actionIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
@@ -271,6 +111,7 @@ public class MobilePeriodService extends JobIntentService implements
 	}
 
 
+	@SuppressLint("UnspecifiedImmutableFlag")
 	public void launchNotification(){
 		//building android wear-only action for extending previously ended period
 		//the action intent
@@ -370,19 +211,12 @@ public class MobilePeriodService extends JobIntentService implements
 				}
 				break;
 			default:
-				//note = new Notification(android.R.drawable.stat_sys_warning, getString(R.string.notify_work_period_end_ticker_message), System.currentTimeMillis());
-				//note.setLatestEventInfo(this, "Type exception title", "Type exception message", pi);
 				builder.setSmallIcon(android.R.drawable.stat_sys_warning);
 				builder.setTicker(getString(R.string.notify_work_period_end_ticker_message));
 				builder.setContentTitle("PeriodTypeException");
 				builder.setContentText("PeriodTypeException");
 				break;
 		}
-				/*
-				if(am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && callState == TelephonyManager.CALL_STATE_IDLE){
-					builder.setSound(Scheduler.getRingtone(getBaseContext(),typeForNotification));
-				}
-				*/
 		if(am!=null && am.getRingerMode()!=AudioManager.RINGER_MODE_SILENT){
 
 			if(RReminder.isVibrateEnabledSupport(this)){

@@ -11,9 +11,7 @@ import java.util.List;
 
 public class PeriodViewModel extends AndroidViewModel {
 
-    private RReminderRepository mRepository;
-    private LiveData<List<Period>> mSessionPeriods;
-    private LiveData<Period> mPeriod;
+    private final RReminderRepository mRepository;
 
     public PeriodViewModel(Application application){
         super(application);
@@ -21,19 +19,13 @@ public class PeriodViewModel extends AndroidViewModel {
     }
 
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){
-        mSessionPeriods = mRepository.getSessionPeriods(sessionStart, sessionEnd);
-        return mSessionPeriods;
+        return mRepository.getSessionPeriods(sessionStart, sessionEnd);
     }
 
-    LiveData<Period> getPeriod(long endTime){
-        mPeriod = mRepository.getPeriod(endTime);
-        return mPeriod;
-    }
 
     LiveData<Period> getLastPeriod(){return mRepository.getLastPeriod();}
     LiveData<List<Period>>getLastTwoPeriods(){return mRepository.getLastTwoPeriods();}
 
-    public void deletePeriod(long startTime){mRepository.deletePeriod(startTime);}
 
 
     public void insert(Period period){
@@ -47,10 +39,6 @@ public class PeriodViewModel extends AndroidViewModel {
 
     public void update(Period period){
         mRepository.updatePeriod(period);
-    }
-
-    LiveData<Integer> getPeriodCount(int type, long start, long end) {
-        return mRepository.getPeriodCount(type, start, end);
     }
 
     LiveData<List<PeriodTotals>> getPeriodTotals(long start, long end){

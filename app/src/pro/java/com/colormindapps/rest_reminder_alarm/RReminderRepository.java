@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.app.Application;
 import androidx.lifecycle.LiveData;
-import android.os.AsyncTask;
 
 import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.data.PeriodDao;
@@ -15,13 +14,11 @@ import java.util.List;
 
 public class RReminderRepository {
 
-    private PeriodDao mPeriodDao;
-    private SessionDao mSessionDao;
-    private LiveData<List<Session>> mAllSessions, mAllSessionPieView;
-    private LiveData<Session> mSession;
-    private LiveData<List<Period>> mPeriods;
-    private LiveData<Period> mPeriod;
-    private RReminderRoomDatabase db;
+    private final PeriodDao mPeriodDao;
+    private final SessionDao mSessionDao;
+    private final LiveData<List<Session>> mAllSessions;
+    private final LiveData<List<Session>> mAllSessionPieView;
+    private final RReminderRoomDatabase db;
 
     RReminderRepository(Application application){
         db = RReminderRoomDatabase.getDatabase(application);
@@ -53,30 +50,22 @@ public class RReminderRepository {
     LiveData<Session> getCurrentSession() {return mSessionDao.getCurrentSession();}
     LiveData<Integer> hasSessions(long from, long to){return mSessionDao.hasSessions(from, to);}
     LiveData<List<Period>> getSessionPeriods(long sessionStart, long sessionEnd){return mPeriodDao.getSessionPeriods(sessionStart, sessionEnd);}
-    LiveData<Period> getPeriod(long startTime) {return mPeriodDao.getPeriod(startTime);}
     LiveData<Period> getLastPeriod(){return mPeriodDao.getLastPeriod();}
     LiveData<List<Period>> getLastTwoPeriods(){return mPeriodDao.getLastTwoPeriods();}
-    LiveData<Integer> getPeriodCount(int type, long start,long end){return mPeriodDao.getPeriodCount(type, start, end);}
     LiveData<List<PeriodTotals>> getPeriodTotals(long start, long end){return mPeriodDao.getPeriodTotals(start, end);}
     LiveData<SessionTotals> getSessionTotals(long start, long end){return mSessionDao.getSessionTotals(start, end);}
 
 
     void insertPeriod(Period period) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mPeriodDao.insertPeriod(period);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mPeriodDao.insertPeriod(period));
     }
 
     void deletePeriod(Period period) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mPeriodDao.deletePeriod(period);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mPeriodDao.deletePeriod(period));
     }
 
     void deleteSession(Session session) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mSessionDao.deleteSession(session);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mSessionDao.deleteSession(session));
     }
 
 
@@ -95,9 +84,7 @@ public class RReminderRepository {
 
 
     void insertSession(Session session) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mSessionDao.insertSession(session);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mSessionDao.insertSession(session));
     }
 
 
@@ -117,30 +104,19 @@ public class RReminderRepository {
         });
     }
 
-    void deletePeriod(long endTime) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mPeriodDao.deletePeriod(endTime);
-        });
-    }
 
     void deleteShortSessionPeriods(long sessionStartTime) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mPeriodDao.deleteShortSessionPeriods(sessionStartTime);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mPeriodDao.deleteShortSessionPeriods(sessionStartTime));
     }
 
 
     void updatePeriod(Period period) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mPeriodDao.updatePeriod(period);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mPeriodDao.updatePeriod(period));
     }
 
 
     void updateSession(Session session) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            mSessionDao.updateSession(session);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> mSessionDao.updateSession(session));
     }
 
 

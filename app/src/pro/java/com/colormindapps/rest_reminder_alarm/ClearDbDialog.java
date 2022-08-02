@@ -5,18 +5,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Build;
+
 import android.os.Bundle;
-import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
-
 import java.util.Objects;
 
 
@@ -44,9 +40,7 @@ public class ClearDbDialog extends DialogFragment {
 	           		parentActivity.deleteDB();
 				   Objects.requireNonNull(ClearDbDialog.this.getDialog()).cancel();
 			   })
-				.setNegativeButton(android.R.string.cancel, (dialog, id) -> {
-					Objects.requireNonNull(ClearDbDialog.this.getDialog()).cancel();
-				})
+				.setNegativeButton(android.R.string.cancel, (dialog, id) -> Objects.requireNonNull(ClearDbDialog.this.getDialog()).cancel())
 ;
 	    return builder.create();
 	}
@@ -81,7 +75,7 @@ public class ClearDbDialog extends DialogFragment {
 			//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
 			setParentActivity((OnClearDbDialogCloseListener) getActivity());
 		} catch (ClassCastException e) {
-			throw new ClassCastException(context.toString() + " must implement OnClearDbDialogCloseListener");
+			throw new ClassCastException(context + " must implement OnClearDbDialogCloseListener");
 		}
 	}
 

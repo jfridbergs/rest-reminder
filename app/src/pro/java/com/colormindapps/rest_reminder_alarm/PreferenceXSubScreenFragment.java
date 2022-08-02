@@ -60,7 +60,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
     public static final String PAGE_ID = "page_id";
     private PreferenceActivityLinkedService parentActivity;
 
-    private String debug = "PERFERENCE_SUBSCREEN";
 
     public static PreferenceXSubScreenFragment newInstance(String pageId) {
         PreferenceXSubScreenFragment f = new PreferenceXSubScreenFragment();
@@ -104,14 +103,17 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         preferenceScreenKey = getArguments().getString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT);
 
 
-
+        assert preferenceScreenKey != null;
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
 
             //disable preference for enabling shorter than 10 min periods in order to avoid messy interactions when updating current running periods, that were <10 mins to new min 10 min value (unnecessary work)
-            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(!RReminderMobile.isCounterServiceRunning(context));
+            Preference preference = getPreferenceManager().findPreference(enableShortPeriodsKey);
+            assert preference != null;
+            preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 
             workSoundPreference = findPreference(workPeriodSoundKey);
             String valueString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert valueString != null;
             if (valueString.equals("DEFAULT_RINGTONE_URI")){
                 originalWorkUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -126,6 +128,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             restSoundPreference = findPreference(restPeriodSoundKey);
             valueString = sharedPreferences.getString(restPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert valueString != null;
             if (valueString.equals("DEFAULT_RINGTONE_URI")){
                 originalRestUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -151,7 +154,8 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
                 testDisableBatteryOptSummary = disableBatteryOptPreference.getSummary().toString();
             } else {
-                PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_period_settings_key));
+                PreferenceCategory preferenceCategory = findPreference(getString(R.string.pref_category_period_settings_key));
+                assert preferenceCategory != null;
                 preferenceCategory.removePreference(disableBatteryOptPreference);
             }
 
@@ -241,20 +245,19 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         int periodType = 0;
         int extendCount = 0;
         long periodEndTimeValue = 0L;
-        Bundle dataFromCounterSerivce;
+        Bundle dataFromCounterService;
         Preference preference = findPreference(key);
         int value;
-        boolean batteryOptDisabled;
         String name, outputName;
         Uri ringtoneUri;
         String updatedWorkPeriodLength, updatedRestPeriodLength;
 
         if(RReminderMobile.isCounterServiceRunning(context)){
-            dataFromCounterSerivce = parentActivity.getDataFromService();
-            if(dataFromCounterSerivce!=null){
-                periodType = dataFromCounterSerivce.getInt(RReminder.PERIOD_TYPE);
-                extendCount = dataFromCounterSerivce.getInt(RReminder.EXTEND_COUNT);
-                periodEndTimeValue = dataFromCounterSerivce.getLong(RReminder.PERIOD_END_TIME);
+            dataFromCounterService = parentActivity.getDataFromService();
+            if(dataFromCounterService!=null){
+                periodType = dataFromCounterService.getInt(RReminder.PERIOD_TYPE);
+                extendCount = dataFromCounterService.getInt(RReminder.EXTEND_COUNT);
+                periodEndTimeValue = dataFromCounterService.getLong(RReminder.PERIOD_END_TIME);
             }
 
         }
@@ -267,7 +270,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         wearStartNextEnabled = sharedPreferences.getBoolean(startNextEnabledKey, true);
         wearReminderMode = sharedPreferences.getString(reminderModeKey, "0");
 
-        parentActivity.updateWearPreferences(wearReminderMode, wearWorkLength, wearRestLength, wearExtendLength, wearExtendEnabled, wearStartNextEnabled);
 
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
             if (key.equals(workPeriodLengthKey) || key.equals(restPeriodLengthKey)){
@@ -283,6 +285,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             }  else if (key.equals(workPeriodSoundKey)){
                 name = sharedPreferences.getString(key, "DEFAULT_RINGTONE_URI");
+                assert name != null;
                 if (name.equals("DEFAULT_RINGTONE_URI")){
                     ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                 } else {
@@ -315,7 +318,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
                         getAndUpdatePeriodDb(newPeriodEndValue,periodType,extendCount);
 
-                        parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         workPeriodLength = updatedWorkPeriodLength;
                     }
                 }
@@ -337,7 +339,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                         RReminderMobile.startCounterService(context.getApplicationContext(), periodType, extendCount, newPeriodEndValue, false);
                         getAndUpdatePeriodDb(newPeriodEndValue,periodType,extendCount);
 
-                        parentActivity.updateWearStatusFromPreference(periodType,newPeriodEndValue,extendCount);
                         restPeriodLength = updatedRestPeriodLength;
                     }
                 }
@@ -348,6 +349,8 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                     shortDisabled = true;
                     String workPeriod = sharedPreferences.getString(workPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
                     String restPeriod = sharedPreferences.getString(restPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
+                    assert workPeriod != null;
+                    assert restPeriod != null;
                     int workPeriodValue = getHourFromString(workPeriod) * 60 + getMinuteFromString(workPeriod);
                     int restPeriodValue = getHourFromString(restPeriod) * 60 + getMinuteFromString(restPeriod);
                     if(workPeriodValue<10){
@@ -384,6 +387,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 } else {
                     output=String.format(getString(R.string.pref_options_multiple), value);
                 }
+                assert preference != null;
                 preference.setSummary(output);
                 testExtendCountSummary = preference.getSummary().toString();
             } else if (key.equals(extendBaseLengthKey)) {
@@ -394,6 +398,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 } else {
                     output=String.format(getString(R.string.pref_minute_multiple), value);
                 }
+                assert preference != null;
                 preference.setSummary(output);
                 testExtendLengthSummary = preference.getSummary().toString();
             }
@@ -413,6 +418,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         //get latest work sound uri
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
             String workString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert workString != null;
             if (workString.equals("DEFAULT_RINGTONE_URI")){
                 newWorkUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -428,6 +434,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             //get latest rest sound uri
             String restString = sharedPreferences.getString(restPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert restString != null;
             if (restString.equals("DEFAULT_RINGTONE_URI")){
                 newRestUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -476,6 +483,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_NOTIFICATION_URI);
 
             String existingValue = sharedPreferences.getString(preference.getKey(), "DEFAULT_RINGTONE_URI"); // TODO
+            assert existingValue != null;
             if (existingValue.length() == 0) {
                 // Select "Silent"
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
@@ -544,7 +552,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         try {
             setParentActivity((PreferenceActivityLinkedService) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement PreferenceActivityLinkedService");
+            throw new ClassCastException(context + " must implement PreferenceActivityLinkedService");
         }
     }
 
@@ -556,7 +564,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             try {
                 setParentActivity((PreferenceActivityLinkedService)activity);
             } catch (ClassCastException e) {
-                throw new ClassCastException(activity.toString() + " must implement PreferenceActivityLinkedService");
+                throw new ClassCastException(activity + " must implement PreferenceActivityLinkedService");
             }
         }
     }
@@ -572,17 +580,13 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
     public void getAndUpdatePeriodDb(long newEndTime, int type, int extendCount){
         currentLDPeriod = mPeriodViewModel.getLastPeriod();
-        periodObserver = new Observer<Period>() {
-            @Override
-            public void onChanged(Period period) {
-                mPeriod = period;
-                mPeriod.setType(type);
-                mPeriod.setExtendCount(extendCount);
-                mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
-                Log.d(debug, "getPeriod observer onChanged");
-                mPeriodViewModel.update(mPeriod);
-                currentLDPeriod.removeObserver(periodObserver);
-            }
+        periodObserver = period -> {
+            mPeriod = period;
+            mPeriod.setType(type);
+            mPeriod.setExtendCount(extendCount);
+            mPeriod.setDuration(newEndTime-mPeriod.getStartTime());
+            mPeriodViewModel.update(mPeriod);
+            currentLDPeriod.removeObserver(periodObserver);
         };
 
         currentLDPeriod.observe(this, periodObserver);

@@ -10,7 +10,8 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/transparent_layer_test"/>
+        android:background="@drawable/transparent_layer_test"
+		tools:ignore="ContentDescription" />
     
     <LinearLayout
         android:layout_height="match_parent"
@@ -24,7 +25,8 @@
 		    android:background="@drawable/btn_turn_off"
 			android:contentDescription="@string/turning_off_text"
 		    android:layout_marginTop="15dp"
-		    android:layout_marginLeft="15dp" />
+		    android:layout_marginLeft="15dp"
+			android:layout_marginStart="15dp" />
 	    
 	   	<ImageView
             android:id="@+id/notification_image"
@@ -34,7 +36,8 @@
             android:layout_marginLeft="@dimen/notification_image_marginHorizontal"
             android:layout_marginRight="@dimen/notification_image_marginHorizontal"
             android:gravity="center_horizontal|center_vertical"
-            android:src="@drawable/img_coffee_mug" />
+            android:src="@drawable/img_coffee_mug"
+			tools:ignore="ContentDescription" />
     
 	    <LinearLayout
 	        android:layout_height="match_parent"

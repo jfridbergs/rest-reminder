@@ -10,11 +10,12 @@ import com.prolificinteractive.materialcalendarview.DayViewFacade;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class EventDecorator implements DayViewDecorator {
 
     Context context;
-    private HashSet<CalendarDay> dates;
+    private final HashSet<CalendarDay> dates;
 
     public EventDecorator(Context context, Collection<CalendarDay> dates) {
         this.context = context;
@@ -28,6 +29,6 @@ public class EventDecorator implements DayViewDecorator {
 
     @Override
     public void decorate(DayViewFacade view) {
-        view.setBackgroundDrawable(ContextCompat.getDrawable(context, R.drawable.has_session));
+        view.setBackgroundDrawable(Objects.requireNonNull(ContextCompat.getDrawable(context, R.drawable.has_session)));
     }
 }

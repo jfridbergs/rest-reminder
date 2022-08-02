@@ -1,25 +1,19 @@
 package com.colormindapps.rest_reminder_alarm.charts;
 
-import android.util.Log;
 
 public class ColumnHelper {
     private float height;
-    private float targetHeight;
-    private float multiplier;
-    private int color;
-    private float percent;
-    private int count;
-    private int extendCount;
-    private long totalLength, totalExtendDuration;
-    private boolean isAnimated = false;
-    private String debug="PIE_HELPER";
+    private final float targetHeight;
+    private final int color;
+    private final float percent;
+    private final int count;
+    private final int extendCount;
+    private final long totalLength;
+    private final long totalExtendDuration;
 
     int velocity = 25;
 
 
-    public ColumnHelper(float percent){
-        this(percent, 0, 0, 0l,0,0l);
-    }
 
     public ColumnHelper(float percent,  int color, int count, long totalLength, int extendCount, long totalExtendDuration){
         this.percent = percent;
@@ -32,38 +26,6 @@ public class ColumnHelper {
     }
 
 
-    ColumnHelper(float endHeight, ColumnHelper targetColumn){
-        this.height = endHeight;
-        this.percent = targetColumn.getPercent();
-        this.targetHeight = targetColumn.getEndHeight();
-        this.color = targetColumn.getColor();
-        this.count = targetColumn.count;
-        this.extendCount = targetColumn.extendCount;
-        this.totalExtendDuration = targetColumn.totalExtendDuration;
-        this.totalLength = targetColumn.totalLength;
-    }
-
-    ColumnHelper setTarget(ColumnHelper targetColumn){
-        this.height = targetColumn.getEndHeight();
-        this.color = targetColumn.getColor();
-        return this;
-    }
-
-    void setHeight( float height){
-        this.height = height;
-    }
-
-    void setAnimateStatus(boolean status){
-        this.isAnimated = status;
-    }
-
-
-    boolean isAnimated(){
-        return this.isAnimated;
-    }
-
-
-    boolean isColorSetted(){return color != 0;}
 
     boolean isAtRest(){
         return (height==targetHeight);
@@ -84,10 +46,6 @@ public class ColumnHelper {
         //Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
     }
 
-    String getPercentStr(){
-        float percent = height / 500 * 100;
-        return String.valueOf((int)percent) + "%";
-    }
 
     public int getColor(){ return color; }
 

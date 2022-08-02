@@ -50,7 +50,7 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    private static RoomDatabase.Callback sRoomDatabaseCallback =
+    private static final RoomDatabase.Callback sRoomDatabaseCallback =
             new RoomDatabase.Callback(){
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db){
@@ -62,9 +62,7 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
     };
 
     void insertPeriod(Period period) {
-        RReminderRoomDatabase.databaseExecutor.execute(() -> {
-            INSTANCE.periodDao().insertPeriod(period);
-        });
+        RReminderRoomDatabase.databaseExecutor.execute(() -> INSTANCE.periodDao().insertPeriod(period));
     }
 
 
@@ -148,14 +146,14 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
 
         public long insertDefaultWorkPeriod( long startTime, int length){
             long workLength = (long) length *60*1000;
-            Period period = new Period(0,1, startTime,workLength,0,0l,0);
+            Period period = new Period(0,1, startTime,workLength,0, 0L,0);
             mPeriodDao.insertPeriod(period);
             return startTime+workLength;
         }
 
         public long insertDefaultRestPeriod( long startTime, int length){
             long restLength = (long) length *60*1000;
-            Period period = new Period(0,2, startTime,restLength,0, 0l,0);
+            Period period = new Period(0,2, startTime,restLength,0, 0L,0);
             mPeriodDao.insertPeriod(period);
             return startTime+restLength;
         }
@@ -266,7 +264,6 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
                 mDao.deleteOlder(time);
                 mPeriodDao.deleteOlder(time);
                 date.set(Calendar.DAY_OF_MONTH,15);
-                time = date.getTimeInMillis();
 
                 date.set(Calendar.YEAR,2021);
                 for (int j=0;j<12;j++){

@@ -12,7 +12,6 @@ import java.util.Calendar;
 
 public class MobileOnAlarmReceiver extends OnAlarmReceiver {
 
- private int previousPeriodId;
 
 	public MobileOnAlarmReceiver(){
 

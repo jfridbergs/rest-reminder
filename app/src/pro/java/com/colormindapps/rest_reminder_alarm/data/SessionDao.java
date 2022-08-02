@@ -7,8 +7,6 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.colormindapps.rest_reminder_alarm.data.Session;
-
 import java.util.List;
 
 @Dao
@@ -24,7 +22,7 @@ public interface SessionDao {
     void deleteAll();
 
     @Delete
-    int deleteSession(Session session);
+    void deleteSession(Session session);
 
     @Query("DELETE FROM session_table WHERE session_end < :currentTime")
     void deleteOlder(long currentTime);

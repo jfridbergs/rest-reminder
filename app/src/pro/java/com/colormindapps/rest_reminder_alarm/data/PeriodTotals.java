@@ -1,9 +1,7 @@
 package com.colormindapps.rest_reminder_alarm.data;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
+
 
 public class PeriodTotals {
 
@@ -13,10 +11,10 @@ public class PeriodTotals {
 
 
     @ColumnInfo(name = "total_duration")
-    private long totalDuration;
+    private final long totalDuration;
 
     @ColumnInfo(name = "period_count")
-    private int periodCount;
+    private final int periodCount;
 
 
 
@@ -24,7 +22,7 @@ public class PeriodTotals {
     private int extendCount;
 
     @ColumnInfo(name = "total_extend_duration")
-    private long totalExtendDuration;
+    private final long totalExtendDuration;
 
 
 
@@ -52,18 +50,10 @@ public class PeriodTotals {
     public int getExtendCount(){return this.extendCount;}
 
 
-    public void setTotalDuration(long totalDuration){
-        this.totalDuration = totalDuration;
-    }
-    public void setTotalExtendDuration(long totalExtendDuration){
-        this.totalExtendDuration = totalExtendDuration;
-    }
 
 
 
-    public void setPeriodCount(int periodCount){
-        this.periodCount = periodCount;
-    }
+
 
 
 

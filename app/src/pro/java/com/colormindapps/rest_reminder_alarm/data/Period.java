@@ -3,15 +3,13 @@ package com.colormindapps.rest_reminder_alarm.data;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import androidx.annotation.NonNull;
 
 @Entity(tableName = "period_table")
 public class Period {
 
     @PrimaryKey(autoGenerate = true)
-    @NonNull
     @ColumnInfo(name = "period_id")
-    private int  periodId;
+    private final int  periodId;
 
 
     @ColumnInfo(name = "start_time")
@@ -20,7 +18,6 @@ public class Period {
     @ColumnInfo(name = "duration")
     private long duration;
 
-    @NonNull
     @ColumnInfo(name = "period_type")
     private int type;
 
@@ -34,7 +31,7 @@ public class Period {
     @ColumnInfo(name = "is_ended")
     private int ended;
 
-    public Period(@NonNull int periodId,  @NonNull int type, long startTime, long duration, int extendCount, long initialDuration, int ended){
+    public Period(int periodId, int type, long startTime, long duration, int extendCount, long initialDuration, int ended){
 
         this.periodId = periodId;
         this.type = type;

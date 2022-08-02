@@ -17,7 +17,9 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="PreferencesNoOverlayActionbar" parent="Theme.WorkRestTheme"></style>
+    <style name="PreferencesNoOverlayActionbar" parent="Theme.WorkRestTheme">
+
+    </style>
 
     <!-- ActionBar styles -->
     <style name="MyToolBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">

@@ -4,16 +4,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.core.content.ContextCompat;
@@ -26,36 +22,27 @@ import java.util.ArrayList;
 public class ColumnGraphView extends View {
 
 
-    private Paint cirPaint;
-    private Paint cirExtPaint;
-    private Paint columnPaint;
-    private Paint whiteLinePaint;
-    private Point pieCenterPoint;
-    private Paint textPaint;
-    private Paint whitePaint;
-    private Paint columnTextPaint, columnTextExtendPaint, columnTextExtendAmountPaint;
-    private RectF cirRect, cirExtRect;
-    private RectF cirSelectedRect;
-    private Paint paintGradientBlack, paintGradientWork, paintGradientRest;
-    private Drawable dGears, dMug;
+    private final Paint columnPaint;
+    private final Paint whiteLinePaint;
+    private final Point pieCenterPoint;
+    private final Paint columnTextPaint;
+    private final Paint columnTextExtendPaint;
+    private final Paint columnTextExtendAmountPaint;
+    private final RectF cirRect;
+    private final RectF cirExtRect;
+    private final RectF cirSelectedRect;
+    private final Drawable dGears;
+    private final Drawable dMug;
 
     private Typeface font;
 
     private int mViewWidth;
     private int mViewHeight;
-    private int margin;
-    private int pieRadius;
-    private int colorWork, colorRest, colorWorkHighlight, colorRestHighlight;
-    private boolean drawEndEdge = false;
-    private boolean booleanDrawDonut = true;
 
-    private float baseLaneLength = 0;
-    private String debug = "COLUMN_VIEW";
+    private final String debug = "COLUMN_VIEW";
 
 
-    private ArrayList<ColumnHelper> columnHelperList;
-
-    private boolean showPercentLabel = true;
+    private final ArrayList<ColumnHelper> columnHelperList;
 
 
     public ColumnGraphView(Context context) {
@@ -67,10 +54,10 @@ public class ColumnGraphView extends View {
 
 
         columnHelperList = new ArrayList<>();
-        cirPaint = new Paint();
+        Paint cirPaint = new Paint();
         cirPaint.setAntiAlias(true);
         cirPaint.setColor(Color.GRAY);
-        cirExtPaint = new Paint();
+        Paint cirExtPaint = new Paint();
         cirExtPaint.setAntiAlias(true);
         cirExtPaint.setColor(Color.BLACK);
         cirExtPaint.setTextSize(RReminder.sp2px(getContext(), RReminder.isTablet(getContext())?24:15));
@@ -83,10 +70,10 @@ public class ColumnGraphView extends View {
         whiteLinePaint = new Paint(cirPaint);
         whiteLinePaint.setColor(Color.BLACK);
         whiteLinePaint.setStrokeWidth(2f);
-        whitePaint = new Paint();
+        Paint whitePaint = new Paint();
         whitePaint.setAntiAlias(true);
         whitePaint.setColor(Color.WHITE);
-        textPaint = new Paint();
+        Paint textPaint = new Paint();
         textPaint.setAntiAlias(true);
         textPaint.setColor(Color.BLACK);
         textPaint.setTextSize(RReminder.sp2px(getContext(), RReminder.isTablet(getContext())?24:15));
@@ -126,13 +113,13 @@ public class ColumnGraphView extends View {
         cirSelectedRect = new RectF();
         cirExtRect = new RectF();
 
-        paintGradientBlack = new Paint();
+        Paint paintGradientBlack = new Paint();
         paintGradientBlack.setStyle(Paint.Style.FILL);
 
-        paintGradientWork = new Paint();
+        Paint paintGradientWork = new Paint();
         paintGradientWork.setStyle(Paint.Style.FILL);
 
-        paintGradientRest = new Paint();
+        Paint paintGradientRest = new Paint();
         paintGradientRest.setStyle(Paint.Style.FILL);
 
         dGears = ContextCompat.getDrawable(context, R.drawable.img_gears);
@@ -247,9 +234,9 @@ public class ColumnGraphView extends View {
         Log.d(debug, "onMeasure");
         mViewWidth = measureWidth(widthMeasureSpec);
         mViewHeight = measureHeight(heightMeasureSpec);
-        margin = mViewWidth / 16;
-        pieRadius = (mViewWidth) / 2 - margin;
-        float pieExtRadius = pieRadius*0.81f;
+        int margin = mViewWidth / 16;
+        int pieRadius = (mViewWidth) / 2 - margin;
+        float pieExtRadius = pieRadius *0.81f;
         pieCenterPoint.set(pieRadius + margin, pieRadius + margin);
         cirRect.set(pieCenterPoint.x - pieRadius,
                 pieCenterPoint.y - pieRadius,
@@ -265,12 +252,6 @@ public class ColumnGraphView extends View {
                 mViewWidth - 2,
                 mViewHeight - 2);
 
-
-
-        colorWork = ContextCompat.getColor(getContext(), R.color.work_chart);
-        colorRest = ContextCompat.getColor(getContext(), R.color.rest_chart);
-        colorWorkHighlight = ContextCompat.getColor(getContext(), R.color.work);
-        colorRestHighlight = ContextCompat.getColor(getContext(), R.color.rest);
 
         setMeasuredDimension(mViewWidth, mViewHeight);
     }
@@ -292,7 +273,7 @@ public class ColumnGraphView extends View {
 
     private int getMeasurement(int measureSpec, int preferred) {
         int specSize = MeasureSpec.getSize(measureSpec);
-        int measurement;
+        int measurement = 0;
 
         switch (MeasureSpec.getMode(measureSpec)) {
             case MeasureSpec.EXACTLY:
@@ -303,6 +284,8 @@ public class ColumnGraphView extends View {
                 break;
             default:
                 measurement = preferred;
+                break;
+            case MeasureSpec.UNSPECIFIED:
                 break;
         }
         return measurement;

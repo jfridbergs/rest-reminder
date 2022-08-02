@@ -8,12 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -27,12 +24,13 @@ import androidx.preference.SwitchPreference;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
+import java.util.Objects;
+
 
 public class PreferenceXFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener{
 	public String reminderModeKey, workPeriodLengthKey, restPeriodLengthKey,enableColorizedNotificationsKey, enableExtendKey,changeSummaryKey,extendEnabledKey,startNextEnabledKey,extendBaseLengthKey, prefScreenExtendKey, clearDbKey;
 	public String testModeSummary;
 	SharedPreferences sharedPreferences;
-	String workPeriodLength, restPeriodLength;
 	String wearWorkLength, wearRestLength, wearReminderMode;
 	int wearExtendLength;
 	boolean wearExtendEnabled, wearStartNextEnabled;
@@ -82,7 +80,7 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 
 		Preference preference = findPreference(reminderModeKey);
 		// Set summary to be the user-description for the selected value
-		value = Integer.parseInt(sharedPreferences.getString(reminderModeKey,"0"));
+		value = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(reminderModeKey, "0")));
 		switch(value){
 			case 0: {
 				assert preference != null;
@@ -104,34 +102,29 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 
 		//display the preference for enabling notification color only on devices with oreo or newer
 		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-			PreferenceCategory mCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_basic_settings_key));
+			PreferenceCategory mCategory =  findPreference(getString(R.string.pref_category_basic_settings_key));
 			assert mCategory != null;
 			mCategory.removePreference(findPreference(enableColorizedNotificationsKey));
 		} else {
-
-			if(RReminderMobile.isCounterServiceRunning(context)){
-				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(false);
-			} else {
-				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(true);
-			}
+			preference = getPreferenceManager().findPreference(enableColorizedNotificationsKey);
+			assert preference != null;
+			preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 		}
 
-
-
-
-		if(RReminderMobile.isCounterServiceRunning(context)){
-			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(false);
-		} else {
-			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(true);
-		}
+		preference = getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key));
+		assert preference != null;
+		preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 		Vibrator vib = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
 		assert vib != null;
+		preference = getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key));
 		if(vib.hasVibrator()){
-			getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key)).setEnabled(true);
+			assert preference != null;
+			preference.setEnabled(true);
 		} else {
 			sharedPreferences.edit().putBoolean(getString(R.string.pref_enable_vibrate_key), false).commit();
-			getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key)).setEnabled(false);
+			assert preference != null;
+			preference.setEnabled(false);
 		}
 	}
 
@@ -157,10 +150,6 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 
     	Preference preference = findPreference(key);
     	int value;
-		Bundle dataFromCounterSerivce;
-		int periodType = 0;
-		int extendCount = 0;
-		long periodEndTimeValue = 0L;
 
 		//after every preference change made while Rest reminder is running we are fetching the current period data from CounterService
 		if(RReminderMobile.isCounterServiceRunning(context)){
@@ -180,15 +169,12 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 		wearStartNextEnabled = sharedPreferences.getBoolean(startNextEnabledKey, true);
 		wearReminderMode = sharedPreferences.getString(changeSummaryKey, "0");
 
-		parentActivity.updateWearPreferences(wearReminderMode, wearWorkLength, wearRestLength, wearExtendLength, wearExtendEnabled, wearStartNextEnabled);
 
-
-		String updatedWorkPeriodLength, updatedRestPeriodLength;
 
 		//updating preference summary after preferences are changed
         if (key.equals(reminderModeKey)) {
             // Set summary to be the user-description for the selected value
-            value = Integer.parseInt(sharedPreferences.getString(key,"0"));
+            value = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(key, "0")));
             switch(value){
         	case 0:{
 				assert preference != null;
@@ -197,6 +183,7 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 				break;
 			}
         	case 1:{
+				assert preference != null;
 				preference.setTitle(getString(R.string.pref_mode_title_first_part,getString(R.string.pref_mode_title_manual)));
 				preference.setSummary(getString(R.string.pref_mode_summary_manual));
 				break;
@@ -265,7 +252,7 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 		try {
 			setParentActivity((PreferenceActivityLinkedService) getActivity());
 		} catch (ClassCastException e) {
-			throw new ClassCastException(context.toString() + " must implement PreferenceActivityLinkedService");
+			throw new ClassCastException(context + " must implement PreferenceActivityLinkedService");
 		}
 	}
 
@@ -277,7 +264,7 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 			try {
 				setParentActivity((PreferenceActivityLinkedService)activity);
 			} catch (ClassCastException e) {
-				throw new ClassCastException(activity.toString() + " must implement PreferenceActivityLinkedService");
+				throw new ClassCastException(activity + " must implement PreferenceActivityLinkedService");
 			}
 		}
 	}

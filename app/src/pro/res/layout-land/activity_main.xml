@@ -26,7 +26,9 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 			android:id="@+id/toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="?attr/actionBarSize"
-			android:background="@color/toolbar"></androidx.appcompat.widget.Toolbar>
+			android:background="@color/toolbar">
+
+		</androidx.appcompat.widget.Toolbar>
 
 
 	</com.google.android.material.appbar.AppBarLayout>
@@ -36,11 +38,13 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 		android:id="@+id/mainActivityLayout"
 		app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-		<RelativeLayout
+		<ImageView
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:background="@drawable/transparent_layer"
-			android:id="@+id/transparentImageView" >
+			android:src="@drawable/transparent_layer"
+			android:id="@+id/transparentImageView"
+			android:layout_below="@id/toolbar"
+			tools:ignore="ContentDescription" />
 
 			<ImageView
 				android:id="@+id/shadow"
@@ -214,7 +218,6 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 				android:textSize="@dimen/swipe_area_text_text_size"
 				android:layout_alignParentRight="true"
 				android:background="@drawable/swipe_idle_land" />
-		</RelativeLayout>
 	</RelativeLayout>
 
 

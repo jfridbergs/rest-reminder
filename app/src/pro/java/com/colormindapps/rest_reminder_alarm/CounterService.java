@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -61,6 +62,7 @@ public class CounterService extends Service {
 	}
 
 	
+	@SuppressLint("UnspecifiedImmutableFlag")
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
 		boolean excludeOngoing = false;
@@ -121,8 +123,6 @@ public class CounterService extends Service {
 				builder.setSmallIcon(R.drawable.ic_notify_rest_period);
 			}
 
-			//note.setLatestEventInfo(context, context.getString(R.string.notify_scheduler_is_on_title), context.getString(R.string.notify_scheduler_is_on_message), pi);
-			//note.flags |= Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
 			builder.setContentIntent(pi);
 			builder.setOngoing(true);
 			builder.setAutoCancel(false);

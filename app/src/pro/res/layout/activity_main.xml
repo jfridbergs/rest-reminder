@@ -44,7 +44,7 @@ tools:context="com.colormindapps.rest_reminder_alarm.MainActivity">
 			android:src="@drawable/transparent_layer"
 			android:id="@+id/transparentImageView"
 			android:layout_below="@id/toolbar"
-			/>
+			tools:ignore="ContentDescription" />
 
 		<ImageView
 			android:id="@+id/shadow"

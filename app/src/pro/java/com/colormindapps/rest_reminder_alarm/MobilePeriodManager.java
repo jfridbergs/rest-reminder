@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -22,6 +23,7 @@ public class MobilePeriodManager extends PeriodManager {
 		mContext = context;
 		mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 	}
+	@SuppressLint("UnspecifiedImmutableFlag")
 	@TargetApi(Build.VERSION_CODES.M)
 	public void setPeriod(int type, long when, int extendCount){
 		buildNumber = Build.VERSION.SDK_INT;

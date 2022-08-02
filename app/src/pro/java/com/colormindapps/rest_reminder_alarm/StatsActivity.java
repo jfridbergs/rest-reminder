@@ -1,7 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -10,10 +9,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -27,7 +24,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.colormindapps.rest_reminder_alarm.data.Period;
 import com.colormindapps.rest_reminder_alarm.data.Session;
 import com.colormindapps.rest_reminder_alarm.data.TimeInterval;
 import com.google.android.material.navigation.NavigationView;
@@ -40,15 +36,9 @@ import java.util.List;
 
 
 public class StatsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, NavigationView.OnNavigationItemSelectedListener {
-    private long sessionStart, sessionEnd;
-    boolean showingBack = false;
-    private PeriodViewModel mPeriodViewModel;
     private SessionsViewModel mSessionViewModel;
-    private List<Period> mPeriods;
-    private List<Session> mSessions;
     private Session firstSession;
     private Spinner spinner;
-    private Typeface titleFont;
     private Comparator<TimeInterval> comparator;
     private List<TimeInterval> yearly, monthly, weekly, daily;
     private final int INTERVAL_DAY = 0;
@@ -67,38 +57,22 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
     private FragmentStateAdapter pagerDailyAdapter, pagerWeeklyAdapter, pagerMonthlyAdapter, pagerYearlyAdapter, pagerOverallAdapter;
 
 
-    private String debug = "SESSION_DETAILS";
+    private final String debug = "SESSION_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.stats_activity);
 
-        titleFont = Typeface.createFromAsset(getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
-
-        mPeriodViewModel = new ViewModelProvider(this).get(PeriodViewModel.class);
         mSessionViewModel = new ViewModelProvider(this).get(SessionsViewModel.class);
         previous = findViewById(R.id.previous);
-        previous.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewPager.setCurrentItem(viewPagerPosition-1, true);
-            }
-        });
+        previous.setOnClickListener(view -> viewPager.setCurrentItem(viewPagerPosition-1, true));
         next = findViewById(R.id.next);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                viewPager.setCurrentItem(viewPagerPosition+1, true);
-            }
-        });
+        next.setOnClickListener(view -> viewPager.setCurrentItem(viewPagerPosition+1, true));
 
-        comparator = new Comparator<TimeInterval>() {
-            @Override
-            public int compare(TimeInterval lhs, TimeInterval rhs) {
-                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                return Long.compare(rhs.getStart(), lhs.getStart());
-            }
+        comparator = (lhs, rhs) -> {
+            // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+            return Long.compare(rhs.getStart(), lhs.getStart());
         };
 
         dailyOnPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
@@ -186,29 +160,26 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
 // Apply the adapter to the spinner
         spinner.setAdapter(adapter);
 
-        mSessionViewModel.getFirstSession().observe(this, new Observer<Session>(){
-            @Override
-            public void onChanged(@Nullable final Session session){
-                firstSession = session;
-                //launchPagerAdapter();
-                if(firstSession!=null){
-                    initIntervals();
-                    findViewById(R.id.no_data).setVisibility(View.GONE);
-                } else {
-                    findViewById(R.id.no_data).setVisibility(View.VISIBLE);
-                }
-
+        mSessionViewModel.getFirstSession().observe(this, session -> {
+            firstSession = session;
+            //launchPagerAdapter();
+            if(firstSession!=null){
+                initIntervals();
+                findViewById(R.id.no_data).setVisibility(View.GONE);
+            } else {
+                findViewById(R.id.no_data).setVisibility(View.VISIBLE);
             }
+
         });
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(getString(R.string.stats_activity_title));
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -277,7 +248,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         date.clear(Calendar.MINUTE);
         date.clear(Calendar.SECOND);
         date.clear(Calendar.MILLISECOND);
-        yearly = new ArrayList<TimeInterval>();
+        yearly = new ArrayList<>();
         long intervalEnd = currentTime;
         long intervalStart = date.getTimeInMillis();
         while(intervalStart>firstSessionStart){
@@ -290,7 +261,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         checkIntervalForSessions(INTERVAL_YEAR, firstSessionStart,intervalEnd, true);
         //yearly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
-        monthly = new ArrayList<TimeInterval>();
+        monthly = new ArrayList<>();
         date = Calendar.getInstance();
         date.set(Calendar.DAY_OF_MONTH,1);
         date.set(Calendar.HOUR_OF_DAY,0);
@@ -299,7 +270,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         date.clear(Calendar.MILLISECOND);
         intervalEnd = currentTime;
         intervalStart = date.getTimeInMillis();
-        int month = date.get(Calendar.MONTH);
         while(intervalStart>firstSessionStart){
             checkIntervalForSessions(INTERVAL_MONTH, intervalStart, intervalEnd, false);
             //monthly.add(new TimeInterval(intervalStart,intervalEnd));
@@ -310,7 +280,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         checkIntervalForSessions(INTERVAL_MONTH, firstSessionStart, intervalEnd, true);
         //monthly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
-        weekly = new ArrayList<TimeInterval>();
+        weekly = new ArrayList<>();
         date = Calendar.getInstance();
         int dayOfWeek = date.get(Calendar.DAY_OF_WEEK)-2;
         date.set(Calendar.DAY_OF_MONTH,(date.get(Calendar.DAY_OF_MONTH)-dayOfWeek));
@@ -330,7 +300,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         checkIntervalForSessions(INTERVAL_WEEK, intervalStart, intervalEnd, true);
         //weekly.add(new TimeInterval(firstSessionStart,intervalEnd));
 
-        daily = new ArrayList<TimeInterval>();
+        daily = new ArrayList<>();
         date = Calendar.getInstance();
         date.set(Calendar.HOUR_OF_DAY,0);
         date.clear(Calendar.MINUTE);
@@ -480,7 +450,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
             startActivity(Intent.createChooser(Email, "Send Feedback:"));
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -496,6 +466,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return StatsFragment.newInstance(1, daily.get(daily.size()-position-1).getStart(),daily.get(daily.size()-position-1).getEnd());
@@ -512,6 +483,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return StatsFragment.newInstance(2, weekly.get(weekly.size()-position-1).getStart(),weekly.get(weekly.size()-position-1).getEnd());
@@ -528,6 +500,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return StatsFragment.newInstance(3, monthly.get(monthly.size()-position-1).getStart(),monthly.get(monthly.size()-position-1).getEnd());
@@ -544,6 +517,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return StatsFragment.newInstance(4, yearly.get(yearly.size()-position-1).getStart(),yearly.get(yearly.size()-position-1).getEnd());
@@ -560,6 +534,7 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             super(fa);
         }
 
+        @NonNull
         @Override
         public Fragment createFragment(int position) {
             return StatsFragment.newInstance(0,  firstSession.getSessionStart(),Calendar.getInstance().getTimeInMillis());

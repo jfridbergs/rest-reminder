@@ -10,13 +10,13 @@ public class SessionTotals {
 
 
     @ColumnInfo(name = "total_duration")
-    private long totalDuration;
+    private final long totalDuration;
 
     @ColumnInfo(name = "session_count")
-    private int sessionCount;
+    private final int sessionCount;
 
     @ColumnInfo(name = "session_average_length")
-    private long sessionAverageLength;
+    private final long sessionAverageLength;
 
 
 
@@ -31,21 +31,6 @@ public class SessionTotals {
     public long getTotalDuration(){return this.totalDuration; }
     public int getSessionCount(){return this.sessionCount; }
     public long getSessionAverageLength(){return this.sessionAverageLength;}
-
-
-
-    public void setTotalDuration(long totalDuration){
-        this.totalDuration = totalDuration;
-    }
-    public void setSessionCount(int sessionCount){
-        this.sessionCount = sessionCount;
-    }
-
-
-
-    public void setSessionAverageLength(long sessionAverageLength){
-        this.sessionAverageLength = sessionAverageLength;
-    }
 
 
 }
