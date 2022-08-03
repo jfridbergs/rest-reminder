@@ -6,7 +6,6 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -35,17 +34,12 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             Executors.newFixedThreadPool(NUMBER_OF_THREADS);
 
     static RReminderRoomDatabase getDatabase(final Context context){
-        Log.d("ROOM_DATABASE", "getDatabase");
         if(INSTANCE == null){
-            Log.d("ROOM_DATABASE", "instance IS null");
             synchronized (RReminderRoomDatabase.class){
                 if(INSTANCE == null){
-                    Log.d("ROOM_DATABASE", "instance IS null IN SYNCRONIZED");
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(), RReminderRoomDatabase.class, "rreminder_database").addCallback(sRoomDatabaseCallback).build();
                 }
             }
-        } else {
-            Log.d("ROOM_DATABASE", "instance IS NOT null");
         }
         return INSTANCE;
     }
@@ -55,7 +49,6 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
             @Override
             public void onOpen(@NonNull SupportSQLiteDatabase db){
                 super.onOpen(db);
-                Log.d("ROOM_DATABASE", "onOpen");
                 //new PopulateSessionDbAsync(INSTANCE).execute();
             }
 
@@ -283,16 +276,12 @@ public abstract class RReminderRoomDatabase extends RoomDatabase {
                     date.set(Calendar.MONTH,i);
                     for (int k=1;k<25;k=k+5){
                         date.set(Calendar.DAY_OF_MONTH,k);
-                        Log.d("DATABASE", "year (month): "+date.get(Calendar.YEAR));
                         insertSession(date.getTimeInMillis(),5+i,15+k,10+i);
                     }
                 }
                 date.set(Calendar.MONTH,current.get(Calendar.MONTH));
-                Log.d("RR_DB", "CURRENT_DAY_OF_MONTH: "+current.get(Calendar.DAY_OF_MONTH));
-                Log.d("RR_DB", "CURRENT_MONTH: "+current.get(Calendar.MONTH));
                 for(int i = 1; i<current.get(Calendar.DAY_OF_MONTH);i=i+2){
                     date.set(Calendar.DAY_OF_MONTH,i);
-                    Log.d("DATABASE", "year (day): "+date.get(Calendar.YEAR));
                     insertSession(date.getTimeInMillis(),5+(i/2),15+i,10+i);
                 }
             }

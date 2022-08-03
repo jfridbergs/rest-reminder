@@ -47,7 +47,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -144,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements
 	private NotificationManagerCompat mgr;
 	private CountDownTimer descriptionAnimTimer;
 	private SharedPreferences sharedPref;
-	private final String debug = "MAIN_ACTIVITY";
 	private SessionsViewModel mSessionsViewModel;
 	private PeriodViewModel mPeriodViewModel;
 	private Session currentSession;
@@ -219,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements
 			periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
 			long timeRemaining = mService.getCounterTimeValue();
 			//checking for special case where the reminder was turned off from notification bar after the the app was removed from active task list
-			Log.d(debug, "onServiceConnected");
 			if(getIntent().hasExtra(RReminder.TURN_OFF)){
 				if(getIntent().getAction()!=null && getIntent().getAction().equals(RReminder.ACTION_TURN_OFF) && getIntent().getExtras()!=null &&periodEndTimeValue == getIntent().getExtras().getLong(RReminder.PERIOD_END_TIME)){
 					turnOffFirstIntent = true;
@@ -281,7 +278,6 @@ public class MainActivity extends AppCompatActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		Log.d(debug, "onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		NavigationView navigationView = findViewById(R.id.nav_view);
@@ -328,10 +324,6 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Log.d(debug, "onStart");
-
-
-
 		//setting the pre-existing (before getting the current value from counterservice) value of periodEndTime
 
 		powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -387,44 +379,7 @@ public class MainActivity extends AppCompatActivity implements
 
 		description.setText("");
 
-		/*
-			if (screenOrientation == Configuration.ORIENTATION_PORTRAIT){
-				if(isTablet()){
-					swipeArea.setBackgroundResource(R.drawable.swipe_idle_tablet);
-				} else {
-					swipeArea.setBackgroundResource(R.drawable.swipe_idle);
-				}
-
-			} else if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
-				if(isTablet()){
-					swipeArea.setBackgroundResource(R.drawable.swipe_idle_land_tablet);
-				} else {
-					swipeArea.setBackgroundResource(R.drawable.swipe_idle_land);
-				}
-			}
-			*/
-
-
-			/*
-			if (screenOrientation == Configuration.ORIENTATION_PORTRAIT){
-					Bitmap swipeBitmap = BitmapFactory.decodeResource(context.getResources(),
-	                        R.drawable.swipe_test);
-					BitmapDrawable swipeBmDr = new BitmapDrawable(resources, swipeBitmap);
-					swipeBmDr.setTileModeX(Shader.TileMode.REPEAT);
-					swipeArea.setBackgroundDrawable(swipeBmDr);
-
-			} else if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE){
-				Bitmap swipeBitmap = BitmapFactory.decodeResource(context.getResources(),
-	                    R.drawable.swipe_land_test);
-				BitmapDrawable swipeBmDr = new BitmapDrawable(resources, swipeBitmap);
-				swipeBmDr.setTileModeY(Shader.TileMode.REPEAT);
-				swipeArea.setBackgroundDrawable(swipeBmDr);
-			}
-		 	*/
-
-
 		setVisibleState(true);
-		//dismissExtendDialog();
 
 
 		rootLayout.setBackgroundColor(colorBlack);
@@ -453,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements
 			}
 
 		} else if(currentVersionNumber > savedVersionNumber && !RReminderMobile.isCounterServiceRunning(MainActivity.this)){
-			showPatchNotesDialog();
+			//showPatchNotesDialog();
 			Editor editor = sharedPref.edit();
 			editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
 			editor.apply();
@@ -465,7 +420,6 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Log.d(debug, "onResume");
 		//removing the flag for special case of serviceconnected after pause to resume
 		stopTimerInServiceConnectedAfterPause = false;
 		//A workaround for screen-off-orientation-change bug to imitate onstart by binding to service
@@ -501,14 +455,12 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Log.d(debug, "onPause");
 		//setting up a flag for special case in manual mode, when onPause, onStop is immediately called after onStart, onResume
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 		if(!isMultiWindow){
 			stopTimerInServiceConnectedAfterPause = true;
 
 			if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
-				Log.d(debug, "onPause stopCountdownTimer");
 				stopCountDownTimer();
 				if(descriptionAnimTimer!=null){
 					descriptionAnimTimer.cancel();
@@ -521,9 +473,7 @@ public class MainActivity extends AppCompatActivity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-		Log.d(debug, "onStop");
 		setVisibleState(false);
-		//stopCountDownTimer();
 		if (mBound) {
 			unbindService(mConnection);
 			mBound = false;
@@ -585,7 +535,6 @@ public class MainActivity extends AppCompatActivity implements
 	private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.d(debug, "update UI broadcast received");
 			//add an extra check for multi-window mode only?
 			if(mBound){
 				Bundle data = getDataFromService();
@@ -655,10 +604,8 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	private void setReminderOn() {
-		Log.d(debug, "setReminderOn");
 		periodType = 1;
 		sessionStartTime = Calendar.getInstance().getTimeInMillis();
-		Log.d(debug, "SET_REMINDER_ON sessionStartTime: "+sessionStartTime);
 		long firstPeriodEndTime = RReminder.getNextPeriodEndTime(MainActivity.this, periodType, sessionStartTime, 1, 0L);
 
 		RReminderMobile.startCounterService(MainActivity.this, 1, 0, firstPeriodEndTime, false);
@@ -667,7 +614,6 @@ public class MainActivity extends AppCompatActivity implements
 		currentSession = new Session(0,sessionStartTime,sessionStartTime);
 		mSessionsViewModel.insert(currentSession);
 		mPeriod = new Period(0,1,sessionStartTime, firstPeriodEndTime -sessionStartTime,0, 0L,0);
-		Log.d(debug, "insert period value: "+ firstPeriodEndTime);
 		mPeriodViewModel.insert(mPeriod);
 
 		final Handler handler = new Handler(Looper.getMainLooper());
@@ -691,8 +637,6 @@ public class MainActivity extends AppCompatActivity implements
 	public void getCurrentSessionDb(long sessionStart){
 		currentLDSession = mSessionsViewModel.getSessionByStart(sessionStart);
 		sessionObserver = session -> {
-			Log.d(debug, "observer onChanged called");
-			Log.d(debug, "OBSERVER onChanged sessionStartValue: "+session.getSessionStart());
 			sessionID = session.getSessionId();
 			updateCurrentSession(sessionID);
 			extendPeriodEnd.setVisibility(View.VISIBLE);
@@ -706,7 +650,6 @@ public class MainActivity extends AppCompatActivity implements
 	public void getAndUpdatePeriodDb(long newEnd, int flag){
 		currentLDPeriod = mPeriodViewModel.getLastPeriod();
 		periodObserver = period -> {
-			Log.d(debug, "getPeriod observer onChanged");
 			mPeriod = period;
 			long actualDuration = newEnd - mPeriod.getStartTime();
 			switch (flag){
@@ -715,7 +658,6 @@ public class MainActivity extends AppCompatActivity implements
 					long initialDuration = mPeriod.getInitialDuration();
 					//special case when a period has been extended and then ended before its intended end time (negative extend length)
 					if(initialDuration!=0 && initialDuration > actualDuration){
-						Log.d(debug, "initialDuration > actual duration");
 						mPeriod.setInitialDuration(actualDuration);
 
 					}
@@ -748,7 +690,6 @@ public class MainActivity extends AppCompatActivity implements
 				mPeriod.setInitialDuration(period.getDuration());
 			}
 			mPeriod.setDuration(newEndTime-period.getStartTime());
-			Log.d(debug, "getPeriod observer onChanged");
 			mPeriodViewModel.update(mPeriod);
 			currentLDPeriod.removeObserver(periodObserver);
 		};
@@ -773,7 +714,6 @@ public class MainActivity extends AppCompatActivity implements
 
 	public void updateCurrentPeriod(){
 		if(mPeriod!=null){
-			Log.d(debug, mPeriod.toString());
 			mPeriodViewModel.update(mPeriod);
 		}
 		if(periodObserver!=null){
@@ -796,14 +736,11 @@ public class MainActivity extends AppCompatActivity implements
 	}
 
 	private void setReminderOff(long periodEndTime) {
-		Log.d(debug, "setReminderOff");
 		setReminderOffCounter++;
 		stopCountDownTimer();
 
-		Log.d(debug, "SET_REMINDER_OFF period values: type: "+ periodType + ", endtime: "+ periodEndTime);
 		RReminderMobile.cancelCounterAlarm(getApplicationContext(), periodType, extendCount, periodEndTime);
 		long currentTime = Calendar.getInstance().getTimeInMillis();
-		Log.d(debug, "SET_REMINDER_OFF session start time: "+sessionStartTime);
 
 		int sessionId = mService.getSessionId();
 		currentLDSession = mSessionsViewModel.getSessionById(sessionId);
@@ -812,7 +749,6 @@ public class MainActivity extends AppCompatActivity implements
 			currentSession.setSessionEnd(currentTime);
 			long sessionStartTime = currentSession.getSessionStart();
 			if((currentTime - sessionStartTime) > 1000*60){
-				Log.d(debug, "update session status to FINISHED");
 				mSessionsViewModel.update(currentSession);
 				getAndUpdatePeriodDb(currentTime,FLAG_TURN_OFF);
 			} else {
@@ -888,18 +824,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
 	public void manageUI(Boolean isOn) {
-		Log.d(debug, "manageUi");
-		//swipeArea.setOnFocusChangeListener(swipeFocus);
-
-		/*
-		endCurrentPeriodSwipeArea.setOnTouchListener(new OnTouchListener() {
-	         @Override
-	         public boolean onTouch(final View view, final MotionEvent event) {
-	            return mDetector.onTouchEvent(event);
-	         }
-	      });
-	      
-	      */
 		if(descriptionAnimTimer!=null){
 			descriptionAnimTimer.cancel();
 		}
@@ -1072,10 +996,8 @@ public class MainActivity extends AppCompatActivity implements
 			lastLDSession = mSessionsViewModel.getCurrentSession();
 			lastSessionObserver = session -> {
 				if(session!=null){
-					Log.d(debug, "show last session button: TRUE");
 					lastSession.setVisibility(View.VISIBLE);
 				} else {
-					Log.d(debug, "show last session button: FALSE");
 					lastSession.setVisibility(View.GONE);
 				}
 				lastLDSession.removeObserver(lastSessionObserver);
@@ -1712,11 +1634,8 @@ public class MainActivity extends AppCompatActivity implements
 		super.onNewIntent(intent);
 		Bundle data = intent.getExtras();
 		String intentAction = intent.getAction();
-		Log.d(debug, "onNewIntent action: "+intentAction);
-		Log.d(debug, "wear extend action name: "+RReminder.ACTION_WEAR_NOTIFICATION_EXTEND);
 
 		if (data != null && intentAction!=null) {
-			Log.d(debug,"intent has data");
 			switch(intentAction) {
 				//intent after turning off countdown from notification activity
 				case RReminder.ACTION_TURN_OFF: {
@@ -1740,17 +1659,6 @@ public class MainActivity extends AppCompatActivity implements
 						}
 											}
 					turnOffIntent = true;
-					break;
-				}
-				case RReminder.ACTION_WEAR_NOTIFICATION_EXTEND: {
-					//dismissing notification after selecting to extend last ended period
-					//mgr.cancel(1);
-					//code for extending previously ended period
-					Log.d(debug, "extend wear notification received");
-					periodType = data.getInt(RReminder.PERIOD_TYPE);
-					periodEndTimeValue = data.getLong(RReminder.PERIOD_END_TIME);
-					extendCount = data.getInt(RReminder.EXTEND_COUNT);
-					//extendPeriod(RReminder.EXTEND_PERIOD_WEAR, periodToExtend);
 					break;
 				}
 				case RReminder.ACTION_VIEW_MAIN_ACTIVITY:{
@@ -2527,12 +2435,7 @@ public class MainActivity extends AppCompatActivity implements
 							colorHex[i] = Integer.toHexString(colorValues[i]);
 						}
 					}
-						
-						/*
-						String redHex = Integer.toHexString(colorValues[0]);
-						String greenHex = Integer.toHexString(colorValues[1]);
-						String blueHex = Integer.toHexString(colorValues[2]);
-						*/
+
 					outputColorHex = "#FF" + colorHex[0] + colorHex[1] + colorHex[2];
 					return Color.parseColor(outputColorHex);
 				}
@@ -2665,11 +2568,6 @@ public class MainActivity extends AppCompatActivity implements
 							colorHex[i] = Integer.toHexString(colorValues[i]);
 						}
 					}
-					 /*
-					String secondRedHex = Integer.toHexString(colorValues[0]);
-					String secondGreenHex = Integer.toHexString(colorValues[1]);
-					String secondBlueHex = Integer.toHexString(colorValues[2]);
-					*/
 
 					outputColorHex = "#FF" + colorHex[0] + colorHex[1] + colorHex[2];
 					return Color.parseColor(outputColorHex);

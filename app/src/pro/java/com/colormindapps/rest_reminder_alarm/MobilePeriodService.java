@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
@@ -37,29 +36,17 @@ public class MobilePeriodService extends JobIntentService {
 		enqueueWork(context, MobilePeriodService.class, JOB_ID, work);
 	}
 
-	String debug  = "MOBILE_PERIOD_SERVICE";
 
 
 
 
 
-	@Override
-	public void onCreate() {
-		Log.d(debug, "onCreate");
-		super.onCreate();
 
-	}
 
-	@Override
-	public void onDestroy() {
-		Log.d(debug, "onDestroy");
-		super.onDestroy();
 
-	}
 
 	@Override
 	protected void onHandleWork(@NonNull Intent intent) {
-		Log.d(debug, "onHandleWork");
 		periodIntent = intent;
 		doServiceWork();
 
@@ -72,9 +59,6 @@ public class MobilePeriodService extends JobIntentService {
 			periodEndedTime = periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME);
 			nextPeriodEndTime = periodIntent.getExtras().getLong(RReminder.NEXT_PERIOD_END_TIME);
 		}
-
-		Log.d(debug, "periodEndTimeValue: "+ periodIntent.getExtras().getLong(RReminder.PERIOD_END_TIME));
-
 			//manage period end
 			RReminder.addDismissDialogFlag(this);
 			typeForNotification = type;

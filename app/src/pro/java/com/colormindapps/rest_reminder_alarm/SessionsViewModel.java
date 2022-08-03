@@ -1,7 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -15,11 +14,9 @@ public class SessionsViewModel extends AndroidViewModel {
 
     private final RReminderRepository mRepository;
     private final LiveData<List<Session>> mAllSessionsPieView;
-    String debug =  "SESSIONS_VIEW_MODEL";
 
     public SessionsViewModel(Application application){
         super(application);
-        Log.d(debug, "initiated");
         mRepository = new RReminderRepository(application);
         mAllSessionsPieView = mRepository.getAllSessionsPieData();
     }

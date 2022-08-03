@@ -341,7 +341,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(5000));
         onView(withId(R.id.button_period_end_extend)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(35000));
-        timerLongPress(500);
+        onView(withId(R.id.period_title)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(40000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
@@ -357,7 +357,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(38000));
         onView(withId(R.id.button_period_end_extend)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(45000));
-        timerLongPress(500);
+        onView(withId(R.id.period_title)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(45000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
@@ -416,7 +416,7 @@ public class EspressoSessionTest {
         onView(withId(R.id.button_period_end_extend)).perform(click());
         onView(withId(R.id.extend_dialog_button_extend)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(50000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(50000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
@@ -431,9 +431,9 @@ public class EspressoSessionTest {
         onView(withId(R.id.button_period_end_extend)).perform(click());
         onView(withId(R.id.extend_dialog_button_extend1)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(38000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(45000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(45000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
@@ -495,7 +495,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         onView(withId(R.id.period_title)).check(matches(isDisplayed()));
         onView(isRoot()).perform(CustomActions.waitFor(30000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(28000));
         endTimes[0] = Calendar.getInstance().getTimeInMillis();
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
@@ -510,7 +510,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         onView(withId(R.id.period_title)).check(matches(isDisplayed()));
         onView(isRoot()).perform(CustomActions.waitFor(30000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(30000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.button_notification_period_end_extend)).perform(click());
@@ -518,7 +518,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(1000));
         onView(withId(R.id.period_title)).check(matches(isDisplayed()));
         onView(isRoot()).perform(CustomActions.waitFor(30000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(28500));
         endTimes[1] = Calendar.getInstance().getTimeInMillis();
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
@@ -584,9 +584,9 @@ public class EspressoSessionTest {
         Espresso.pressBack();
         Espresso.pressBack();
         onView(isRoot()).perform(CustomActions.waitFor(50000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(30000));
-        timerLongPress(500);
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(isRoot()).perform(CustomActions.waitFor(35000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         endTimes[0] = Calendar.getInstance().getTimeInMillis();
@@ -651,7 +651,7 @@ public class EspressoSessionTest {
         onView(isRoot()).perform(CustomActions.waitFor(11000));
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
-        onView(isRoot()).perform(CustomActions.waitFor(500));
+        onView(withId(R.id.timer_layout)).perform(click());
         onView(withId(R.id.period_title)).check(matches(isDisplayed()));
         onView(withId(R.id.period_title)).check(matches(withText(expectedOnlineWorkTitle)));
         onView(isRoot()).perform(CustomActions.waitFor(20000));
@@ -1189,7 +1189,7 @@ public class EspressoSessionTest {
         if (longer){
             onView(isRoot()).perform(CustomActions.waitFor(20000));
         } else {
-            onView(isRoot()).perform(CustomActions.waitFor(19000));
+            onView(isRoot()).perform(CustomActions.waitFor(19500));
         }
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());
@@ -1201,7 +1201,7 @@ public class EspressoSessionTest {
         if (longer){
             onView(isRoot()).perform(CustomActions.waitFor(10000));
         } else {
-            onView(isRoot()).perform(CustomActions.waitFor(9000));
+            onView(isRoot()).perform(CustomActions.waitFor(9500));
         }
         onView(withId(R.id.notification_title)).check(matches(isDisplayed()));
         onView(withId(R.id.notification_button)).perform(click());

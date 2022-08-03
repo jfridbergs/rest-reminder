@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,6 @@ public class SessionDetailsViewFragment extends Fragment {
     private PeriodViewModel mPeriodViewModel;
     List<Period> mPeriods;
     List<PeriodTotals> mPeriodTotals;
-    private final String debug = "SESSION_DETAILS_FRAG";
 
     public static SessionDetailsViewFragment newInstance(long sessionStart, long sessionEnd) {
 
@@ -55,10 +53,6 @@ public class SessionDetailsViewFragment extends Fragment {
             sessionLength = sessionEnd - sessionStart;
         }
 
-        Log.d(debug, "date: "+RReminder.getSessionDateString(0,sessionStart));
-        Log.d(debug, "session start:"+sessionStart);
-        Log.d(debug, "session end: "+sessionEnd);
-
         View view = inflater.inflate(R.layout.session_details_view_fragment, container, false);
         if(getActivity()!=null){
             titleFont = Typeface.createFromAsset(getActivity().getAssets(), "fonts/HelveticaNeueLTPro-ThCn.otf");
@@ -77,12 +71,9 @@ public class SessionDetailsViewFragment extends Fragment {
 
         mPeriodViewModel = new ViewModelProvider(requireActivity()).get(PeriodViewModel.class);
         pieView = view.findViewById(R.id.pie_view);
-       // Log.d(debug, "sessionStart: "+sessionStart);
-       // Log.d(debug, "sessionEnd: "+sessionEnd);
 
         mPeriodViewModel.getPeriodTotals(sessionStart, sessionEnd).observe(getViewLifecycleOwner(), periodTotals -> {
             mPeriodTotals = periodTotals;
-           // Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
             launchPeriodsQuery();
         });
 
@@ -103,23 +94,23 @@ public class SessionDetailsViewFragment extends Fragment {
     private void set(PieView pieView){
         ArrayList<PieHelper> pieHelperArrayList = new ArrayList<>();
         int periodCount = mPeriods.size()-1;
+        long sessionLengthPie = 0L;
+        for (Period period :  mPeriods) {
+            sessionLengthPie+=period.getDuration();
+        }
 
         float fractionTotal=0;
         //Log.d(debug, "Period count: "+mPeriods.size());
         for (int i=0; i<=periodCount;i++){
             long periodLength = mPeriods.get(i).getDuration();
-            float fraction = (float)periodLength / sessionLength;
+            float fraction = (float)periodLength / sessionLengthPie;
             fractionTotal+=fraction;
-            Log.d(debug, "period start: "+RReminder.getTimeString(getContext(), mPeriods.get(i).getStartTime()));
-            Log.d(debug, "period duration: "+RReminder.getDurationFromMillis(getContext(), mPeriods.get(i).getDuration()));
-            Log.d(debug, "period initial duration: "+RReminder.getDurationFromMillis(getContext(), mPeriods.get(i).getInitialDuration()));
 
 
            // Log.d(debug, "Percent sum: "+percentSum);
             pieHelperArrayList.add(new PieHelper(fraction, mPeriods.get(i)));
 
         }
-        Log.d(debug, "fractionTotal: "+fractionTotal);
         pieView.setDate(pieHelperArrayList);
 
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / sessionLength)*100;

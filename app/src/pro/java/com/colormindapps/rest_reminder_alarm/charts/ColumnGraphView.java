@@ -39,7 +39,6 @@ public class ColumnGraphView extends View {
     private int mViewWidth;
     private int mViewHeight;
 
-    private final String debug = "COLUMN_VIEW";
 
 
     private final ArrayList<ColumnHelper> columnHelperList;
@@ -139,14 +138,14 @@ public class ColumnGraphView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.d(debug, "onDraw");
         if (columnHelperList.isEmpty()) {
             return;
         }
-
-            canvas.drawLine(toPx(40), mViewHeight-10, mViewWidth-toPx(40), mViewHeight-10, whiteLinePaint);
             int stepCount = 2*columnHelperList.size()+1;
             int xStepWidth = mViewWidth/stepCount;
+            float baseLaneStartX = xStepWidth-toPx(45);
+            float baseLaneEndX = (2*xStepWidth)+2*xStepWidth+toPx(45);
+            canvas.drawLine(baseLaneStartX, mViewHeight-10, baseLaneEndX, mViewHeight-10, whiteLinePaint);
             float sizeKoef = 1.0f;
             String periodCount;
             String totalLength;
@@ -171,18 +170,10 @@ public class ColumnGraphView extends View {
                 float x0 = (2*i*xStepWidth)+xStepWidth-toPx(33);
                 float y0 = mViewHeight-toPx(cHelper.getTargetHeight())*sizeKoef;
                 float x1 = (2*i*xStepWidth)+2*xStepWidth+toPx(33);
-                Log.d(debug, "mViewHeight: "+mViewHeight);
-                Log.d(debug, "y0: "+y0);
-                Log.d(debug, "column x0: "+x0);
-                Log.d(debug, "column x1: "+x1);
                 canvas.drawRect(x0,y0,x1,mViewHeight-11,columnPaint);
-                Log.d(debug, "toPx(20): "+toPx(20));
                     float imgX0, imgX1, imgY0, imgY1;
                     imgX0 = x0+xStepWidth/2f+toPx(33)-toPx(30);
                     imgX1 = x0+xStepWidth/2f+toPx(33)+toPx(30);
-                Log.d(debug, "stepWidth: "+xStepWidth);
-                Log.d(debug, "image x0: "+imgX0);
-                Log.d(debug, "image x1: "+imgX1);
                     if(cHelper.getPercent()<25){
                         imgY0 = y0-toPx(RReminder.isTablet(getContext())?208:148);
                         imgY1 = y0-toPx(RReminder.isTablet(getContext())?168:108);
@@ -231,7 +222,6 @@ public class ColumnGraphView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(debug, "onMeasure");
         mViewWidth = measureWidth(widthMeasureSpec);
         mViewHeight = measureHeight(heightMeasureSpec);
         int margin = mViewWidth / 16;

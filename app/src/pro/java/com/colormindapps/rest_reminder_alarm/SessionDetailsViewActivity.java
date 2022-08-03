@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -36,7 +35,6 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
     private ViewPager2.OnPageChangeCallback onPageChangeCallback;
 
 
-    private final String debug = "SESSION_DETAILS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +51,6 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
         next.setOnClickListener(view -> viewPager.setCurrentItem(viewPagerPosition+1, true));
 
         viewPager = findViewById(R.id.pager);
-        Log.d(debug, "session start: "+ sessionStart);
-        Log.d(debug, "session end: "+ sessionEnd);
 
         onPageChangeCallback = new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -104,7 +100,6 @@ public class SessionDetailsViewActivity extends AppCompatActivity implements Nav
         FragmentStateAdapter pagerAdapter = new ScreenSlidePagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(1);
-        Log.d(debug, "session position: "+getSessionPosition(sessionStart));
         viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
         viewPagerPosition = getSessionPosition(sessionStart);
         if(getSessionPosition(sessionStart) ==0){

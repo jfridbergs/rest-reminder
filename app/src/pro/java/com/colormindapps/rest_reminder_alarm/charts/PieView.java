@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm.charts;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -12,7 +13,6 @@ import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -33,7 +33,6 @@ public class PieView extends View {
     private final Paint columnPaint;
     private final Paint whiteLinePaint;
     private final Point pieCenterPoint;
-    private final Paint textPaint;
     private final Paint whitePaint;
     private final Paint columnTextPaint;
     private final Paint columnTextExtendPaint;
@@ -59,7 +58,6 @@ public class PieView extends View {
 
     private float baseLaneLength = 0;
     private float baseLaneTargetLength;
-    private final String debug = "PIE_VIEW";
 
 
     private final ArrayList<PieHelper> pieHelperList;
@@ -93,7 +91,7 @@ public class PieView extends View {
 
                     }
                     if (needNewFrame) {
-                        postDelayed(this, 10);
+                        postDelayed(this, 7);
                     } else {
                         pieHelperList.get(size-1).setDrawAllStatus(true);
                         //Log.d(debug, "SELECT_RANDOM");
@@ -111,10 +109,9 @@ public class PieView extends View {
     private final Runnable drawBaseLane = new Runnable(){
         @Override
         public void run() {
-            Log.d(debug, "draw baseline");
             baseLaneLength+=50;
             if(baseLaneLength<baseLaneTargetLength){
-                postDelayed(this, 10);
+                postDelayed(this, 7);
             } else {
                 removeCallbacks(drawColumns);
                 post(drawColumns);
@@ -130,7 +127,7 @@ public class PieView extends View {
         public void run() {
             baseLaneLength-=50;
             if(baseLaneLength>0){
-                postDelayed(this, 10);
+                postDelayed(this, 7);
             } else {
                 removeCallbacks(drawDonut);
                 booleanDrawDonut=true;
@@ -152,7 +149,7 @@ public class PieView extends View {
                 }
             }
             if(needNewFrame){
-                postDelayed(this,10);
+                postDelayed(this,7);
             }
             invalidate();
         }
@@ -169,7 +166,7 @@ public class PieView extends View {
                 }
             }
             if(needNewFrame){
-                postDelayed(this,10);
+                postDelayed(this,7);
             } else {
                 removeCallbacks(hideBaseLine);
                 post(hideBaseLine);
@@ -181,12 +178,10 @@ public class PieView extends View {
     private final Runnable donutHide = new Runnable() {
         @Override
         public void run() {
-            Log.d(debug, "DONUT_HIDE");
             boolean needNewFrame = false;
             for(int i=pieHelperList.size()-1;i>=0;i--){
                 if(pieHelperList.get(i).isAnimated()){
                     PieHelper pie = pieHelperList.get(i);
-                    //Log.d(debug, " HIDE Animate sector nr. "+i);
                     pie.updateHide();
                     if (!pie.isHidden()) {
                         needNewFrame = true;
@@ -200,12 +195,10 @@ public class PieView extends View {
 
                     }
                     if (needNewFrame) {
-                        postDelayed(this, 10);
+                        postDelayed(this, 7);
                         pie.setDrawAllStatus(false);
                     } else {
                         booleanDrawDonut=false;
-                        baseLaneTargetLength = mViewWidth;
-                        Log.d(debug, "DRAW_BASELINE_CALL");
                         post(drawBaseLane);
                     }
                 }
@@ -243,7 +236,7 @@ public class PieView extends View {
         whitePaint = new Paint();
         whitePaint.setAntiAlias(true);
         whitePaint.setColor(Color.WHITE);
-        textPaint = new Paint();
+        Paint textPaint = new Paint();
         textPaint.setAntiAlias(true);
         textPaint.setColor(Color.BLACK);
         textPaint.setTextSize(RReminder.sp2px(getContext(), RReminder.isTablet(getContext())?24:15));
@@ -251,8 +244,6 @@ public class PieView extends View {
         textPaint.setTextAlign(Paint.Align.CENTER);
 
         font = Typeface.createFromAsset(getContext().getAssets(), "fonts/HelveticaNeueLTPro-Lt.otf");
-
-        Log.d(debug, "CONSTRUCTOR");
 
         columnTextPaint = new Paint();
         columnTextPaint.setAntiAlias(true);
@@ -317,7 +308,6 @@ public class PieView extends View {
 
 
     public void setDate(ArrayList<PieHelper> helperList) {
-        Log.d(debug, "SET_DATE");
 
         initPies(helperList);
         pieHelperList.clear();
@@ -329,9 +319,10 @@ public class PieView extends View {
         }
 
         removeCallbacks(drawDonut);
-        Log.d(debug, "startAnimate");
         pieHelperList.get(0).setAnimateStatus(true);
         booleanDrawDonut=true;
+        float xStepWidth = mViewWidth/5f;
+        baseLaneTargetLength = (2*xStepWidth)+2*xStepWidth+toPx(45);
         post(drawDonut);
 
 
@@ -348,7 +339,6 @@ public class PieView extends View {
     public void toColumn(){
         removeCallbacks(donutHide);
         selectedIndex = NO_SELECTED_INDEX;
-        Log.d(debug, "startDonutHideAnimate");
         pieHelperList.get(pieHelperList.size()-1).setAnimateStatus(true);
         post(donutHide);
     }
@@ -374,11 +364,9 @@ public class PieView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.d(debug, "onDraw");
         long selectedLength;
         long selectedFrom, selectedTo;
         if (pieHelperList.isEmpty()) {
-            Log.d(debug, "piehelperlist EMPTY?");
             return;
         }
         if(booleanDrawDonut){
@@ -440,10 +428,8 @@ public class PieView extends View {
 
             if(selectedIndex!=NO_SELECTED_INDEX){
                 if(selectedColor == colorWork){
-                    Log.d(debug, "selected color WORK");
                     canvas.drawCircle(pieCenterPoint.x, pieCenterPoint.y,pieRadius*0.7f, paintGradientWork);
                 } else {
-                    Log.d(debug, "selected color REST");
                     canvas.drawCircle(pieCenterPoint.x, pieCenterPoint.y,pieRadius*0.7f, paintGradientRest);
                 }
             }
@@ -466,7 +452,6 @@ public class PieView extends View {
                     }
                     extendLength = RReminder.getExtendMinsFromMillis(getContext(),selectedLength-initialDuration);
                 }
-                Log.d(debug, "isTablet: "+RReminder.isTablet(getContext()));
                 String selectedDuration = RReminder.getShortDurationFromMillis(getContext(),selectedLength);
                 canvas.drawText(selectedDuration,pieCenterPoint.x, pieCenterPoint.y+15, columnTextPaint);
                 String selectedTime = RReminder.getTimeString(getContext(), selectedFrom).toString()+ " - " + RReminder.getTimeString(getContext(), selectedTo).toString();
@@ -491,9 +476,11 @@ public class PieView extends View {
             //drawLineBesideCir(canvas, pieHelper.getEndDegree(), selected);
             //}
         } else {
-            canvas.drawLine(toPx(40), mViewHeight, baseLaneLength-toPx(40), mViewHeight, whiteLinePaint);
             int stepCount = 2*columnHelperList.size()+1;
             int xStepWidth = mViewWidth/stepCount;
+            float baseLaneStartX = xStepWidth-toPx(45);
+            canvas.drawLine(baseLaneStartX, mViewHeight, baseLaneLength, mViewHeight, whiteLinePaint);
+
             String periodCount;
             String totalLength;
             String extendCount;
@@ -620,8 +607,6 @@ public class PieView extends View {
         path.close();
 
         canvas.drawPath(path, cirPaint);
-        //Log.d(debug, "draw selected line");
-        //canvas.drawLine(pieCenterPoint.x, pieCenterPoint.y, lineToX, lineToY, cirPaint);
     }
 
 
@@ -649,10 +634,8 @@ public class PieView extends View {
             } else {
                 selectedIndex = NO_SELECTED_INDEX;
             }
-            Log.d(debug, "ON TOUCH pieHelperList empty status: "+pieHelperList.isEmpty());
             if(selectedIndex == PieView.NO_SELECTED_INDEX) {
                 if (isDonutOnScreen()){
-                    Log.d(debug, "TO_COLUMN");
                     toColumn();
                 } else {
                     toDonut();
@@ -683,10 +666,8 @@ public class PieView extends View {
         if(degree>480){
             degree-=360;
         }
-        Log.d(debug, "touch degree: "+degree);
         int index = 0;
         for (PieHelper pieHelper : pieHelperList) {
-            Log.d(debug, "start degree: "+pieHelper.getStartDegree()+", end degree: "+pieHelper.getEndDegree());
             if (degree >= pieHelper.getStartDegree() && degree <= pieHelper.getEndDegree()) {
                 return index;
             }
@@ -710,7 +691,6 @@ public class PieView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d(debug, "onMeasure");
         mViewWidth = measureWidth(widthMeasureSpec);
         mViewHeight = measureHeight(heightMeasureSpec);
         int margin = mViewWidth / 16;
@@ -763,6 +743,7 @@ public class PieView extends View {
         return getMeasurement(measureSpec, preferred);
     }
 
+    @SuppressLint("SwitchIntDef")
     private int getMeasurement(int measureSpec, int preferred) {
         int specSize = View.MeasureSpec.getSize(measureSpec);
         int measurement;

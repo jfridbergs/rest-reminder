@@ -16,7 +16,6 @@ public class RReminderRepository {
 
     private final PeriodDao mPeriodDao;
     private final SessionDao mSessionDao;
-    private final LiveData<List<Session>> mAllSessions;
     private final LiveData<List<Session>> mAllSessionPieView;
     private final RReminderRoomDatabase db;
 
@@ -24,15 +23,11 @@ public class RReminderRepository {
         db = RReminderRoomDatabase.getDatabase(application);
         mPeriodDao = db.periodDao();
         mSessionDao = db.sessionDao();
-        mAllSessions = mSessionDao.getAllSessions();
         mAllSessionPieView = mSessionDao.getAllSessionsPieView();
     }
 
 
 
-    LiveData<List<Session>> getAllSessions(){
-        return mAllSessions;
-    }
     LiveData<List<Session>> getAllSessionsPieData(){
         return mAllSessionPieView;
     }
@@ -68,10 +63,6 @@ public class RReminderRepository {
         RReminderRoomDatabase.databaseExecutor.execute(() -> mSessionDao.deleteSession(session));
     }
 
-
-    public void populateDatabase(){
-        db.populateDatabase();
-    }
 
     public void populateDatabaseForStats(){
         db.populateDatabaseForStats();

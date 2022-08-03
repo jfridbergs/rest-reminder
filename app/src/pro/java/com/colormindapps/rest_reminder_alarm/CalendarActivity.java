@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.appcompat.widget.Toolbar;
@@ -39,7 +38,6 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
     int yearValue, monthValue;
     HashSet<Integer> hSetNumbers;
     private ArrayList<Integer> shownMonths;
-    private final String debug = "RR_CALENDAR";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,11 +98,9 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
     }
 
     public void decorateMonth(int year, int month){
-        Log.d(debug, "decorateMonth, value: "+month);
         Calendar mycal = new GregorianCalendar(year, month, 1);
         int daysInMonth = mycal.getActualMaximum(Calendar.DAY_OF_MONTH);
         long periodFrom = RReminder.getMillisFromDate(year,month,1,true);
-        Log.d(debug, "decorateMonth, from value: "+periodFrom);
         long periodTo = RReminder.getMillisFromDate(year,month,daysInMonth,false);
 
 
@@ -126,14 +122,11 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
             calendar.setTimeInMillis(from);
             daysArray.add(calendar.get(Calendar.DAY_OF_MONTH));
         }
-        Log.d(debug, "daysArray contents: "+daysArray);
         hSetNumbers = new HashSet(daysArray);
         ArrayList<CalendarDay> dates = new ArrayList<>();
         for (int day : hSetNumbers){
             dates.add(CalendarDay.from(year, month,day));
         }
-        Log.d(debug, "arraylistDates size: "+dates.size());
-        Log.d(debug, "arraylistDates: "+dates);
         EventDecorator eventDecorator = new EventDecorator(getApplicationContext(), dates);
         calendarView.addDecorator(eventDecorator);
         calendarView.invalidateDecorators();
@@ -141,28 +134,18 @@ public class CalendarActivity extends AppCompatActivity implements OnMonthChange
 
     @Override
     public void onMonthChanged(MaterialCalendarView widget, CalendarDay date) {
-        Log.d(debug, "onMonthChanged");
-        // getSupportActionBar().setTitle( df.format("MMMM, yyyy", date.getDate()));
         int month = date.getMonth();
         int shownValue = date.getYear()*100+month;
-        if(!shownMonths.contains(shownValue)){
-            Log.d(debug, "new month/year, add more decorations");
+
             decorateMonth(date.getYear(),month);
             shownMonths.add(shownValue);
-        } else {
-            Log.d(debug, "month/year was already shown, dont decorate");
-        }
+
     }
 
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
         int day = date.getDay();
-        Log.d(debug, "day value: "+day);
-        Log.d(debug, "hashset size: "+hSetNumbers.size());
-            Log.d(debug, "day value is in hashset");
-
-
         long periodFrom = RReminder.getMillisFromDate( date.getYear(),date.getMonth(),day,true);
         long periodTo = RReminder.getMillisFromDate(date.getYear(),date.getMonth(),day,false);
 

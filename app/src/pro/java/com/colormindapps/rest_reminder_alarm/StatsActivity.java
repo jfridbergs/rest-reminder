@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -57,8 +56,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
     private FragmentStateAdapter pagerDailyAdapter, pagerWeeklyAdapter, pagerMonthlyAdapter, pagerYearlyAdapter, pagerOverallAdapter;
 
 
-    private final String debug = "SESSION_DETAILS";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +76,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                Log.d(debug, "daily changed position: "+position);
                 viewPagerPosition = position;
                 if(position ==0){
                     previous.setVisibility(View.GONE);
@@ -214,13 +210,11 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 currentIntervalType = 1;
                 break;
             case "week":
-                Log.d(debug, "week item pressed");
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(2);
                 currentIntervalType = 2;
                 break;
             case "month":
-                Log.d(debug, "month item pressed");
                 unregisterCallback(currentIntervalType);
                 launchPagerAdapter(3);
                 currentIntervalType = 3;
@@ -350,7 +344,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                         case INTERVAL_MONTH:{
                             monthly.add(new TimeInterval(start,end));
                             if (last) {
-                                Log.d(debug, "sorting monthly arraylist");
                                 Collections.sort(monthly, comparator);
                             }
                         } break;
@@ -383,7 +376,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
                 viewPager.registerOnPageChangeCallback(dailyOnPageChangeCallback);
                 viewPager.setCurrentItem(daily.size()-1, false);
                 viewPagerPosition = daily.size()-1;
-                Log.d(debug, "daily size: "+daily.size());
             } break;
             case 2: {
                 if(pagerWeeklyAdapter==null) pagerWeeklyAdapter = new ScreenSlidePagerWeeklyAdapter(this);
@@ -411,9 +403,6 @@ public class StatsActivity extends AppCompatActivity implements AdapterView.OnIt
         }
 
         viewPager.setOffscreenPageLimit(2);
-
-        //Log.d(debug, "session position: "+getSessionPosition(sessionStart));
-        //viewPager.setCurrentItem(getSessionPosition(sessionStart), false);
 
     }
 

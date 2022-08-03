@@ -1,6 +1,5 @@
 package com.colormindapps.rest_reminder_alarm.charts;
 
-import android.util.Log;
 
 import com.colormindapps.rest_reminder_alarm.data.Period;
 
@@ -12,29 +11,20 @@ public class PieHelper {
     private float middleDegree;
     private final String title;
     private float sweepDegree;
-    private float extendStartDegree= 0;
     private boolean isAnimated = false;
-    private boolean extended = false;
     private boolean drawAll = false;
-    private boolean drawExtended = false;
     private final Period period;
 
     int velocity = 2;
 
-    public PieHelper (float percent){
-        this(percent, null, null);
-    }
     public PieHelper(float percent, Period period){
         this(percent, period, null);
     }
 
     PieHelper(float percent, Period period, String title){
-        String debug = "PIE_HELPER";
-        Log.d(debug, "percent: "+percent);
         this.sweepDegree = percent * 300;
         this.period = period;
         this.title = title;
-       // Log.d(debug, "period type: "+period.getType());
     }
 
 
@@ -47,16 +37,6 @@ public class PieHelper {
         this.sweepDegree = targetPie.getSweep();
         this.title = targetPie.getTitle();
         this.period = targetPie.getPeriod();
-        if(this.period.getType()==3 || this.period.getType()==4){
-            this.extended = true;
-            long actualDuration = this.period.getDuration();
-            long initialDuration = this.period.getInitialDuration();
-            float extendFraction = (float)initialDuration /actualDuration;
-            this.extendStartDegree = this.startDegree + (this.endDegree - this.startDegree)*extendFraction;
-        }
-        //Log.d(debug, "extendStartDegree: "+this.extendStartDegree+", startDegree: "+startDegree+", endDegree: "+endDegree);
-
-
     }
 
 
@@ -83,11 +63,6 @@ public class PieHelper {
         return this.drawAll;
     }
 
-    boolean isExtended(){return this.extended;}
-
-    boolean drawExtended(){return drawExtended;}
-
-
     boolean isAtRest(){
         return (startDegree==targetStartDegree)&&(endDegree==targetEndDegree);
     }
@@ -95,25 +70,16 @@ public class PieHelper {
     boolean isHidden(){return endDegree==startDegree;}
 
     void update(){
-        //Log.d(debug, "BEFORE Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
         this.startDegree = updateSelf(startDegree, targetStartDegree, velocity);
         this.endDegree = updateSelf(endDegree, targetEndDegree, velocity);
         this.sweepDegree = endDegree - startDegree;
 
-        if(this.extended && this.endDegree>this.extendStartDegree){
-           // Log.d(debug, "START_DRAWING_EXT");
-            drawExtended = true;
-        }
-         //Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
-
     }
 
     void updateHide(){
-        //Log.d(debug, "BEFORE Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
         this.startDegree = updateSelf(startDegree, targetStartDegree, velocity);
         this.endDegree = updateSelf(endDegree, targetStartDegree, velocity);
         this.sweepDegree = endDegree - startDegree;
-        //Log.d(debug, "AFTER Start degree: " + this.startDegree + ", startTargetDegree: "+ this.targetStartDegree +", end degree "+this.endDegree+", targetEndDegree: "+this.targetEndDegree);
     }
 
 

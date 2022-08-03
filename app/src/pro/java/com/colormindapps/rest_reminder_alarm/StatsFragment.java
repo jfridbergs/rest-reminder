@@ -2,7 +2,6 @@ package com.colormindapps.rest_reminder_alarm;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,7 +33,6 @@ public class StatsFragment extends Fragment {
     private SessionsViewModel mSessionsViewModel;
     List<PeriodTotals> mPeriodTotals;
     SessionTotals mSessionTotals;
-    private final String debug = "STATS_FRAGMENT";
 
     public static StatsFragment newInstance(int intervalType, long intervalStart, long intervalEnd) {
 
@@ -137,9 +135,6 @@ public class StatsFragment extends Fragment {
     private void fillGraph(){
         mPeriodViewModel.getPeriodTotals(intervalStart, intervalEnd).observe(getViewLifecycleOwner(), periodTotals -> {
             mPeriodTotals = periodTotals;
-            int periodCount = mPeriodTotals.get(0).getPeriodCount();
-            long totalDuration = mPeriodTotals.get(0).getTotalDuration();
-            Log.d(debug, "TOTALS FOR WORK: period count: "+periodCount+", totalLength+ "+RReminder.getDurationFromMillis(getContext(),totalDuration));
             set(columnGraphView);
         });
     }
@@ -147,10 +142,6 @@ public class StatsFragment extends Fragment {
     private void set(ColumnGraphView columnGraphView){
         float workPercent = ((float)mPeriodTotals.get(0).getTotalDuration() / mSessionTotals.getTotalDuration())*100;
         float restPercent = 100-workPercent;
-
-        Log.d(debug, "date: "+RReminder.getSessionDateString(0,intervalEnd-1000000));
-        Log.d(debug, "workPercent: "+workPercent);
-        Log.d(debug, "restPercent: "+restPercent);
 
         ArrayList<ColumnHelper> columnHelperList = new ArrayList<>();
         columnHelperList.add(new ColumnHelper(workPercent, getResources().getColor(R.color.work_chart), mPeriodTotals.get(0).getPeriodCount(), mPeriodTotals.get(0).getTotalDuration(), mPeriodTotals.get(0).getExtendCount(), mPeriodTotals.get(0).getTotalExtendDuration()));

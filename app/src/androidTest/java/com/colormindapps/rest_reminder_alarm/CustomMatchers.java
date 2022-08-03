@@ -91,7 +91,7 @@ public class CustomMatchers {
             protected boolean matchesSafely(PieView pieView) {
                 long length = pieView.getPeriodList().get(position).getPeriodDuration();
                 Log.d("CUSTOM_MATCHER", "period length abs: "+abs(length-expectedLength));
-                return abs(length-expectedLength) <1500;
+                return abs(length-expectedLength) <2500;
             }
 
             @Override
@@ -110,7 +110,7 @@ public class CustomMatchers {
             protected boolean matchesSafely(PieView pieView) {
                 long periodStart = pieView.getPeriodList().get(position).getPeriodStart();
                 Log.d("CUSTOM_MATCHER", "period start abs: "+abs(periodStart-expectedStart));
-                return abs(periodStart-expectedStart) <1000;
+                return abs(periodStart-expectedStart) <1500;
             }
 
             @Override
@@ -199,7 +199,7 @@ public class CustomMatchers {
             protected boolean matchesSafely(PieView pieView) {
                 long actualExtendLength = pieView.getPeriodList().get(position).getPeriod().getDuration() - pieView.getPeriodList().get(position).getPeriod().getInitialDuration();
                 Log.d("CUSTOM_MATCHER", "period extend length: "+abs(actualExtendLength-expectedExtendLength));
-                return abs(actualExtendLength-expectedExtendLength) <1000;
+                return abs(actualExtendLength-expectedExtendLength) <1500;
             }
 
             @Override

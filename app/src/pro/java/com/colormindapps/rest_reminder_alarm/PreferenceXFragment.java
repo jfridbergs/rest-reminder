@@ -11,7 +11,6 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
@@ -150,16 +149,6 @@ public class PreferenceXFragment extends PreferenceFragmentCompat implements OnS
 
     	Preference preference = findPreference(key);
     	int value;
-
-		//after every preference change made while Rest reminder is running we are fetching the current period data from CounterService
-		if(RReminderMobile.isCounterServiceRunning(context)){
-			if(parentActivity!=null){
-				Log.d("RREMINDER_PREFERENCE", "NOT null");
-			} else {
-				Log.d("RREMINDER_PREFERENCE", "IS null");
-			}
-			//dataFromCounterSerivce = parentActivity.getDataFromService();
-		}
 
 		//updating the preferences values on wear device
 		wearWorkLength = sharedPreferences.getString(workPeriodLengthKey, RReminder.DEFAULT_WORK_PERIOD_STRING);
