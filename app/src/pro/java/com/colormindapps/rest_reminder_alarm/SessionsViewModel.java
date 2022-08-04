@@ -49,5 +49,4 @@ public class SessionsViewModel extends AndroidViewModel {
         mRepository.updateSession(session);
     }
 
-    public void populateDatabaseForStats(){mRepository.populateDatabaseForStats();}
 }

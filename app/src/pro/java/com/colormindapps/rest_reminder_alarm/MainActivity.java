@@ -721,20 +721,6 @@ public class MainActivity extends AppCompatActivity implements
 		}
 	}
 
-	public void deleteDbForTests(){
-		if(!RReminderMobile.isCounterServiceRunning(getApplicationContext())){
-			mSessionsViewModel.deleteOlder(0);
-			Toast.makeText(this, "Database deleted", Toast.LENGTH_SHORT).show();
-		} else {
-			Toast.makeText(this, "only when Rest Reminder is turned off", Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	public void populateDbForTests(){
-		mSessionsViewModel.populateDatabaseForStats();
-		Toast.makeText(this, "Database populated", Toast.LENGTH_SHORT).show();
-	}
-
 	private void setReminderOff(long periodEndTime) {
 		setReminderOffCounter++;
 		stopCountDownTimer();

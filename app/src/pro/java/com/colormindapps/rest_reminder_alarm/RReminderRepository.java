@@ -64,9 +64,6 @@ public class RReminderRepository {
     }
 
 
-    public void populateDatabaseForStats(){
-        db.populateDatabaseForStats();
-    }
 
 
 
