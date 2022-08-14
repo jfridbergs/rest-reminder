@@ -23,7 +23,12 @@ public class RReminderMobile {
 			i.putExtra(RReminder.PERIOD_TYPE, type);
 			i.putExtra(RReminder.EXTEND_COUNT, extendCount);
 			i.setAction(RReminder.ACTION_ALARM_PERIOD_END);
-			pi = PendingIntent.getBroadcast(context, (int)endTime, i, PendingIntent.FLAG_ONE_SHOT);
+
+			if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+				pi = PendingIntent.getBroadcast(context, (int)endTime, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+			} else {
+				pi = PendingIntent.getBroadcast(context, (int)endTime, i, PendingIntent.FLAG_ONE_SHOT);
+			}
 			if(mAlarmManager!=null)
 				mAlarmManager.cancel(pi);
 			pi.cancel();
@@ -72,14 +77,23 @@ public class RReminderMobile {
 		notificationIntent.setAction(RReminder.ACTION_VIEW_MAIN_ACTIVITY);
 		notificationIntent.putExtra(RReminder.START_COUNTER, false);
 		notificationIntent.putExtra(RReminder.PERIOD_TYPE, type);
-		PendingIntent pi = PendingIntent.getActivity(context, 15 , notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && showTurnOff) {
+		PendingIntent pi;
+		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+			pi = PendingIntent.getActivity(context, 15 , notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			pi = PendingIntent.getActivity(context, 15 , notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+		}
+		if (showTurnOff) {
 			Intent turnOffIntent = new Intent (context, MainActivity.class);
 			turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
 			turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
 			turnOffIntent.putExtra(RReminder.PERIOD_END_TIME,periodEndTime);
-			PendingIntent pIntentTurnOff = PendingIntent.getActivity(context, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
+			PendingIntent pIntentTurnOff;
+			if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+				pIntentTurnOff = PendingIntent.getActivity(context, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+			} else {
+				pIntentTurnOff = PendingIntent.getActivity(context, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
+			}
 			builder.addAction(R.drawable.ic_notify_turn_off , context.getString(R.string.notify_turn_off), pIntentTurnOff);
 		}
 		//note = new Notification(android.R.drawable.stat_notify_sync, null, System.currentTimeMillis());

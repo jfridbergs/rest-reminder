@@ -22,6 +22,7 @@
 	    android:layout_height="48dp"
 	    android:onClick="notificationTurnOff"
 	    android:background="@drawable/btn_turn_off"
+		android:stateListAnimator="@null"
 	    android:layout_marginTop="15dp"
 	    android:layout_marginLeft="15dp" />
     

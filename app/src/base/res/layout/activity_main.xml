@@ -39,6 +39,7 @@
 	   	    android:layout_marginTop="15dp"
 			android:paddingTop="2dp"
 	   	    android:onClick="showHintDialog"
+			android:stateListAnimator="@null"
 			android:layout_below="@id/toolbar"
 	   	    android:text="@string/hint_dialog_text"
 			style="@style/InfoButton"/>
@@ -165,6 +166,7 @@
 			   	    android:layout_height="@dimen/button_period_end_extend_height"
 			   	    android:background="@drawable/btn_extend_np"
 			   	    android:onClick="showExtendDialog"
+					android:stateListAnimator="@null"
 					android:layout_marginRight="15dp"
 			   	    android:text="@string/extend_current_period" />
 				<Button
@@ -175,6 +177,7 @@
 					android:layout_toRightOf="@id/button_period_end_extend"
 					android:layout_marginLeft="15dp"
 					android:background="@drawable/btn_extend_np"
+					android:stateListAnimator="@null"
 					android:onClick="endPeriod"
 					android:text="sessions" />
  

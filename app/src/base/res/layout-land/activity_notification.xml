@@ -22,6 +22,7 @@
 		    android:layout_height="48dp"
 		    android:onClick="notificationTurnOff"
 		    android:background="@drawable/btn_turn_off"
+			android:stateListAnimator="@null"
 		    android:layout_marginTop="15dp"
 		    android:layout_marginLeft="15dp" />
 	    
@@ -94,6 +95,7 @@
 	                android:layout_marginBottom="0dp"
 	                android:layout_marginLeft="@dimen/button_notification_period_end_extend_marginHorizontal"
 	                android:layout_marginRight="@dimen/button_notification_period_end_extend_marginHorizontal"
+					android:stateListAnimator="@null"
 	                android:background="@drawable/btn_extend_np"
 	                android:text="@string/extend_current_period" />
 		
@@ -107,6 +109,7 @@
 				    android:layout_marginBottom="0dp"
 				    android:layout_marginLeft="@dimen/notification_button_marginHorizontal"
 				    android:layout_marginRight="@dimen/notification_button_marginHorizontal"
+					android:stateListAnimator="@null"
 				    android:layout_toRightOf="@id/button_notification_period_end_extend"
 				    android:background="@drawable/btn_notification_np"
 				    android:onClick="notificationButtonAction"

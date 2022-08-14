@@ -181,7 +181,7 @@ public class ExtendDialog extends DialogFragment{
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnDialogCloseListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context + " must implement OnExtendDialogSelectedListener");
         }
     }
 

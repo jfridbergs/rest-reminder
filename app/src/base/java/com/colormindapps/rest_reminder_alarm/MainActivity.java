@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Vibrator;
 
@@ -1343,6 +1342,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		//replacing hint dialog with showcaseview
 
+
+		/*
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			if (RReminder.isExtendEnabled(MainActivity.this)) {
 				if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
@@ -1361,6 +1362,9 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			createShowcaseView(RReminder.SHOWCASEVIEW_START, 0);
 		}
 
+
+		 */
+		showPatchNotesDialog();
 	}
 
 	public void createShowcaseView(int type, int nextShowcaseView) {

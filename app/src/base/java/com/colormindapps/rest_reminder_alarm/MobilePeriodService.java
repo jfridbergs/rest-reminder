@@ -1,12 +1,12 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
@@ -88,6 +88,7 @@ public class MobilePeriodService extends JobIntentService {
 
 
 
+	@SuppressLint("UnspecifiedImmutableFlag")
 	public void launchNotification(){
 		//building android wear-only action for extending previously ended period
 		//the action intent
@@ -95,20 +96,28 @@ public class MobilePeriodService extends JobIntentService {
 		AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(this, RReminder.CHANNEL_PERIOD_END_ID);
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-			if(RReminder.getMode(this)==1){
-				Intent startNextPeriod = new Intent (this, MainActivity.class);
-				startNextPeriod.setAction(RReminder.ACTION_MANUAL_START_NEXT_PERIOD);
-				startNextPeriod.putExtra(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE, type);
-				PendingIntent pIntentStartNextPeriod = PendingIntent.getActivity(this, 0, startNextPeriod, PendingIntent.FLAG_ONE_SHOT);
-				builder.addAction(android.R.drawable.stat_notify_sync , getString(R.string.start_next_period), pIntentStartNextPeriod);
+		if(RReminder.getMode(this)==1){
+			Intent startNextPeriod = new Intent (this, MainActivity.class);
+			startNextPeriod.setAction(RReminder.ACTION_MANUAL_START_NEXT_PERIOD);
+			startNextPeriod.putExtra(RReminder.MANUAL_MODE_NEXT_PERIOD_TYPE, type);
+			PendingIntent pIntentStartNextPeriod;
+			if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+				pIntentStartNextPeriod = PendingIntent.getActivity(this, 0, startNextPeriod, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+			} else {
+				pIntentStartNextPeriod = PendingIntent.getActivity(this, 0, startNextPeriod, PendingIntent.FLAG_ONE_SHOT);
 			}
-			Intent turnOffIntent = new Intent (this, MainActivity.class);
-			turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
-			turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
-			PendingIntent pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
-			builder.addAction(R.drawable.ic_notify_turn_off , getString(R.string.notify_turn_off), pIntentTurnOff);
+			builder.addAction(android.R.drawable.stat_notify_sync , getString(R.string.start_next_period), pIntentStartNextPeriod);
 		}
+		Intent turnOffIntent = new Intent (this, MainActivity.class);
+		turnOffIntent.setAction(RReminder.ACTION_TURN_OFF);
+		turnOffIntent.putExtra(RReminder.TURN_OFF, 1);
+		PendingIntent pIntentTurnOff;
+		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+			pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			pIntentTurnOff = PendingIntent.getActivity(this, 0, turnOffIntent, PendingIntent.FLAG_ONE_SHOT);
+		}
+		builder.addAction(R.drawable.ic_notify_turn_off , getString(R.string.notify_turn_off), pIntentTurnOff);
 		Intent notificationIntent = new Intent(this, NotificationActivity.class);
 		notificationIntent.putExtra(RReminder.PERIOD_TYPE, typeForNotification);
 		notificationIntent.putExtra(RReminder.PERIOD_END_TIME, nextPeriodEndTime);
@@ -117,7 +126,12 @@ public class MobilePeriodService extends JobIntentService {
 		notificationIntent.putExtra(RReminder.REDIRECT_SCREEN_OFF, false);
 		notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		notificationIntent.setAction(RReminder.ACTION_VIEW_NOTIFICATION_ACTIVITY);
-		PendingIntent pi = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent pi;
+		if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+			pi = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			pi = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+		}
 		switch(typeForNotification){
 			case 1: case 3:
 				//note = new Notification(android.R.drawable.stat_sys_warning, getString(R.string.notify_work_period_end_ticker_message), System.currentTimeMillis());

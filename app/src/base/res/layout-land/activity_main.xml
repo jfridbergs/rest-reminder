@@ -33,6 +33,7 @@
 			    android:layout_marginLeft="20dp"
 			    android:layout_marginTop="20dp"
 			    android:onClick="showHintDialog"
+				android:stateListAnimator="@null"
 			    android:layout_alignParentLeft="true"
 			    android:text="@string/hint_dialog_text"
 				style="@style/InfoButton"/>
@@ -148,6 +149,7 @@
 			   	    android:layout_width="@dimen/button_period_end_extend_width"
 			   	    android:layout_height="@dimen/button_period_end_extend_height"
 					android:layout_marginRight="15dp"
+					android:stateListAnimator="@null"
 			   	    android:background="@drawable/btn_extend_np"
 			   	    android:onClick="showExtendDialog"
 			   	    android:text="@string/extend_current_period" />
@@ -158,6 +160,7 @@
 					android:layout_width="@dimen/button_multiple_width"
 					android:layout_height="@dimen/button_period_end_extend_height"
 					android:layout_marginLeft="15dp"
+					android:stateListAnimator="@null"
 					android:layout_toRightOf="@id/button_period_end_extend"
 					android:background="@drawable/btn_extend_np"
 					android:onClick="endPeriod"
