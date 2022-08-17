@@ -87,14 +87,17 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         preferenceScreenKey = getArguments().getString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT);
 
 
-
+        assert preferenceScreenKey != null;
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
 
             //disable preference for enabling shorter than 10 min periods in order to avoid messy interactions when updating current running periods, that were <10 mins to new min 10 min value (unnecessary work)
-            getPreferenceManager().findPreference(enableShortPeriodsKey).setEnabled(!RReminderMobile.isCounterServiceRunning(context));
+            Preference preference = getPreferenceManager().findPreference(enableShortPeriodsKey);
+            assert preference != null;
+            preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 
             workSoundPreference = findPreference(workPeriodSoundKey);
             String valueString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert valueString != null;
             if (valueString.equals("DEFAULT_RINGTONE_URI")){
                 originalWorkUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -109,6 +112,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             restSoundPreference = findPreference(restPeriodSoundKey);
             valueString = sharedPreferences.getString(restPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert valueString != null;
             if (valueString.equals("DEFAULT_RINGTONE_URI")){
                 originalRestUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -135,6 +139,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 testDisableBatteryOptSummary = disableBatteryOptPreference.getSummary().toString();
             } else {
                 PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference(getString(R.string.pref_category_period_settings_key));
+                assert preferenceCategory != null;
                 preferenceCategory.removePreference(disableBatteryOptPreference);
             }
 
@@ -227,7 +232,6 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         Bundle dataFromCounterSerivce;
         Preference preference = findPreference(key);
         int value;
-        boolean batteryOptDisabled;
         String name, outputName;
         Uri ringtoneUri;
         String updatedWorkPeriodLength, updatedRestPeriodLength;
@@ -255,6 +259,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             }  else if (key.equals(workPeriodSoundKey)){
                 name = sharedPreferences.getString(key, "DEFAULT_RINGTONE_URI");
+                assert name != null;
                 if (name.equals("DEFAULT_RINGTONE_URI")){
                     ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                 } else {
@@ -316,7 +321,9 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                     shortDisabled = true;
                     String workPeriod = sharedPreferences.getString(workPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_work_length_string));
                     String restPeriod = sharedPreferences.getString(restPeriodLengthKey, context.getString(com.colormindapps.rest_reminder_alarm.shared.R.string.default_rest_length_string));
+                    assert workPeriod != null;
                     int workPeriodValue = getHourFromString(workPeriod) * 60 + getMinuteFromString(workPeriod);
+                    assert restPeriod != null;
                     int restPeriodValue = getHourFromString(restPeriod) * 60 + getMinuteFromString(restPeriod);
                     if(workPeriodValue<10){
                         String output = RReminder.getFormatedValue(context, 0, "00:10");
@@ -352,6 +359,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 } else {
                     output=String.format(getString(R.string.pref_options_multiple), value);
                 }
+                assert preference != null;
                 preference.setSummary(output);
                 testExtendCountSummary = preference.getSummary().toString();
             } else if (key.equals(extendBaseLengthKey)) {
@@ -362,6 +370,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
                 } else {
                     output=String.format(getString(R.string.pref_minute_multiple), value);
                 }
+                assert preference != null;
                 preference.setSummary(output);
                 testExtendLengthSummary = preference.getSummary().toString();
             }
@@ -381,6 +390,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         //get latest work sound uri
         if(preferenceScreenKey.equals(getString(R.string.pref_screen_periods_key))){
             String workString = sharedPreferences.getString(workPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert workString != null;
             if (workString.equals("DEFAULT_RINGTONE_URI")){
                 newWorkUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -396,6 +406,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
 
             //get latest rest sound uri
             String restString = sharedPreferences.getString(restPeriodSoundKey, "DEFAULT_RINGTONE_URI");
+            assert restString != null;
             if (restString.equals("DEFAULT_RINGTONE_URI")){
                 newRestUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             } else {
@@ -444,6 +455,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             intent.putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_NOTIFICATION_URI);
 
             String existingValue = sharedPreferences.getString(preference.getKey(), "DEFAULT_RINGTONE_URI"); // TODO
+            assert existingValue != null;
             if (existingValue.length() == 0) {
                 // Select "Silent"
                 intent.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
@@ -512,7 +524,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
         try {
             setParentActivity((PreferenceActivityLinkedService) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement PreferenceActivityLinkedService");
+            throw new ClassCastException(context + " must implement PreferenceActivityLinkedService");
         }
     }
 
@@ -524,7 +536,7 @@ public class PreferenceXSubScreenFragment extends PreferenceFragmentCompat imple
             try {
                 setParentActivity((PreferenceActivityLinkedService)activity);
             } catch (ClassCastException e) {
-                throw new ClassCastException(activity.toString() + " must implement PreferenceActivityLinkedService");
+                throw new ClassCastException(activity + " must implement PreferenceActivityLinkedService");
             }
         }
     }

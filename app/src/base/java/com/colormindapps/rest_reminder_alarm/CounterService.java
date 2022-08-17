@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -64,6 +65,7 @@ public class CounterService extends Service {
 	}
 
 	
+	@SuppressLint("UnspecifiedImmutableFlag")
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId){
 		boolean excludeOngoing = false;

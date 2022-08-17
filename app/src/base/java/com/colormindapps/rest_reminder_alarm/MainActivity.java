@@ -28,17 +28,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Vibrator;
-
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MotionEventCompat;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,6 +47,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.MotionEventCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.colormindapps.rest_reminder_alarm.shared.MyCountDownTimer;
 import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 import com.github.amlcurran.showcaseview.OnShowcaseEventListener;
@@ -69,11 +68,11 @@ import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.tasks.Task;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 public class MainActivity extends AppCompatActivity implements OnDialogCloseListener, OnPromoDialogListener {
@@ -177,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			} else {
 					turnOffIntent = false;
 				//If the activity was opened while the countdown was already finished(manual mode), jump to NotificationActivity
-				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !getIntent().getAction().equals(RReminder.ACTION_TURN_OFF)) {
+				if (RReminder.getMode(MainActivity.this) == 1 && timeRemaining < 0 && !Objects.equals(getIntent().getAction(), RReminder.ACTION_TURN_OFF)) {
 					startNotificationActivity(periodType, extendCount, periodEndTimeValue);
 				} else {
 					if(getVisibleState()){
@@ -269,9 +268,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 	}
 
-	public void assignViews(){
-
-	}
 
 
 	@Override
@@ -538,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 	}
 
-	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+	private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Log.d(debug, "update UI broadcast received");

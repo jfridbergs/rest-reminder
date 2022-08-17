@@ -5,14 +5,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebView;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -24,7 +21,6 @@ import java.util.Objects;
 
 public class PlusPromoDialog extends DialogFragment {
 	WebView patchnotes;
-	OnPromoDialogListener listener;
 
 	
     @Override
@@ -34,7 +30,7 @@ public class PlusPromoDialog extends DialogFragment {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
         	setParentActivity((OnPromoDialogListener) getActivity());
         } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
+            throw new ClassCastException(context + " must implement OnExtendDialogSelectedListener");
         }
     }
     
@@ -56,7 +52,7 @@ public class PlusPromoDialog extends DialogFragment {
 
 	    // Inflate and set the layout for the dialog
 	    // Pass null as the parent view because its going in the dialog layout
-		View view = inflater.inflate(R.layout.plus_promo,new ConstraintLayout(getActivity()), false);
+		View view = inflater.inflate(R.layout.plus_promo,new ConstraintLayout(requireActivity()), false);
 	    builder.setView(view)
 				.setCancelable(true)
 	    // Add action buttons
@@ -97,13 +93,5 @@ public class PlusPromoDialog extends DialogFragment {
 	public void onCancel(@NonNull DialogInterface dialog){
 	}
 
-
-	public void openPlusInPlay() {
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(
-				"https://play.google.com/store/apps/details?id=com.colormindapps.rest_reminder_alarm.pro"));
-		intent.setPackage("com.android.vending");
-		startActivity(intent);
-	}
 
 }

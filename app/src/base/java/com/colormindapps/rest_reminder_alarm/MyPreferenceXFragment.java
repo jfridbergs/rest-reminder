@@ -74,7 +74,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 
 		Preference preference = findPreference(reminderModeKey);
 		// Set summary to be the user-description for the selected value
-		value = Integer.parseInt(sharedPreferences.getString(reminderModeKey,"0"));
+		value = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(reminderModeKey, "0")));
 		switch(value){
 			case 0: {
 				assert preference != null;
@@ -100,30 +100,24 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 			assert mCategory != null;
 			mCategory.removePreference(findPreference(enableColorizedNotificationsKey));
 		} else {
-
-			if(RReminderMobile.isCounterServiceRunning(context)){
-				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(false);
-			} else {
-				getPreferenceManager().findPreference(enableColorizedNotificationsKey).setEnabled(true);
-			}
+			preference = getPreferenceManager().findPreference(enableColorizedNotificationsKey);
+			assert preference != null;
+			preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 		}
 
-
-
-
-		if(RReminderMobile.isCounterServiceRunning(context)){
-			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(false);
-		} else {
-			getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key)).setEnabled(true);
-		}
+		preference = getPreferenceManager().findPreference(getString(R.string.pref_show_is_on_icon_key));
+		assert preference != null;
+		preference.setEnabled(!RReminderMobile.isCounterServiceRunning(context));
 		Vibrator vib = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
 		assert vib != null;
+		preference = getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key));
+		assert preference != null;
 		if(vib.hasVibrator()){
-			getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key)).setEnabled(true);
+			preference.setEnabled(true);
 		} else {
 			sharedPreferences.edit().putBoolean(getString(R.string.pref_enable_vibrate_key), false).commit();
-			getPreferenceManager().findPreference(getString(R.string.pref_enable_vibrate_key)).setEnabled(false);
+			preference.setEnabled(false);
 		}
 	}
 
@@ -146,7 +140,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		//updating preference summary after preferences are changed
         if (key.equals(reminderModeKey)) {
             // Set summary to be the user-description for the selected value
-            value = Integer.parseInt(sharedPreferences.getString(key,"0"));
+            value = Integer.parseInt(Objects.requireNonNull(sharedPreferences.getString(key, "0")));
             switch(value){
         	case 0:{
 				assert preference != null;
@@ -155,6 +149,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 				break;
 			}
         	case 1:{
+				assert preference != null;
 				preference.setTitle(getString(R.string.pref_mode_title_first_part,getString(R.string.pref_mode_title_manual)));
 				preference.setSummary(getString(R.string.pref_mode_summary_manual));
 				break;
@@ -208,7 +203,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 		try {
 			setParentActivity((PreferenceActivityLinkedService) getActivity());
 		} catch (ClassCastException e) {
-			throw new ClassCastException(context.toString() + " must implement PreferenceActivityLinkedService");
+			throw new ClassCastException(context + " must implement PreferenceActivityLinkedService");
 		}
 	}
 
@@ -220,7 +215,7 @@ public class MyPreferenceXFragment extends PreferenceFragmentCompat implements O
 			try {
 				setParentActivity((PreferenceActivityLinkedService)activity);
 			} catch (ClassCastException e) {
-				throw new ClassCastException(activity.toString() + " must implement PreferenceActivityLinkedService");
+				throw new ClassCastException(activity + " must implement PreferenceActivityLinkedService");
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package com.colormindapps.rest_reminder_alarm;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -13,6 +14,7 @@ import com.colormindapps.rest_reminder_alarm.shared.RReminder;
 
 public class RReminderMobile {
 
+	@SuppressLint("UnspecifiedImmutableFlag")
 	public static void cancelCounterAlarm(Context context, int type, int extendCount, long endTime){
 		AlarmManager mAlarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
 		PendingIntent pi;
@@ -71,6 +73,7 @@ public class RReminderMobile {
 		*/
 	}
 
+	@SuppressLint("UnspecifiedImmutableFlag")
 	static Notification updateOnGoingNotification(Context context, int type, long periodEndTime, boolean showTurnOff){
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(context, RReminder.CHANNEL_ONGOING_ID);
 		Intent notificationIntent = new Intent(context, MainActivity.class);
