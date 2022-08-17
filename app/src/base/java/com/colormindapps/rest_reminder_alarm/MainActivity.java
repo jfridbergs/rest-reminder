@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -72,8 +74,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 
-public class MainActivity extends AppCompatActivity implements OnDialogCloseListener {
+public class MainActivity extends AppCompatActivity implements OnDialogCloseListener, OnPromoDialogListener {
 
 
 	public int periodType = 0;
@@ -135,57 +138,16 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 	float mLastTouchX, mLastTouchY, startX, startY;
 	private int mActivePointerId;
 
+	private Executor mainExecutor;
+
 	String debug = "RR_MAIN";
 
 
-	//for testing purposes only. remove before release
-	//boolean isOngoingNotificationOn;
-	//private NotificationReceiver nReceiver;
 
 
 	DialogFragment introFragment, extendFragment, patchNotesFragment;
 
-	private static class MyHandler extends Handler {
-		 final WeakReference<MainActivity> mActivity;
 
-		MyHandler(MainActivity activity) {
-			mActivity = new WeakReference<>(activity);
-		}
-
-	}
-
-	/*
-	private OnLongClickListener longClick = new OnLongClickListener(){
-		@Override
-		public boolean onLongClick (View v){
-			mUpdateHandler.removeCallbacks(mUpdateRunnable);
-			typeForPowerDown = periodType;
-			stopReminder();
-			animatePowerDown();
-	        if(animateInfo){
-	        	mUpdateHandler.postDelayed(mUpdateRunnable, 10000);
-	        }
-			return true;
-		}
-	};
-	
-
-	
-	
-    private boolean isDialogOpen(){
-    	if (introFragment!=null){
-    		if (introFragment.isVisible()){
-    			return true;
-    		}
-    	} else if(extendFragment != null){
-    		if(extendFragment.isVisible()){
-    			return true;
-    		}
-    	}
-    	return false;
-    }
-
-    	*/
 
 	private final ServiceConnection mConnection = new ServiceConnection() {
 		@Override
@@ -357,6 +319,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 		swipeAreaListenerUsed = false;
 
+		mainExecutor = ContextCompat.getMainExecutor(this);
+
 
 		if (screenOrientation == Configuration.ORIENTATION_LANDSCAPE && buildNumber <= Build.VERSION_CODES.HONEYCOMB) {
 			smallTitle = true;
@@ -419,7 +383,6 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 
 
 		rootLayout.setBackgroundColor(colorBlack);
-		myOffMainThreadHandler = new MyHandler(this);
 
 		manageUiOnStart();
 
@@ -444,7 +407,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			}
 
 		} else if(currentVersionNumber > savedVersionNumber && !RReminderMobile.isCounterServiceRunning(MainActivity.this)){
-			showPatchNotesDialog();
+			//showPatchNotesDialog();
+			showPlusPromoDialog();
 			Editor editor = sharedPref.edit();
 			editor.putInt(RReminder.VERSION_KEY, currentVersionNumber);
 			editor.apply();
@@ -530,6 +494,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		font = null;
 		titleFont = null;
 		swipeFont = null;
+		mainExecutor = null;
 		myOffMainThreadHandler = null;
 		activityTitle = null;
 		description = null;
@@ -1210,12 +1175,22 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			startActivity(i);
 			return true;
 		}
+		else if (item.getItemId() == R.id.menu_reminder_plus) {
+			showPlusPromoDialog();
+			return true;
+		}
 		else if (item.getItemId() == R.id.menu_feedback){
 				Intent Email = new Intent(Intent.ACTION_SEND);
 				Email.setType("text/email");
 				Email.putExtra(Intent.EXTRA_EMAIL, new String[] { "colormindapps@gmail.com" });
 				Email.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
+
+			try {
 				startActivity(Intent.createChooser(Email, "Send Feedback:"));
+			} catch (ActivityNotFoundException exception) {
+				String toastText = getString(R.string.no_suitable_application_found);
+				Toast.makeText(MainActivity.this, toastText, Toast.LENGTH_SHORT).show();
+			}
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -1241,6 +1216,13 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		patchNotesFragment = PatchNotesDialog.newInstance(
 				R.string.intro_title);
 		patchNotesFragment.show(getSupportFragmentManager(), "patchNotesDialog");
+		dialogOnScreen = true;
+	}
+
+	public void showPlusPromoDialog() {
+		patchNotesFragment = PlusPromoDialog.newInstance(
+				R.string.intro_title);
+		patchNotesFragment.show(getSupportFragmentManager(), "plusPromoDialog");
 		dialogOnScreen = true;
 	}
 
@@ -1343,7 +1325,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		//replacing hint dialog with showcaseview
 
 
-		/*
+
 		if (RReminderMobile.isCounterServiceRunning(MainActivity.this)) {
 			if (RReminder.isExtendEnabled(MainActivity.this)) {
 				if (RReminder.isEndPeriodEnabled(MainActivity.this)) {
@@ -1363,8 +1345,8 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 		}
 
 
-		 */
-		showPatchNotesDialog();
+
+
 	}
 
 	public void createShowcaseView(int type, int nextShowcaseView) {
@@ -1529,6 +1511,25 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			counterTimeValue = mService.getCounterTimeValue();
 			manageTimer(true);
 		}
+	}
+
+	@Override
+	public void openPlusInPlay() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(
+				"https://play.google.com/store/apps/details?id=com.colormindapps.rest_reminder_alarm.pro"));
+		intent.setPackage("com.android.vending");
+		try {
+			startActivity(intent);
+		} catch (ActivityNotFoundException exception) {
+			String toastText = getString(R.string.no_suitable_application_found);
+			Toast.makeText(MainActivity.this, toastText, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	@Override
+	public void promoDialogIsClosed(){
+		dialogOnScreen = false;
 	}
 
 
@@ -2277,7 +2278,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 					for (int i = 0; i < arrayLength; i++) {
 						final int runnableAnimationIndex = i;
 						// this is on the main thread
-						myOffMainThreadHandler.post(() -> {
+						mainExecutor.execute(() -> {
 
 							activityTitle.setTextColor(Color.parseColor(titleColors[colorIds.length - runnableAnimationIndex - 1]));
 							rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
@@ -2401,7 +2402,7 @@ public class MainActivity extends AppCompatActivity implements OnDialogCloseList
 			for (int i = 0; i < arrayLength; i++) {
 				runnableAnimationIndex = i;
 				// this is on the main thread
-				myOffMainThreadHandler.post(() -> {
+				mainExecutor.execute(() -> {
 					rootLayout.setBackgroundColor(colorIds[runnableAnimationIndex]);
 					//activityTitle.setTextColor(Color.parseColor(titlePowerColors[49-colorIds.length-runnableAnimationIndex]));
 				});

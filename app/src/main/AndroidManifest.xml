@@ -20,6 +20,7 @@
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask"
+            android:hardwareAccelerated = "true"
             android:theme="@style/Theme.WorkRestTheme"
             android:exported="true">
             <layout android:defaultHeight="600dp"

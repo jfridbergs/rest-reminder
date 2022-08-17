@@ -2,6 +2,9 @@
 <resources>
 
     <string name="app_name">Atpūtu atgādinātājs</string>
+    <string name="no_suitable_application_found">Piemērota lietotne netika atrasta!</string>
+    <string name="reminder_plus">Atpūtu atgādinātājs +</string>
+    <string name="get_plus" translatable="false">Iegūt Atpūtu atgādinātāju +</string>
 
 
 </resources>

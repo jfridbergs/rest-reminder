@@ -2,6 +2,10 @@
 <resources>
 
     <string name="app_name">Rest reminder</string>
+    <string name="get_plus_on_play" translatable="false">Get Rest Reminder + on Google Play</string>
+    <string name="get_plus">Get Rest Reminder +</string>
+    <string name="reminder_plus">Rest Reminder +</string>
+    <string name="no_suitable_application_found">No suitable application was found!</string>
 
 
 </resources>

@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,13 +16,15 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.Objects;
 
 
-public class PatchNotesDialog extends DialogFragment {
+public class PlusPromoDialog extends DialogFragment {
 	WebView patchnotes;
+	OnPromoDialogListener listener;
 
 	
     @Override
@@ -28,15 +32,15 @@ public class PatchNotesDialog extends DialogFragment {
         super.onAttach(context);
         try {
         	//OnExtendDialogSelectedListener parentActivity = (OnExtendDialogSelectedListener) getActivity();
-        	setParentActivity((OnDialogCloseListener) getActivity());
+        	setParentActivity((OnPromoDialogListener) getActivity());
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnExtendDialogSelectedListener");
         }
     }
     
-	private OnDialogCloseListener parentActivity;
+	private OnPromoDialogListener parentActivity;
 	
-	private void setParentActivity(OnDialogCloseListener activity){
+	private void setParentActivity(OnPromoDialogListener activity){
 		parentActivity = activity;
 	}
 	
@@ -52,24 +56,31 @@ public class PatchNotesDialog extends DialogFragment {
 
 	    // Inflate and set the layout for the dialog
 	    // Pass null as the parent view because its going in the dialog layout
-		View view = inflater.inflate(R.layout.patch_notes_dialog,new LinearLayout(getActivity()), false);
+		View view = inflater.inflate(R.layout.plus_promo,new ConstraintLayout(getActivity()), false);
 	    builder.setView(view)
 				.setCancelable(true)
 	    // Add action buttons
-	           .setPositiveButton(R.string.close, (dialog, id) -> {
-				   parentActivity.dialogIsClosed(true);
-				   Objects.requireNonNull(PatchNotesDialog.this.getDialog()).cancel();
+	           .setPositiveButton(R.string.get_plus, (dialog, id) -> {
+				   parentActivity.promoDialogIsClosed();
+				   parentActivity.openPlusInPlay();
+				   Objects.requireNonNull(PlusPromoDialog.this.getDialog()).cancel();
 			   })
+				.setNegativeButton(R.string.close, (dialog, id) -> {
+					parentActivity.promoDialogIsClosed();
+					Objects.requireNonNull(PlusPromoDialog.this.getDialog()).cancel();
+				})
 ;
 		patchnotes = view.findViewById(R.id.patch_notes);
-		patchnotes.loadUrl("file:///android_asset/html/patchnotes.html");
+		patchnotes.loadUrl("file:///android_asset/html/rest_reminder_plus.html");
+		patchnotes.getSettings().setMediaPlaybackRequiresUserGesture(false);
 	    return builder.create();
 	}
 
 
+
 	
-    public static PatchNotesDialog newInstance(int title) {
-    	PatchNotesDialog frag = new PatchNotesDialog();
+    public static PlusPromoDialog newInstance(int title) {
+    	PlusPromoDialog frag = new PlusPromoDialog();
         Bundle args = new Bundle();
         args.putInt("title", title);
         frag.setArguments(args);
@@ -86,5 +97,13 @@ public class PatchNotesDialog extends DialogFragment {
 	public void onCancel(@NonNull DialogInterface dialog){
 	}
 
+
+	public void openPlusInPlay() {
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(
+				"https://play.google.com/store/apps/details?id=com.colormindapps.rest_reminder_alarm.pro"));
+		intent.setPackage("com.android.vending");
+		startActivity(intent);
+	}
 
 }

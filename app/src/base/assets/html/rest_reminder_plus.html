@@ -12,24 +12,36 @@
   		display:block;
   		margin-bottom:20px;
   		}
-  		img .promotion
+  		.promotion
 		{
-		max-width: 12%;
-		display: block;
-		float:center;
+ 		display: block;
+  		margin-left: auto;
+  		margin-right: auto;
   		}
   		div
   		{
-  		width:60%;
   		float:left;
+  		margin-bottom:20px;
   		}
-  		img .screenshot
+  		.screenshot
   		{
-		max-width: 10%;
 		height:initial;
 		display: block;
 		margin-left: auto;
   		margin-right: auto;
+  		}
+  		.badge
+  		{
+  		width:250px;
+  		display: block;
+		margin-left: auto;
+		margin-right: auto;
+  		}
+  		video
+  		{
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
   		}
 
 
@@ -37,14 +49,17 @@
 </head>
 	<body>
 	<h2> Thank you for using or trying out Rest Reminder!</h2>
-	<div> I would like to announce a release of an enhanced version: <b>Rest Reminder +</b></div>
+	<div> I would like to inform, that an enhanced version has been released: <b>Rest Reminder +</b></div>
 	<img src="file:///android_asset/img/promotion.png" alt="reminder on" class="promotion"/>
-	<p>On top of all the features of base version, Rest Reminder + records the progress and then offers for the user to access and review information about each individual work session.</p>
-	<img src="file:///android_asset/img/calendar.png" alt="reminder on" class="screenshot"/>
-	//uztaisīt video vai gifu, kas demonstrē donut->column
-	<img src="file:///android_asset/img/session_donut.png" alt="reminder on" class="screenshot"/>
-	<p> Another addition in Rest Reminder + is Statistics page, where user can review their app usage over periods of time.</p>
-
+	<p>On top of all the features of base version, Rest Reminder + records user work-rest sessions and then offers to user information about each individual work session.</p>
+	<video width="250" height="540" autoplay loop>
+		<source src="file:///android_asset/video/session.mp4" type="video/mp4">
+		Your browser does not support the video tag.
+	</video>
+	<p> Also included is Statistics page, where user can review their app usage over a time period.</p>
+	<img src="file:///android_asset/img/stats.png" alt="stats" class="screenshot"/>
+	<p> Get Rest Reminder + on Google Play:</p>
+	<a href='https://play.google.com/store/apps/details?id=com.colormindapps.rest_reminder_alarm.pro&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src="file:///android_asset/img/google-play-badge.png" class="badge"/></a>
 	</body>
 </html>
 
